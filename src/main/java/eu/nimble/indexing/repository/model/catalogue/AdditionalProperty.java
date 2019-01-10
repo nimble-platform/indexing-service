@@ -1,25 +1,32 @@
 package eu.nimble.indexing.repository.model.catalogue;
 
 import java.util.Collection;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.apache.jena.ext.com.google.common.base.CaseFormat;
 import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Dynamic;
 import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import eu.nimble.indexing.repository.model.ItemUtils;
+
+/**
+ * (Nested) Document object for additional properties
+ * @author dglachs
+ *
+ */
 @JsonInclude(value=Include.NON_EMPTY)
 @SolrDocument(collection="item")
-public class AdditionalProperty {
-	public static final String TYPE = "additionalProperty";
+public class AdditionalProperty implements ICatalogueItem {
+	public static final String TYPE = "property";
 	@Id
 	@Indexed
 	private String id;
@@ -31,22 +38,22 @@ public class AdditionalProperty {
 	@Indexed
 	private String valueQualifier;
 	
-	@Indexed 
+	@Indexed(name=LANGUAGES_FIELD) 
 	private Collection<String> languages;
 	
-	@Indexed(name="unit_*") @Dynamic
+	@Indexed(name=PROPERTY_UNIT_FIELD) @Dynamic
 	private Map<String, String> unitMap;
 	
-	@Indexed(name="label_*") @Dynamic
+	@Indexed(name=PROPERTY_LABEL_FIELD) @Dynamic
 	private Map<String, String> name;
 	
-	@Indexed(name="*_string") @Dynamic
+	@Indexed(name=PROPERTY_STRING_VALUE_FIELD) @Dynamic
 	private Map<String, String> value;
 	
-	@Indexed(name="*_quantity", type="pdouble") @Dynamic
+	@Indexed(name=PROPERTY_QUANTITY_VALUE_FIELD, type="pdouble") @Dynamic
 	private Map<String, Double> doubleUnitValue;
 	
-	@Indexed(name="*_boolean", type="boolean") @Dynamic
+	@Indexed(name=PROPERTY_BOOLEAN_VALUE_FIELD, type="boolean") @Dynamic
 	private Map<String, Boolean> booleanUnitValue;
 	
 
@@ -170,16 +177,9 @@ public class AdditionalProperty {
 		if ( this.unitMap == null) {
 			this.unitMap = new HashMap<>();
 		}
-		if (! StringUtils.hasText(unit)) {
-			// when no unit code specified - use "undefined";
-			return "undefined";
-		}
-		String input = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, unit);
-		input = input.replaceAll("[^a-zA-Z0-9_ ]", "");
-		input = input.trim().replaceAll(" ", "_").toUpperCase();
-		input = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, input);
-		this.unitMap.put(input, unit);
-		return input;
+	    String key = ItemUtils.dynamicFieldPart(unit);
+		this.unitMap.put(key, unit);
+		return key;
 		
 	}
 

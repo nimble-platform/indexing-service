@@ -5,36 +5,40 @@ import java.util.Collection;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
-
-@SolrDocument(collection="manufacturer")
-public class PartyType {
+/**
+ * Class representing a manufacturer in the SOLR index
+ * @author dglachs
+ *
+ */
+@SolrDocument(collection=IParty.COLLECTION_NAME)
+public class PartyType implements IParty {
 
 	@Id
-	@Indexed(name="id")
+	@Indexed(name=ID_FIELD)
 	private String id;
-	@Indexed
+	@Indexed(name=NAME_FIELD)
 	private String name;
-	@Indexed
+	@Indexed(name=ORIGIN_FIELD)
 	private String origin;
-	@Indexed
+	@Indexed(name=CERTIFICATE_TYPE_FIELD)
 	private Collection<String> certificateType;
-	@Indexed
+	@Indexed(name=PPAP_COMPLIANCE_LEVEL_FIELD)
 	private String ppapComplianceLevel;
-	@Indexed
+	@Indexed(name=PPAP_DOCUMENT_TYPE_FIELD)
 	private String ppapDocumentType;
-	@Indexed(type="pdouble")
+	@Indexed(name=TRUST_SCORE_FIELD, type="pdouble")
 	private Double trustScore;
-	@Indexed(type="pdouble")
+	@Indexed(name=TRUST_RATING_FIELD, type="pdouble")
 	private Double trustRating;
-	@Indexed(type="pdouble")
+	@Indexed(name=TRUST_TRADING_VOLUME_FIELD, type="pdouble")
 	private Double trustTradingVolume;
-	@Indexed(type="pdouble")
+	@Indexed(name=TRUST_SELLLER_COMMUNICATION_FIELD, type="pdouble")
 	private Double trustSellerCommunication;
-	@Indexed(type="pdouble")
+	@Indexed(name=TRUST_FULFILLMENT_OF_TERMS_FIELD, type="pdouble")
 	private Double trustFullfillmentOfTerms;
-	@Indexed(type="pdouble")
+	@Indexed(name=TRUST_DELIVERY_PACKAGING_FIELD, type="pdouble")
 	private Double trustDeliveryPackaging;
-	@Indexed(type="pdouble")
+	@Indexed(name=TRUST_NUMBER_OF_TRANSACTIONS_FIELD, type="pdouble")
 	private Double trustNumberOfTransactions;
 	public String getId() {
 		return id;
