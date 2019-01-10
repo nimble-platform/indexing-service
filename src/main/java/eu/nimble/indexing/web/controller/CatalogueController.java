@@ -20,7 +20,7 @@ public class CatalogueController {
 	
     @GetMapping("/search/items")
     public ResponseEntity<FacetPage<ItemType>> search(
-    		@RequestHeader(value = "Authorization") String bearerToken,
+//    		@RequestHeader(value = "Authorization") String bearerToken,
     		@RequestParam(value="q") String query
     		) {
     	FacetPage<ItemType> result = items.search(query, new SolrPageRequest(0, 10));

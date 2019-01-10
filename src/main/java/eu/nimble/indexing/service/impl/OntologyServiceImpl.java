@@ -39,7 +39,7 @@ import eu.nimble.indexing.service.OntologyService;
 /**
  * Implementation for the Ontology Service
  * 
- * This service allows uploading an RDF based ontolgy
+ * This service allows uploading an RDF based ontology
  * 
  * @author dglachs
  *
@@ -63,7 +63,8 @@ public class OntologyServiceImpl implements OntologyService {
 			l = Lang.TURTLE;
 			break;
 		default:
-			
+		    // 
+			return;
 		}
 		/*
 		 * Create a Model with RDFS inferencing

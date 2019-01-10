@@ -41,12 +41,8 @@ public class PropertyServiceImpl implements PropertyService {
 		if ( prop != null) {
 			propRepo.delete(prop);
 		}
-//		propRepo.deleteById(uri);
 	}
-//	@Autowired
-//	public void setPropertyLabelRepository(PropertyLabelRepository repository) {
-//		this.labelRepo = repository;
-//	}
+
 	@Autowired
 	public void setPropertyRepository(PropertyRepository repository) {
 		this.propRepo = repository;
