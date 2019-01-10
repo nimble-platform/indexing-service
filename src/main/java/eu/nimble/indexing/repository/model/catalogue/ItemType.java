@@ -20,16 +20,14 @@ import org.springframework.data.solr.core.mapping.SolrDocument;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import eu.nimble.indexing.repository.model.ItemUtils;
-
+/**
+ * Document class representing a single product item
+ * @author dglachs
+ *
+ */
 @SolrDocument(collection="item")
 public class ItemType implements ICatalogueItem, Serializable {
 	private static final long serialVersionUID = -3631731059281154372L;
-
-	/**
-	 * the item entries must have a type value assigned
-	 */
-	public static final String TYPE_VALUE = "item";
-	
 
 	@Id
 	@Indexed(name=ID_FIELD)
@@ -57,10 +55,17 @@ public class ItemType implements ICatalogueItem, Serializable {
 	 * is available with {@link #getLanguages()}
 	 * 
 	 */
-	@Indexed(name=LABEL_FIELD) @Dynamic
+	@Indexed(name=LABEL_FIELD
+//			, copyTo= {LABEL_FIELD_COPY}
+			) @Dynamic
 	private Map<String,String> name;
-	
-	@Indexed(name=DESC_FIELD) @Dynamic
+	/**
+	 * Dynamic map of descriptions (for each language). The list of languages
+	 * is available with {@link #getLanguages()} 
+	 */
+	@Indexed(name=DESC_FIELD 
+//			, copyTo= {DESC_FIELD_COPY}
+			) @Dynamic
 	private Map<String,String> description;
 	// PRICE & Currency
 	@Indexed(name=CURRENCY_FIELD) @Dynamic
@@ -87,7 +92,7 @@ public class ItemType implements ICatalogueItem, Serializable {
 	 * Map holding a list of used Unit's for packaging
 	 * The 
 	 */
-	@Indexed(name=PACKAGE_TYPE_FIELD) @Dynamic
+	@Indexed(name=PACKAGE_UNIT_FIELD) @Dynamic
 	private Map<String, String> packageUnit = new HashMap<>();
 	/**
 	 * Map holding the amounts per package unit
@@ -116,7 +121,8 @@ public class ItemType implements ICatalogueItem, Serializable {
 	@Indexed(name=EMISSION_STANDARD_FIELD)
 	private String emissionStandard;
 	
-	
+	@Indexed(name=PACKAGE_TYPE_FIELD)
+	private String packageType;
 
 	/**
 	 * GETTER for the URI
@@ -172,7 +178,7 @@ public class ItemType implements ICatalogueItem, Serializable {
 	public void setDescription(Map<String, String> description) {
 		if ( description !=null ) {
 			for ( String key : description.keySet()) {
-				addName(key, description.get(key));
+				addDescription(key, description.get(key));
 			}
 		}
 		else {
@@ -354,7 +360,7 @@ public class ItemType implements ICatalogueItem, Serializable {
 	public void setDeliveryTime(Map<String, Double> deliveryTime) {
 		this.deliveryTime.clear();
 		for ( String c : deliveryTime.keySet()) {
-			addPrice(c, deliveryTime.get(c));
+			addDeliveryTime(c, deliveryTime.get(c));
 		}
 	}
 
