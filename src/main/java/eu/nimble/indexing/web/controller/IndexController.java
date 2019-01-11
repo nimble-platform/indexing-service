@@ -1,5 +1,7 @@
 package eu.nimble.indexing.web.controller;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import eu.nimble.indexing.model.IndexField;
 import eu.nimble.indexing.repository.model.ItemUtils;
 import eu.nimble.indexing.repository.model.PartyTypeUtils;
 import eu.nimble.indexing.repository.model.catalogue.ItemType;
@@ -102,9 +105,18 @@ public class IndexController {
 	@GetMapping("/properties")
 	public ResponseEntity<List<Property>> getProperties(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-			@RequestParam(name="product") String productType) {
-		List<Property> prop = properties.getProperties(productType);
-		return ResponseEntity.ok(prop);
+			@RequestParam(name="product", required=false) String productType,
+			@RequestParam(name="localName", required=false) List<String> localNames) {
+		if ( productType != null) {
+			List<Property> prop = properties.getProperties(productType);
+			return ResponseEntity.ok(prop);
+		}
+		if ( localNames != null) {
+			List<Property> prop = properties.getPropertiesByName(localNames);
+			return ResponseEntity.ok(prop);
+			
+		}
+		return ResponseEntity.ok(new ArrayList<>());
 	}
 	@DeleteMapping("/property")
 	public ResponseEntity<Boolean> removeProperty(    		
@@ -151,6 +163,5 @@ public class IndexController {
 		items.setItem(prop);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
-			
 
 }

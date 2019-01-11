@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.solr.core.mapping.ChildDocument;
 import org.springframework.data.solr.core.mapping.Dynamic;
 import org.springframework.data.solr.core.mapping.Indexed;
@@ -63,7 +64,8 @@ public class ItemType implements ICatalogueItem, Serializable {
 	 * Dynamic map of descriptions (for each language). The list of languages
 	 * is available with {@link #getLanguages()} 
 	 */
-	@Indexed(name=DESC_FIELD 
+	@Indexed(name=DESC_FIELD
+
 //			, copyTo= {DESC_FIELD_COPY}
 			) @Dynamic
 	private Map<String,String> description;
@@ -111,6 +113,12 @@ public class ItemType implements ICatalogueItem, Serializable {
 	 */
 	@Indexed(name=MANUFACTURER_ID_FIELD) 
 	private String manufacturerId;
+	/**
+	 * Read only field - used to provide the manufacturer's details
+	 * in a search result
+	 */
+	@ReadOnlyProperty
+	private PartyType manufacturer;
 	// Transportation Service Details
 	@Indexed(name=SERVICE_TYPE_FIELD)
 	private Set<String> serviceType;
@@ -123,7 +131,17 @@ public class ItemType implements ICatalogueItem, Serializable {
 	
 	@Indexed(name=PACKAGE_TYPE_FIELD)
 	private String packageType;
-
+	/**
+	 * Possibility for joining to product class index
+	 */
+	@Indexed(name=COMMODITY_CLASSIFICATION_URI_FIELD)
+	private List<String> commodityClassification;
+	// 
+	private Map<String, String> propertyMap;
+	private Map<String, String> stringValue;
+	private Map<String, Boolean> booleanValue;
+	private Map<String, Double> doubleValue;
+	
 	/**
 	 * GETTER for the URI
 	 * @return
@@ -407,5 +425,17 @@ public class ItemType implements ICatalogueItem, Serializable {
 		String key = ItemUtils.dynamicFieldPart(keyVal);
 		keyMap.put(key, keyVal);
 		return key;
+	}
+	public PartyType getManufacturer() {
+		return manufacturer;
+	}
+	public void setManufacturer(PartyType manufacturer) {
+		this.manufacturer = manufacturer;
+	}
+	public List<String> getCommodityClassification() {
+		return commodityClassification;
+	}
+	public void setCommodityClassification(List<String> commodityClassification) {
+		this.commodityClassification = commodityClassification;
 	}
 }

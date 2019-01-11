@@ -17,6 +17,7 @@ public interface ICatalogueItem {
 	String LANGUAGES_FIELD = "languages";
 	String LABEL_FIELD = "itemLabel_*";
 	String LABEL_FIELD_COPY = "*_txt";
+	String TEXT_FIELD = "_text_";
 	String DESC_FIELD = "itemDescription_*";
 	String DESC_FIELD_COPY = "*_txt";
 	String PRICE_FIELD = "price_*";

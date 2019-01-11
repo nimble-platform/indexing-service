@@ -52,4 +52,13 @@ public class PropertyServiceImpl implements PropertyService {
 	public List<Property> getProperties(String forClass) {
 		return propRepo.findByProduct(forClass);
 	}
+	@Override
+	public List<Property> getPropertiesByName(List<String> names) {
+		return propRepo.findByLocalNameIn(names);
+	}
+	@Override
+	public List<Property> getPropertiesByUri(List<String> uri) {
+		return propRepo.findByUriIn(uri);
+	}
+	
 }

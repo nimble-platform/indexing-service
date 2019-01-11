@@ -13,5 +13,10 @@ public interface PropertyService {
 	public void removeProperty(String uri);
 
 	public List<Property> getProperties(String forClass);
+	
+	public List<Property> getPropertiesByName(List<String> names);
+	
+	public List<Property> getPropertiesByUri(List<String> uri);
+	
 
 }

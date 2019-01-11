@@ -1,17 +1,28 @@
 package eu.nimble.indexing.service.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.request.LukeRequest;
+import org.apache.solr.client.solrj.response.LukeResponse;
+import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.SolrTemplate;
-import org.springframework.data.solr.core.query.result.FacetPage;
 import org.springframework.stereotype.Service;
 
+import eu.nimble.indexing.model.IndexField;
+import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.AdditionalPropertyRepository;
 import eu.nimble.indexing.repository.ItemRepository;
 import eu.nimble.indexing.repository.model.catalogue.AdditionalProperty;
@@ -67,8 +78,49 @@ public class CatalogueServiceImpl implements CatalogueService {
 	}
 	
 	@Override
-	public FacetPage<ItemType> search(String query, Pageable pageable) {
+	public SearchResult<ItemType> search(String query, Pageable pageable) {
+
 		return itemRepo.findItemByName(query, "en", pageable);
 	}
-
+	public Collection<IndexField> fieldsInUse() {
+		LukeRequest luke = new LukeRequest();
+		luke.setShowSchema(false);
+		try {
+			LukeResponse resp = luke.process(solrTemplate.getSolrClient(), "item");
+			
+			@SuppressWarnings("unchecked")
+			NamedList<Object> fields = (NamedList<Object>) resp.getResponse().get("fields");
+			Map<String,IndexField> inUse = getFields(fields);
+			return inUse.values();
+		} catch (SolrServerException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ArrayList<>();
+	}
+	@SuppressWarnings("unchecked")
+	public Map<String, IndexField> getFields(NamedList<Object> fields)  {
+		Map<String, IndexField> ffield = new HashMap<>();
+		for (Map.Entry<String, Object> field : fields) {
+			String name = field.getKey();
+			IndexField f = new IndexField(name);
+			for (Entry<String, Object> prop : (NamedList<Object>)field.getValue()) {
+				switch(prop.getKey()) {
+				case "type":
+					f.setDataType(prop.getValue().toString());
+					break;
+				case "docs":
+					f.setDocCount(Integer.valueOf(prop.getValue().toString()));
+					break;
+				case "dynamicBase":
+					f.setDynamicBase(prop.getValue().toString());
+					break;
+				}
+			}
+			ffield.put(name, f);
+		}
+		
+		return ffield;
+	}
+	
 }

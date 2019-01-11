@@ -21,10 +21,10 @@ public abstract class Named {
 	protected String uri;
 
 	@Indexed
-	protected String localName;
+	public String localName;
 	
 	@Indexed
-	protected String nameSpace;	
+	public String nameSpace;	
 
 	@Indexed
 	protected Collection<String> languages;
