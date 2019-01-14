@@ -27,9 +27,9 @@ node('nimble-jenkins-slave') {
             sh 'docker push nimbleplatform/indexing-service:staging'
         }
 
-//        stage('Deploy') {
-//            sh 'ssh staging "cd /srv/nimble-staging/ && ./run-staging.sh restart-single identity-service"'
-//        }
+        stage('Deploy') {
+            sh 'ssh staging "cd /srv/nimble-staging/ && ./run-staging.sh restart-single indexing-service"'
+        }
     }
 
     // -----------------------------------------------
