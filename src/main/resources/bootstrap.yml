@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: indexing-service
+  cloud:
+    config:
+      enabled: ${CONFIG_SERVER_ENABLED:true}
+      uri: ${CONFIG_SERVER_URI:http://localhost:8888}
+      failFast: ${CONFIG_SERVER_FAILFAST:false}
+    service-registry:
+      auto-registration:
+        enabled: ${DISCOVERY_ENABLED:false}
+        fail-fast: ${DISCOVERY_FAILFAST:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+logstash:
+  uri: ${LOGSTASH_URI:localhost:5000}
