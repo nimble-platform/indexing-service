@@ -11,22 +11,22 @@ node('nimble-jenkins-slave') {
             git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: env.BRANCH_NAME)
         }
 
-        stage('Run Tests') {
-            sh 'mvn clean test'
-        }
+//        stage('Run Tests') {
+//            sh 'mvn clean test'
+//        }
 
         stage('Build Java') {
             sh 'mvn clean install -DskipTests'
         }
 
+        stage('Build Docker') {
+            sh 'mvn docker:build -Ddocker.image.tag=staging'
+        }
 
-//        stage('Build Docker') {
-//            sh 'mvn -f identity-service/pom.xml docker:build -DdockerImageTag=staging'
-//        }
-//        stage('Push Docker') {
-//            sh 'docker push nimbleplatform/identity-service:staging'
-//        }
-//
+        stage('Push Docker') {
+            sh 'docker push nimbleplatform/indexing-service:staging'
+        }
+
 //        stage('Deploy') {
 //            sh 'ssh staging "cd /srv/nimble-staging/ && ./run-staging.sh restart-single identity-service"'
 //        }
