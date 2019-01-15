@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.PropertyRepository;
-import eu.nimble.indexing.repository.model.owl.Property;
+import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.PropertyService;
 
 @Service
@@ -21,9 +21,9 @@ public class PropertyServiceImpl implements PropertyService {
 		
 	}
 	@Override
-	public Property getProperty(String uri) {
+	public PropertyType getProperty(String uri) {
 		// 
-		List<Property> props = propRepo.findByUri(uri);//.orElse(null);
+		List<PropertyType> props = propRepo.findByUri(uri);//.orElse(null);
 		if (props.size() > 0) {
 			return props.get(0);
 		}
@@ -31,13 +31,13 @@ public class PropertyServiceImpl implements PropertyService {
 	}
 
 	@Override
-	public void setProperty(Property prop) {
+	public void setProperty(PropertyType prop) {
 		propRepo.save(prop);
 	}
 
 	@Override
 	public void removeProperty(String uri) {
-		Property prop  = getProperty(uri);
+		PropertyType prop  = getProperty(uri);
 		if ( prop != null) {
 			propRepo.delete(prop);
 		}
@@ -49,15 +49,15 @@ public class PropertyServiceImpl implements PropertyService {
 	}
 
 	@Override
-	public List<Property> getProperties(String forClass) {
+	public List<PropertyType> getProperties(String forClass) {
 		return propRepo.findByProduct(forClass);
 	}
 	@Override
-	public List<Property> getPropertiesByName(List<String> names) {
+	public List<PropertyType> getPropertiesByName(List<String> names) {
 		return propRepo.findByLocalNameIn(names);
 	}
 	@Override
-	public List<Property> getPropertiesByUri(List<String> uri) {
+	public List<PropertyType> getPropertiesByUri(List<String> uri) {
 		return propRepo.findByUriIn(uri);
 	}
 	

@@ -13,7 +13,10 @@ public interface ItemRepository extends SolrCrudRepository<ItemType, String>, Cu
 	String PARENT_FILTER = "[child parentFilter=doctype:item]";
 	@Query(fields= {"*", PARENT_FILTER})
 	ItemType findByUri(String uri);
-	
+
+	@Query(fields= {"*", PARENT_FILTER})
+	List<ItemType> findByType(String doctype);
+
 	
 	@Query(value="label_?1:?0*", fields= {"*", PARENT_FILTER})
 	public List<ItemType> findByNameStartingWith(String name, String lang);

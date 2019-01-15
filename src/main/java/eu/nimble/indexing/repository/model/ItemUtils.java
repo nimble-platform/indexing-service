@@ -14,6 +14,13 @@ import eu.nimble.indexing.repository.model.catalogue.IParty;
 import eu.nimble.indexing.repository.model.catalogue.ItemType;
 
 public class ItemUtils implements ICatalogueItem {
+	public static String dynamicFieldPart(String ...strings ) {
+		StringBuilder sb = new StringBuilder("");
+		for (String s : strings) {
+			sb.append(s+"_");
+		}
+		return dynamicFieldPart(sb.toString());
+	}
 	public static String dynamicFieldPart(String fieldPart) {
 		if (! StringUtils.hasText(fieldPart)) {
 			// when no unit code specified - use "undefined";
@@ -25,6 +32,9 @@ public class ItemUtils implements ICatalogueItem {
 		dynamicFieldPart = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, dynamicFieldPart);
 		return dynamicFieldPart;
 		
+	}
+	public static void main(String [] args) {
+		System.out.println(dynamicFieldPart("length", "cm", "!mix"));
 	}
 	public static ItemType template() {
 		ItemType item = new ItemType();

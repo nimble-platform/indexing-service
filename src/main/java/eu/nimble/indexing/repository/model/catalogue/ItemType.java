@@ -10,7 +10,6 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
-import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.solr.core.mapping.ChildDocument;
@@ -104,8 +103,8 @@ public class ItemType implements ICatalogueItem, Serializable {
 	/**
 	 * nested list of additional properties
 	 */
-	@Indexed(name=ADDITIONAL_PROPERTY_FIELD)
-	@Field(child=true, value=ADDITIONAL_PROPERTY_FIELD)
+//	@Indexed(name=ADDITIONAL_PROPERTY_FIELD)
+//	@Field(child=true, value=ADDITIONAL_PROPERTY_FIELD)
 	@ChildDocument
 	private Collection<AdditionalProperty> additionalProperty;
 	/**
@@ -131,17 +130,39 @@ public class ItemType implements ICatalogueItem, Serializable {
 	
 	@Indexed(name=PACKAGE_TYPE_FIELD)
 	private String packageType;
+	
 	/**
 	 * Possibility for joining to product class index
 	 */
 	@Indexed(name=COMMODITY_CLASSIFICATION_URI_FIELD)
 	private List<String> commodityClassification;
-	// 
+	@ReadOnlyProperty
 	private Map<String, String> propertyMap;
+	@Indexed(name="*_unit", type="pdouble") @Dynamic
 	private Map<String, String> stringValue;
+	@Indexed(name="*_b", type="boolean") @Dynamic
 	private Map<String, Boolean> booleanValue;
+	@Indexed(name="*_d", type="pdouble") @Dynamic
 	private Map<String, Double> doubleValue;
-	
+	@Indexed(name=IMAGE_URI_FIELD) @Dynamic
+	private Map<String, String> imgageUri;
+
+	public void addProperty(String name, Double value) {
+		addProperty(name, "", value);
+	}
+	public void addProperty(@NotNull String name, @NotNull String unit, @NotNull Double value) {
+		if ( doubleValue == null ) {
+			doubleValue = new HashMap<>();
+		}
+		String key = ItemUtils.dynamicFieldPart(name, unit);
+		
+		if ( unit.length() >0)
+			propertyMap.put(key, String.format("%s (%s)", name, unit));
+		else 
+			propertyMap.put(key, name);
+		
+		doubleValue.put(key, value);
+	}
 	/**
 	 * GETTER for the URI
 	 * @return
@@ -238,6 +259,7 @@ public class ItemType implements ICatalogueItem, Serializable {
 	 * @param prop
 	 */
 	public void addAdditionalProperty(AdditionalProperty prop) {
+		
 		getAdditionalProperty().add(prop);
 	}
 	/**
@@ -248,6 +270,9 @@ public class ItemType implements ICatalogueItem, Serializable {
 		this.additionalProperty = additionalProperty;
 	}
 	public String getManufacturerId() {
+		if (manufacturer != null && manufacturer.getId() != null) {
+			return manufacturer.getId();
+		}
 		return manufacturerId;
 	}
 	public void setManufacturerId(String manufacturerId) {
@@ -420,7 +445,13 @@ public class ItemType implements ICatalogueItem, Serializable {
 			addPackageAmounts(key, packageAmountPerUnit.get(key));
 		}
 	}
-	
+	/**
+	 * Helper method to create the index field's name part and
+	 * to maintain the label for the corresponding name map
+	 * @param keyVal
+	 * @param keyMap
+	 * @return
+	 */
 	private String dynamicKey(String keyVal, Map<String, String> keyMap) {
 		String key = ItemUtils.dynamicFieldPart(keyVal);
 		keyMap.put(key, keyVal);
@@ -438,4 +469,6 @@ public class ItemType implements ICatalogueItem, Serializable {
 	public void setCommodityClassification(List<String> commodityClassification) {
 		this.commodityClassification = commodityClassification;
 	}
+	
+	
 }

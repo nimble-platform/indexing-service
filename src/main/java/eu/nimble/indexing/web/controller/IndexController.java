@@ -1,7 +1,6 @@
 package eu.nimble.indexing.web.controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import eu.nimble.indexing.model.IndexField;
 import eu.nimble.indexing.repository.model.ItemUtils;
 import eu.nimble.indexing.repository.model.PartyTypeUtils;
 import eu.nimble.indexing.repository.model.catalogue.ItemType;
 import eu.nimble.indexing.repository.model.catalogue.PartyType;
-import eu.nimble.indexing.repository.model.owl.Clazz;
-import eu.nimble.indexing.repository.model.owl.Property;
+import eu.nimble.indexing.repository.model.owl.ClassType;
+import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.CatalogueService;
 import eu.nimble.indexing.service.ClassService;
 import eu.nimble.indexing.service.ManufacturerService;
@@ -41,17 +39,17 @@ public class IndexController {
 	private CatalogueService items;
 
 	@GetMapping("/class")
-	public ResponseEntity<Clazz> getClass(    		
+	public ResponseEntity<ClassType> getClass(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestParam String uri) {
-		Clazz c = classes.getClass(uri);
+		ClassType c = classes.getClass(uri);
 		return ResponseEntity.ok(c);
 	}
 	@GetMapping("/classes")
-	public ResponseEntity<List<Clazz>> getClasses(    		
+	public ResponseEntity<List<ClassType>> getClasses(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
 			@RequestParam String property) {
-		List<Clazz> result = classes.getClasses(property);
+		List<ClassType> result = classes.getClasses(property);
 		return ResponseEntity.ok(result);
 	}
 	@DeleteMapping("/class")
@@ -96,23 +94,23 @@ public class IndexController {
 	}
 
 	@GetMapping("/property")
-	public ResponseEntity<Property> getProperty(    		
+	public ResponseEntity<PropertyType> getProperty(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestParam String uri) {
-		Property prop = properties.getProperty(uri);
+		PropertyType prop = properties.getProperty(uri);
 		return ResponseEntity.ok(prop);
 	}
 	@GetMapping("/properties")
-	public ResponseEntity<List<Property>> getProperties(    		
+	public ResponseEntity<List<PropertyType>> getProperties(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
 			@RequestParam(name="product", required=false) String productType,
 			@RequestParam(name="localName", required=false) List<String> localNames) {
 		if ( productType != null) {
-			List<Property> prop = properties.getProperties(productType);
+			List<PropertyType> prop = properties.getProperties(productType);
 			return ResponseEntity.ok(prop);
 		}
 		if ( localNames != null) {
-			List<Property> prop = properties.getPropertiesByName(localNames);
+			List<PropertyType> prop = properties.getPropertiesByName(localNames);
 			return ResponseEntity.ok(prop);
 			
 		}
@@ -129,7 +127,7 @@ public class IndexController {
 	@PostMapping("/property")
 	public ResponseEntity<Boolean> setProperty(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestBody Property prop
+    		@RequestBody PropertyType prop
     		) {
 		properties.setProperty(prop);
 		return ResponseEntity.ok(Boolean.TRUE);

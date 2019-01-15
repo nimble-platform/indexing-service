@@ -2,16 +2,17 @@ package eu.nimble.indexing.service;
 
 import java.util.List;
 
-import eu.nimble.indexing.repository.model.owl.Clazz;
+import eu.nimble.indexing.repository.model.owl.ClassType;
 
 public interface ClassService {
 	
-	public Clazz getClass(String uri);
+	public ClassType getClass(String uri);
 	
-	public void setClass(Clazz prop);
+	public void setClass(ClassType prop);
 	
 	public void removeClass(String uri);
 
-	public List<Clazz> getClasses(String forProperty);
+	public List<ClassType> getClasses(String forProperty);
+	
 
 }
