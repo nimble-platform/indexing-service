@@ -1,28 +1,18 @@
 package eu.nimble.indexing.model;
 
-import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import eu.nimble.indexing.repository.model.owl.Named;
 @JsonInclude(value=Include.NON_EMPTY)
 public class IndexField {
 	/**
 	 * name of the field as used in the index
 	 */
 	final String fieldName;
-	/**
-	 * languages in use
-	 */
-	List<String> languages;
-	/**
-	 * labels for this field (if any)
-	 */
-	Map<String, String> label;
-	/**
-	 * labels for this field (if any)
-	 */
-	Map<String, String> description;
+
 	/**
 	 * The type of the field ( string, boolean, pdouble)
 	 */
@@ -35,31 +25,23 @@ public class IndexField {
 	 * The dynamic field name 
 	 */
 	String dynamicBase;
-	
-	
+	/**
+	 * The uri pointing to the concept in the <code>property</code> index
+	 */
+	String uri;
+	/**
+	 * The muliti-lingual labels obtained from the <code>property</code> index
+	 */
+	Map<String, String> label;
+	/**
+	 * The multi-lingual description obtained from the <code>property</code> index
+	 */
+	Map<String, String> description;
 	public IndexField(String name) {
 		this.fieldName = name;
 	}
 	public String getFieldName() {
 		return fieldName;
-	}
-	public List<String> getLanguages() {
-		return languages;
-	}
-	public void setLanguages(List<String> languages) {
-		this.languages = languages;
-	}
-	public Map<String, String> getLabel() {
-		return label;
-	}
-	public void setLabel(Map<String, String> label) {
-		this.label = label;
-	}
-	public Map<String, String> getDescription() {
-		return description;
-	}
-	public void setDescription(Map<String, String> description) {
-		this.description = description;
 	}
 	public String getDataType() {
 		return dataType;
@@ -78,6 +60,34 @@ public class IndexField {
 	}
 	public void setDynamicBase(String dynamicBase) {
 		this.dynamicBase = dynamicBase;
+	}
+	/**
+	 * Method to inject {@link Named#getUri()}, {@link Named#getLabel()} and 
+	 * {@link Named#getComment()} to the current field!
+	 * @param property
+	 */
+	public void withNamed(Named property) {
+		this.uri=property.getUri();
+		this.label = property.getLabel();
+		this.description = property.getComment();
+	}
+	public String getUri() {
+		return uri;
+	}
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+	public Map<String, String> getLabel() {
+		return label;
+	}
+	public void setLabel(Map<String, String> label) {
+		this.label = label;
+	}
+	public Map<String, String> getDescription() {
+		return description;
+	}
+	public void setDescription(Map<String, String> description) {
+		this.description = description;
 	}
 	
 }

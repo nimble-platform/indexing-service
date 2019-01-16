@@ -2,6 +2,7 @@ package eu.nimble.indexing.web.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ import eu.nimble.indexing.repository.model.owl.ClassType;
 import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.CatalogueService;
 import eu.nimble.indexing.service.ClassService;
-import eu.nimble.indexing.service.ManufacturerService;
+import eu.nimble.indexing.service.PartyTypeService;
 import eu.nimble.indexing.service.PropertyService;
 
 @RestController
@@ -33,7 +34,7 @@ public class IndexController {
 	private ClassService classes;
 	
 	@Autowired
-	private ManufacturerService manufacturers;
+	private PartyTypeService partyService;
 	
 	@Autowired
 	private CatalogueService items;
@@ -60,36 +61,36 @@ public class IndexController {
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
-	@GetMapping("/manufacturer")
-	public ResponseEntity<PartyType> getManufacturer(    		
+	@GetMapping("/party")
+	public ResponseEntity<PartyType> getParty(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestParam(defaultValue="null") String uri) {
 		if ( uri.equals("null") ) {
 			return ResponseEntity.ok(PartyTypeUtils.template());
 		}
-		PartyType m = manufacturers.getManufacturerParty(uri);
+		PartyType m = partyService.getPartyType(uri);
 		return ResponseEntity.ok(m);
 	}
-	@GetMapping("/manufacturers")
-	public ResponseEntity<List<PartyType>> getManufacturers(    		
+	@GetMapping("/parties")
+	public ResponseEntity<List<PartyType>> getParties(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
 			@RequestParam String property) {
 		// TODO: check query options
-		List<PartyType> result = manufacturers.getManufacturerParties(null);
+		List<PartyType> result = partyService.getPartyTypes(null);
 		return ResponseEntity.ok(result);
 	}
-	@DeleteMapping("/manufacturer")
+	@DeleteMapping("/party")
 	public ResponseEntity<Boolean> removeManufacturer(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestParam String uri) {
-		manufacturers.removeRemoveManufacturerParty(uri);
+		partyService.removePartyType(uri);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
-	@PostMapping("/manufacturer")
+	@PostMapping("/party")
 	public ResponseEntity<Boolean> setManufacturer(		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestBody PartyType party) {
-		manufacturers.setManufacturerParty(party);
+		partyService.setPartyType(party);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
@@ -104,9 +105,14 @@ public class IndexController {
 	public ResponseEntity<List<PropertyType>> getProperties(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
 			@RequestParam(name="product", required=false) String productType,
-			@RequestParam(name="localName", required=false) List<String> localNames) {
+			@RequestParam(name="localName", required=false) List<String> localNames,
+			@RequestParam(name="idxName", required=false) Set<String> idxName) {
 		if ( productType != null) {
 			List<PropertyType> prop = properties.getProperties(productType);
+			return ResponseEntity.ok(prop);
+		}
+		if ( idxName!=null) {
+			List<PropertyType> prop = properties.getPropertiesByIndexName(idxName);
 			return ResponseEntity.ok(prop);
 		}
 		if ( localNames != null) {

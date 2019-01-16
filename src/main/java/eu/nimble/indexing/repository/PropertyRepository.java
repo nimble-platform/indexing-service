@@ -1,6 +1,7 @@
 package eu.nimble.indexing.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.stereotype.Repository;
@@ -41,6 +42,18 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 	 * @return
 	 */
 	List<PropertyType> findByUriIn(List<String> uri);
+	/**
+	 * Retrieve multiple properties by the index field name they serve as a label
+	 * @param itemFieldNames
+	 * @return
+	 */
+	List<PropertyType> findByItemFieldNamesIn(Set<String> itemFieldNames);
+	/**
+	 * Retrieve multiple fields by their local name OR the index field name 
+	 * @param names
+	 * @return
+	 */
+	List<PropertyType> findByLocalNameOrItemFieldNamesIn(List<String> names);
 	/**
 	 * Remove all properties of the provided namespace
 	 * @param namespace

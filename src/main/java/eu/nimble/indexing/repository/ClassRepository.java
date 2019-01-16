@@ -1,6 +1,7 @@
 package eu.nimble.indexing.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.solr.repository.Query;
 import org.springframework.data.solr.repository.SolrCrudRepository;
@@ -22,4 +23,12 @@ public interface ClassRepository  extends SolrCrudRepository<ClassType, String>{
 	 * @return
 	 */
 	long deleteByNameSpace(String namespace);
+	/**
+	 * Retrieve all classes based on their id (uri)
+	 * @param uri
+	 * @return
+	 */
+	List<ClassType> findByUriIn(Set<String> uri);
 }
+
+

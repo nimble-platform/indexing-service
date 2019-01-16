@@ -8,19 +8,18 @@ import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.SimpleFilterQuery;
 import org.springframework.util.StringUtils;
 
-import eu.nimble.indexing.repository.model.catalogue.AdditionalProperty;
 import eu.nimble.indexing.repository.model.catalogue.ICatalogueItem;
 import eu.nimble.indexing.repository.model.catalogue.IParty;
 import eu.nimble.indexing.repository.model.catalogue.ItemType;
 
 public class ItemUtils implements ICatalogueItem {
-	public static String dynamicFieldPart(String ...strings ) {
-		StringBuilder sb = new StringBuilder("");
-		for (String s : strings) {
-			sb.append(s+"_");
-		}
-		return dynamicFieldPart(sb.toString());
-	}
+//	public static String dynamicFieldPart(String ...strings ) {
+//		StringBuilder sb = new StringBuilder("");
+//		for (String s : strings) {
+//			sb.append(s+"_");
+//		}
+//		return dynamicFieldPart(sb.toString());
+//	}
 	public static String dynamicFieldPart(String fieldPart) {
 		if (! StringUtils.hasText(fieldPart)) {
 			// when no unit code specified - use "undefined";
@@ -34,7 +33,38 @@ public class ItemUtils implements ICatalogueItem {
 		
 	}
 	public static void main(String [] args) {
-		System.out.println(dynamicFieldPart("length", "cm", "!mix"));
+		
+		String template = "*_xminute";
+		String qualified = "mixture_xminute";
+		
+		String template1 = "prefix_*";
+		String qualitfied1 = "prefix_prefix_with_something";
+		System.out.println(extractFromTemplate(qualified, template));
+		System.out.println(extractFromTemplate(qualitfied1, template1));
+		System.out.println(dynamicFieldPart("http://www.aidimme.es./FurnitureSectorTaxonomy.owl#hasItemPerPack"));
+		
+		ItemType t = template();
+		t.getPrice();
+	}
+	public static String extractFromTemplate(String qualified, String template) {
+		int starPos = template.indexOf("*");
+		
+		if (! (starPos < 0)) {
+			boolean leadingStar = template.startsWith("*");
+			String strippedWildcard = template.replace("*", "");
+			
+			if ( leadingStar) {
+				if ( qualified.endsWith(strippedWildcard)) {
+					return qualified.substring(0, qualified.length() - strippedWildcard.length());
+				}
+			}
+			else {
+				if ( qualified.startsWith(strippedWildcard)) {
+					return qualified.substring(strippedWildcard.length());
+				}
+			}
+		}
+		return null;
 	}
 	public static ItemType template() {
 		ItemType item = new ItemType();
@@ -47,23 +77,17 @@ public class ItemUtils implements ICatalogueItem {
 		item.setFreeOfCharge(false);
 		item.addPrice("EUR", 100.00);
 		item.addPrice("USD", 110.00);
+		
 		item.addPackageAmounts("Palette(s)", asList(30.0, 15.0));
 		item.setCatalogueId("Euro");
 		item.setManufacturerId("manu_001");
 		item.addDeliveryTime("Week(s)", 2.0);
 		item.addDeliveryTime("Day(s)", 14.0);
-		AdditionalProperty add = new AdditionalProperty();
-		add.setId("uri-prop-01");
 		// 
-		add.addName("en", "Property Name");
-		add.addName("es", "Prop nom");
-		// 
-		add.addValue("Month(s)", 3.0);
-		add.addValue("Day(s)", 60.0);
-		//
-		add.setValueQualifier("quantity");
-		// 
-		item.getAdditionalProperty().add(add);
+		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasColour", "blue");
+		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasColour", "red");
+		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasUnitsPerPack", 10.0);
+		item.setProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#isFireProof", Boolean.TRUE);
 		return item;
 
 	}
@@ -77,10 +101,10 @@ public class ItemUtils implements ICatalogueItem {
 	public static SimpleFilterQuery doctypeFilter() {
 		return new SimpleFilterQuery(Criteria.where(TYPE_FIELD).is(TYPE_VALUE));
 	}
-	public static SimpleFilterQuery nestedFieldFilter(String field, String query) {
-		Criteria crit = Criteria.where(String.format("{!parent which=%s:%s} %s", TYPE_FIELD, TYPE_VALUE, field));
-		return new SimpleFilterQuery(crit.expression(query));
-	}
+//	public static SimpleFilterQuery nestedFieldFilter(String field, String query) {
+//		Criteria crit = Criteria.where(String.format("{!parent which=%s:%s} %s", TYPE_FIELD, TYPE_VALUE, field));
+//		return new SimpleFilterQuery(crit.expression(query));
+//	}
 	public static SimpleFilterQuery filterManufacturerField(String queryField, String query) {
 		Criteria crit = Criteria.where(String.format("{!join from=%s to=%s fromIndex=%s} %s", IParty.ID_FIELD, MANUFACTURER_ID_FIELD, IParty.COLLECTION_NAME, queryField));
 		return new SimpleFilterQuery(crit.expression(query));

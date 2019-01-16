@@ -7,28 +7,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.solr.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import eu.nimble.indexing.repository.ManufacturerPartyRepository;
+import eu.nimble.indexing.repository.PartyTypeRepository;
 import eu.nimble.indexing.repository.model.catalogue.PartyType;
-import eu.nimble.indexing.service.ManufacturerService;
+import eu.nimble.indexing.service.PartyTypeService;
 
 @Service
-public class ManufacturerServiceImpl implements ManufacturerService {
+public class PartyTypeServiceImpl implements PartyTypeService {
 
-	private ManufacturerPartyRepository repo;
+	private PartyTypeRepository repo;
+	
 	@Override
-	public PartyType getManufacturerParty(String uri) {
+	public PartyType getPartyType(String uri) {
 		return repo.findById(uri).orElse(null);
 	}
 
 	@Override
-	public void setManufacturerParty(PartyType prop) {
+	public void setPartyType(PartyType prop) {
 		repo.save(prop);
 		
 	}
 
 	@Override
-	public void removeRemoveManufacturerParty(String uri) {
-		PartyType p = getManufacturerParty(uri);
+	public void removePartyType(String uri) {
+		PartyType p = getPartyType(uri);
 		if (p!=null) {
 			repo.delete(p);
 		}
@@ -36,13 +37,13 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 	}
 
 	@Override
-	public List<PartyType> getManufacturerParties(Query forProperty) {
+	public List<PartyType> getPartyTypes(Query forProperty) {
 		// TODO Auto-generated method stub
 		return new ArrayList<PartyType>();
 	}
 	
 	@Autowired
-	public void setManufacturerPartyRepository(ManufacturerPartyRepository repository) {
+	public void setPartyTypeRepository(PartyTypeRepository repository) {
 		this.repo = repository;
 	}
 	

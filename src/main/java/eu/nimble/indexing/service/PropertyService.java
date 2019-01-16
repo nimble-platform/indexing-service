@@ -1,6 +1,7 @@
 package eu.nimble.indexing.service;
 
 import java.util.List;
+import java.util.Set;
 
 import eu.nimble.indexing.repository.model.owl.PropertyType;
 
@@ -15,6 +16,8 @@ public interface PropertyService {
 	public List<PropertyType> getProperties(String forClass);
 	
 	public List<PropertyType> getPropertiesByName(List<String> names);
+	
+	public List<PropertyType> getPropertiesByIndexName(Set<String> names);
 	
 	public List<PropertyType> getPropertiesByUri(List<String> uri);
 	

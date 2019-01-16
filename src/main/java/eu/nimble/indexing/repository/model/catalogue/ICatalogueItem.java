@@ -21,11 +21,12 @@ public interface ICatalogueItem {
 	 */
 	String LANGUAGES_FIELD = "languages";
 	/**
-	 * The language based label, e.g. <code>itemLabel_en</code> for english label
+	 * The language based label, e.g. <code><i>en</i>_label</code> for english label
 	 */
-	String LABEL_FIELD = "itemLabel_*";
+	String LABEL_FIELD = "*_label";
 	/**
 	 * Copy Field, language based. The language based label and description are stored in this field
+	 * Final used index name is <code><i>en</i>_txt</code> for english text (label, description)
 	 */
 	String LANGUAGE_TXT_FIELD = "*_txt";
 	/**
@@ -35,19 +36,19 @@ public interface ICatalogueItem {
 	/**
 	 * The language based description, e.g. <code>itemDescription_en</code> for the english description
 	 */
-	String DESC_FIELD = "itemDescription_*";
+	String DESC_FIELD = "*_description";
 	/**
 	 * The curreny label, the dynamic part is the encoded label string such as eUR for EUR
 	 */
-	String CURRENCY_FIELD = "currency_*";
+	String CURRENCY_FIELD = "*_currency";
 	/**
 	 * The currency based price field, e.g. <code>price_eur</code>, <code>price_usd</code> 
 	 */
-	String PRICE_FIELD = "price_*";
+	String PRICE_FIELD = "*_price";
 	/**
 	 * The image field with qualifier (thumbnail, midsize)
 	 */
-	String IMAGE_URI_FIELD ="image_*";
+	String IMAGE_URI_FIELD ="image";
 	/**
 	 * Free of charge indicator
 	 */
@@ -63,13 +64,11 @@ public interface ICatalogueItem {
 	/**
 	 * The delivery time, numeric
 	 */
-	String ESTIMATED_DELIVERY_TIME_FIELD = "deliveryTime_value_*";
+	String ESTIMATED_DELIVERY_TIME_FIELD = "*_deliveryTime";
 	/**
 	 * The delivery time unit (weeks, days) 
 	 */
-	String ESTIMATED_DELIVERY_TIME_UNIT_FIELD = "deliveryTime_unit_*";
-	@Deprecated
-	String ADDITIONAL_PROPERTY_FIELD = "additionalProperty";
+	String ESTIMATED_DELIVERY_TIME_UNIT_FIELD = "*_deliveryTimeUnit";
 	/**
 	 * The id of the manufacturer's party type
 	 */
@@ -90,17 +89,15 @@ public interface ICatalogueItem {
 	/**
 	 * Dynamic! The packaging unit, e.g. the field name <code>package_unit_box</code> for the package type <b>Box</b>
 	 */
-	String PACKAGE_UNIT_FIELD = "package_unit_*";
+	String PACKAGE_UNIT_FIELD = "*_packageUnit";
 	// DYNAMIC
 	/**
 	 * Dynamic The packaging amount per unit, e.g. the field name <code>package_amount_box</code> for the package type <b>Box</b>
 	 */
-	String PACKAGE_AMOUNT_FILED = "package_amount_*";
+	String PACKAGE_AMOUNT_FILED = "*_package";
 	/**
 	 * The package type, such as
 	 */
-	@Deprecated
-	String PACKAGE_TYPE_FIELD = "package_type";
 	/**
 	 * The label for any item classification
 	 */
@@ -140,30 +137,14 @@ public interface ICatalogueItem {
 	
 	// additional property attributes
 	String VALUE_QUALIFIER_FIELD = "valueQualifier";
-	String PROPERTY_UNIT_FIELD = "unit_*";
-	String PROPERTY_LABEL_FIELD = "propLabel_*";
-	String PROPERTY_STRING_VALUE_FIELD = "propValue_s_*";
-	String PROPERTY_QUANTITY_VALUE_FIELD = "propValue_q_*";
-	String PROPERTY_BOOLEAN_VALUE_FIELD = "propValue_b_*";
-	/*
-	 * qualifier1: totalCapacity
-	 * qualifier2: boxes
-	 * 
-	 * totalQualifierBoxes_s: "boxes"
-	 * totalQualifierBoxes_d: 12.0
-	 * ---------
-	 * qualifier1: package
-	 * qualifier2: palletes
-	 * 
-	 * packagePalletes_s: "palletes"
-	 * packagePalletes_d: 10.0
-	 * ---------
-	 * qualifier1: deliveryTime
-	 * qualifier2: week(s)
-	 * 
-	 * deliveryTimeWeeks_s: "week(s)
-	 * deliveryTimeWeeks_d: 2.0
+//	String PROPERTY_UNIT_FIELD = "unit_*";
+//	String PROPERTY_LABEL_FIELD = "propLabel_*";
+	/**
+	 * Additional Properties
 	 */
-	
+	String QUALIFIED_KEY_FIELD = "*_key";
+	String QUALIFIED_STRING_FIELD = "*_svalues";
+	String QUALIFIED_DOUBLE_FIELD = "*_dvalues";
+	String QUALIFIED_BOOLEAN_FIELD = "*_bvalue";	
 
 }

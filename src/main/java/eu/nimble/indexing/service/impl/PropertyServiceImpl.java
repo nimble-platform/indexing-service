@@ -1,6 +1,7 @@
 package eu.nimble.indexing.service.impl;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -59,6 +60,10 @@ public class PropertyServiceImpl implements PropertyService {
 	@Override
 	public List<PropertyType> getPropertiesByUri(List<String> uri) {
 		return propRepo.findByUriIn(uri);
+	}
+	@Override
+	public List<PropertyType> getPropertiesByIndexName(Set<String> names) {
+		return propRepo.findByItemFieldNamesIn(names);
 	}
 	
 }

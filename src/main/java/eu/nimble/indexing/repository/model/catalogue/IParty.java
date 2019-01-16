@@ -6,7 +6,7 @@ package eu.nimble.indexing.repository.model.catalogue;
  *
  */
 public interface IParty {
-	public String COLLECTION_NAME = "manufacturer";
+	public String COLLECTION_NAME = "party";
 	public String ID_FIELD = "id";
 	public String NAME_FIELD = "name";
 	public String ORIGIN_FIELD = "origin";
