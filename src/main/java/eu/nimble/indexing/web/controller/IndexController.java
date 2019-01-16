@@ -1,8 +1,8 @@
 package eu.nimble.indexing.web.controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,16 +13,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import eu.nimble.indexing.model.IndexField;
 import eu.nimble.indexing.repository.model.ItemUtils;
 import eu.nimble.indexing.repository.model.PartyTypeUtils;
 import eu.nimble.indexing.repository.model.catalogue.ItemType;
 import eu.nimble.indexing.repository.model.catalogue.PartyType;
-import eu.nimble.indexing.repository.model.owl.Clazz;
-import eu.nimble.indexing.repository.model.owl.Property;
+import eu.nimble.indexing.repository.model.owl.ClassType;
+import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.CatalogueService;
 import eu.nimble.indexing.service.ClassService;
-import eu.nimble.indexing.service.ManufacturerService;
+import eu.nimble.indexing.service.PartyTypeService;
 import eu.nimble.indexing.service.PropertyService;
 
 @RestController
@@ -35,23 +34,23 @@ public class IndexController {
 	private ClassService classes;
 	
 	@Autowired
-	private ManufacturerService manufacturers;
+	private PartyTypeService partyService;
 	
 	@Autowired
 	private CatalogueService items;
 
 	@GetMapping("/class")
-	public ResponseEntity<Clazz> getClass(    		
+	public ResponseEntity<ClassType> getClass(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestParam String uri) {
-		Clazz c = classes.getClass(uri);
+		ClassType c = classes.getClass(uri);
 		return ResponseEntity.ok(c);
 	}
 	@GetMapping("/classes")
-	public ResponseEntity<List<Clazz>> getClasses(    		
+	public ResponseEntity<List<ClassType>> getClasses(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
 			@RequestParam String property) {
-		List<Clazz> result = classes.getClasses(property);
+		List<ClassType> result = classes.getClasses(property);
 		return ResponseEntity.ok(result);
 	}
 	@DeleteMapping("/class")
@@ -62,57 +61,62 @@ public class IndexController {
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
-	@GetMapping("/manufacturer")
-	public ResponseEntity<PartyType> getManufacturer(    		
+	@GetMapping("/party")
+	public ResponseEntity<PartyType> getParty(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestParam(defaultValue="null") String uri) {
 		if ( uri.equals("null") ) {
 			return ResponseEntity.ok(PartyTypeUtils.template());
 		}
-		PartyType m = manufacturers.getManufacturerParty(uri);
+		PartyType m = partyService.getPartyType(uri);
 		return ResponseEntity.ok(m);
 	}
-	@GetMapping("/manufacturers")
-	public ResponseEntity<List<PartyType>> getManufacturers(    		
+	@GetMapping("/parties")
+	public ResponseEntity<List<PartyType>> getParties(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
 			@RequestParam String property) {
 		// TODO: check query options
-		List<PartyType> result = manufacturers.getManufacturerParties(null);
+		List<PartyType> result = partyService.getPartyTypes(null);
 		return ResponseEntity.ok(result);
 	}
-	@DeleteMapping("/manufacturer")
+	@DeleteMapping("/party")
 	public ResponseEntity<Boolean> removeManufacturer(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestParam String uri) {
-		manufacturers.removeRemoveManufacturerParty(uri);
+		partyService.removePartyType(uri);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
-	@PostMapping("/manufacturer")
+	@PostMapping("/party")
 	public ResponseEntity<Boolean> setManufacturer(		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestBody PartyType party) {
-		manufacturers.setManufacturerParty(party);
+		partyService.setPartyType(party);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
 	@GetMapping("/property")
-	public ResponseEntity<Property> getProperty(    		
+	public ResponseEntity<PropertyType> getProperty(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
     		@RequestParam String uri) {
-		Property prop = properties.getProperty(uri);
+		PropertyType prop = properties.getProperty(uri);
 		return ResponseEntity.ok(prop);
 	}
 	@GetMapping("/properties")
-	public ResponseEntity<List<Property>> getProperties(    		
+	public ResponseEntity<List<PropertyType>> getProperties(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
 			@RequestParam(name="product", required=false) String productType,
-			@RequestParam(name="localName", required=false) List<String> localNames) {
+			@RequestParam(name="localName", required=false) List<String> localNames,
+			@RequestParam(name="idxName", required=false) Set<String> idxName) {
 		if ( productType != null) {
-			List<Property> prop = properties.getProperties(productType);
+			List<PropertyType> prop = properties.getProperties(productType);
+			return ResponseEntity.ok(prop);
+		}
+		if ( idxName!=null) {
+			List<PropertyType> prop = properties.getPropertiesByIndexName(idxName);
 			return ResponseEntity.ok(prop);
 		}
 		if ( localNames != null) {
-			List<Property> prop = properties.getPropertiesByName(localNames);
+			List<PropertyType> prop = properties.getPropertiesByName(localNames);
 			return ResponseEntity.ok(prop);
 			
 		}
@@ -129,7 +133,7 @@ public class IndexController {
 	@PostMapping("/property")
 	public ResponseEntity<Boolean> setProperty(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestBody Property prop
+    		@RequestBody PropertyType prop
     		) {
 		properties.setProperty(prop);
 		return ResponseEntity.ok(Boolean.TRUE);

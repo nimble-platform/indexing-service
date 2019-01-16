@@ -14,22 +14,25 @@ import org.springframework.data.solr.core.mapping.SolrDocument;
  *
  */
 @SolrDocument(collection="props")
-public class Property extends Named {
+public class PropertyType extends Named {
 	static final String TYPE = "property"; 
-	
 	/**
 	 * The uri of the property including namespace
 	 */
-
-	
 	@Indexed(defaultValue=TYPE, name="doctype")
 	private String type = TYPE;
 
 	@Indexed(required=false, name="range") 
 	private String range;
 	
+	@Indexed(required=false, name="valueQualifier")
+	private String valueQualifier;
+	
 	@Indexed(required=false, name="used_in")
 	private Collection<String> product;
+	
+	@Indexed(required=false, name="idxField")
+	private Collection<String> itemFieldNames;
 
 	public String getRange() {
 		return range;
@@ -60,6 +63,22 @@ public class Property extends Named {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public Collection<String> getItemFieldNames() {
+		return itemFieldNames;
+	}
+
+	public void setItemFieldNames(Collection<String> idxFieldNames) {
+		this.itemFieldNames = idxFieldNames;
+	}
+
+	public String getValueQualifier() {
+		return valueQualifier;
+	}
+
+	public void setValueQualifier(String valueQualifier) {
+		this.valueQualifier = valueQualifier;
 	}
 
 

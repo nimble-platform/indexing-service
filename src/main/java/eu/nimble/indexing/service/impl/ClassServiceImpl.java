@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.ClassRepository;
-import eu.nimble.indexing.repository.model.owl.Clazz;
+import eu.nimble.indexing.repository.model.owl.ClassType;
 import eu.nimble.indexing.service.ClassService;
 
 @Service
@@ -15,24 +15,24 @@ public class ClassServiceImpl implements ClassService {
 	private ClassRepository classRepo;
 	
 	@Override
-	public Clazz getClass(String uri) {
+	public ClassType getClass(String uri) {
 		return classRepo.findById(uri).orElse(null);
 	}
 	@Override
-	public void setClass(Clazz prop) {
+	public void setClass(ClassType prop) {
 		classRepo.save(prop);
 		
 	}
 	@Override
 	public void removeClass(String uri) {
-		Clazz c = getClass(uri);
+		ClassType c = getClass(uri);
 		if (c != null) {
 			classRepo.delete(c);
 		}
 		
 	}
 	@Override
-	public List<Clazz> getClasses(String forProperty) {
+	public List<ClassType> getClasses(String forProperty) {
 		return classRepo.findByProperties(forProperty);
 	}
 	

@@ -22,19 +22,21 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
+import org.apache.jena.vocabulary.XSD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
-import eu.nimble.indexing.repository.model.owl.Clazz;
-import eu.nimble.indexing.repository.model.owl.Property;
+import eu.nimble.indexing.repository.model.owl.ClassType;
+import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.OntologyService;
 /**
  * Implementation for the Ontology Service
@@ -49,8 +51,14 @@ public class OntologyServiceImpl implements OntologyService {
 	@Autowired
 	private PropertyRepository propRepo;
 	@Autowired 
-	private ClassRepository clazzRepo;
+	private ClassRepository classRepository;
 
+	@Override
+	public boolean deleteNamespace(String namespace) {
+		propRepo.deleteByNameSpace(namespace);
+		classRepository.deleteByNameSpace(namespace);
+		return true;
+	}
 	@Override
 	public void upload(String mimeType, String onto) {
 		
@@ -85,7 +93,7 @@ public class OntologyServiceImpl implements OntologyService {
 		 * Keep a list of indexed properties, use this list for
 		 * mapping with classes 
 		 */
-		List<Property> indexedProp = new ArrayList<>();
+		List<PropertyType> indexedProp = new ArrayList<>();
 		/*
 		 * Process all ontology properties, index them and fill
 		 * the list of indexedProp
@@ -93,7 +101,7 @@ public class OntologyServiceImpl implements OntologyService {
 		Iterator<OntProperty> properties = ontModel.listAllOntProperties();
 		while ( properties.hasNext()) {
 			OntProperty p = properties.next();
-			Property prop = processProperty(ontModel, p);
+			PropertyType prop = processProperty(ontModel, p);
 			if ( prop != null) {
 				propRepo.save(prop);
 				indexedProp.add(prop);
@@ -106,9 +114,9 @@ public class OntologyServiceImpl implements OntologyService {
 		Iterator<OntClass> classes = ontModel.listClasses();
 		while ( classes.hasNext()) {
 			OntClass c = classes.next();
-			Clazz clazz = processClazz(ontModel, c, indexedProp);
+			ClassType clazz = processClazz(ontModel, c, indexedProp);
 			if ( clazz != null) {
-				clazzRepo.save(clazz);
+				classRepository.save(clazz);
 			}
 		}
 	}
@@ -120,10 +128,10 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param availableProps
 	 * @return
 	 */
-	private Clazz processClazz(OntModel model, OntClass clazz, List<Property> availableProps) {
+	private ClassType processClazz(OntModel model, OntClass clazz, List<PropertyType> availableProps) {
 		// we do store only named ontology classes, omitting anonymous 
 		if (!clazz.isAnon()) {
-			Clazz index = new Clazz();
+			ClassType index = new ClassType();
 			index.setUri(clazz.getURI());
 			index.setLocalName(clazz.getLocalName());
 			index.setNameSpace(clazz.getNameSpace());
@@ -132,9 +140,11 @@ public class OntologyServiceImpl implements OntologyService {
 			// search for properties (including properties of super classes
 			index.setProperties(getProperties(clazz, availableProps));
 			// search for parent / super classes
-			index.setParent(getSuperClasses(clazz));
+			index.setAllParents(getSuperClasses(clazz));
+			index.setParents(getSuperClasses(clazz, true));
 			// search for child / sub classes
-			index.setChild(getSubClasses(clazz));
+			index.setAllChildren(getSubClasses(clazz));
+			index.setChildren(getSubClasses(clazz, true));
 			return index;
 		}
 		return null;
@@ -145,21 +155,21 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param properties
 	 * @return
 	 */
-	private Set<String> getProperties(final OntClass clazz, List<Property> properties) {
+	private Set<String> getProperties(final OntClass clazz, List<PropertyType> properties) {
 		return properties.stream()
 				// filtering 
-				.filter(new Predicate<Property>() {
+				.filter(new Predicate<PropertyType>() {
 					@Override
-					public boolean test(Property t) {
+					public boolean test(PropertyType t) {
 						// filter - check whether the property is assigned to the current class
 						return t.getProduct().contains(clazz.getURI());
 					}
 				})
 				// conversion from property to string
-				.map(new Function<Property, String>() {
+				.map(new Function<PropertyType, String>() {
 		
 					@Override
-					public String apply(Property t) {
+					public String apply(PropertyType t) {
 						// map - extract the URI 
 						return t.getUri();
 					}
@@ -173,14 +183,38 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param prop
 	 * @return
 	 */
-	private Property processProperty(OntModel model, OntProperty prop) {
-		Property index = new Property();
+	private PropertyType processProperty(OntModel model, OntProperty prop) {
+		PropertyType index = new PropertyType();
 		index.setUri(prop.getURI());
 		if ( prop.getRange()!= null) {
-			index.setRange(prop.getRange().getURI());
+			Resource range = prop.getRange();
+			index.setRange(range.getURI());
+			// 
+			
+			if (range.getNameSpace()!=null &&  range.getNameSpace().equals(XSD.NS)) {
+				switch(prop.getRange().getLocalName()) {
+				case "string":
+				case "normalizedString":
+					index.setValueQualifier("TEXT");
+					break;
+				case "float":
+				case "double":
+				case "decimal":
+				case "int":
+					index.setValueQualifier("REAL_MEASURE");
+					break;
+				case "boolean":
+					index.setValueQualifier("BOOLEAN");
+					break;
+				default:
+					// no value qualifier
+				}
+				
+			}
 		}
 		index.setLocalName(prop.getLocalName());
 		index.setNameSpace(prop.getNameSpace());
+		//
 		// try to find labels by searching rdfs:label and skos:prefLabel
 		index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
 		// try to find labels by searching rdfs:comment and skos:definition
@@ -256,8 +290,11 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @return
 	 */
 	private Set<String> getSuperClasses(OntClass cls) {
+		return getSuperClasses(cls, false);
+	}
+	private Set<String> getSuperClasses(OntClass cls, boolean direct) {
 		Set<String> sup = new HashSet<>();
-		Iterator<OntClass> iter = cls.listSuperClasses();
+		Iterator<OntClass> iter = cls.listSuperClasses(direct);
 		while (iter.hasNext()) {
 			OntClass superClass = iter.next();
 			if (! superClass.isAnon()) {
@@ -318,8 +355,11 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @return
 	 */
 	private Set<String> getSubClasses(OntClass cls) {
+		return getSubClasses(cls, false);
+	}
+	private Set<String> getSubClasses(OntClass cls, boolean direct) {
 		Set<String> sub = new HashSet<>();
-		Iterator<OntClass> iter = cls.listSubClasses();
+		Iterator<OntClass> iter = cls.listSubClasses(direct);
 		while (iter.hasNext()) {
 			OntClass subClass = iter.next();
 			if (subClass.isURIResource()) {

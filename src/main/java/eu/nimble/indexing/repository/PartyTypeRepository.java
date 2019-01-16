@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import eu.nimble.indexing.repository.model.catalogue.PartyType;
 
 @Repository
-public interface ManufacturerPartyRepository extends SolrCrudRepository<PartyType, String> {
+public interface PartyTypeRepository extends SolrCrudRepository<PartyType, String> {
 	/**
 	 * Retrieve all manufacturers as provided in the list
 	 * @param id

@@ -4,10 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.solr.client.solrj.response.FacetField;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class SearchResult<T> {
 	private long totalElements;
 	private long totalPages;

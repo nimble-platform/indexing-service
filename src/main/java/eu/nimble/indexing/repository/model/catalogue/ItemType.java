@@ -1,6 +1,7 @@
 package eu.nimble.indexing.repository.model.catalogue;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,16 +11,15 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
-import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.ReadOnlyProperty;
-import org.springframework.data.solr.core.mapping.ChildDocument;
 import org.springframework.data.solr.core.mapping.Dynamic;
 import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import eu.nimble.indexing.model.Concept;
 import eu.nimble.indexing.repository.model.ItemUtils;
 /**
  * Document class representing a single product item
@@ -57,7 +57,7 @@ public class ItemType implements ICatalogueItem, Serializable {
 	 * 
 	 */
 	@Indexed(name=LABEL_FIELD
-//			, copyTo= {LABEL_FIELD_COPY}
+			, copyTo= {LANGUAGE_TXT_FIELD,TEXT_FIELD}
 			) @Dynamic
 	private Map<String,String> name;
 	/**
@@ -65,8 +65,7 @@ public class ItemType implements ICatalogueItem, Serializable {
 	 * is available with {@link #getLanguages()} 
 	 */
 	@Indexed(name=DESC_FIELD
-
-//			, copyTo= {DESC_FIELD_COPY}
+			, copyTo= {LANGUAGE_TXT_FIELD,TEXT_FIELD}
 			) @Dynamic
 	private Map<String,String> description;
 	// PRICE & Currency
@@ -102,23 +101,10 @@ public class ItemType implements ICatalogueItem, Serializable {
 	@Indexed(name=PACKAGE_AMOUNT_FILED, type="pdouble") @Dynamic
 	private Map<String, List<Double>> packageAmounts =new HashMap<>();
 	/**
-	 * nested list of additional properties
-	 */
-	@Indexed(name=ADDITIONAL_PROPERTY_FIELD)
-	@Field(child=true, value=ADDITIONAL_PROPERTY_FIELD)
-	@ChildDocument
-	private Collection<AdditionalProperty> additionalProperty;
-	/**
 	 * Id of the corresponding manufacturer
 	 */
 	@Indexed(name=MANUFACTURER_ID_FIELD) 
 	private String manufacturerId;
-	/**
-	 * Read only field - used to provide the manufacturer's details
-	 * in a search result
-	 */
-	@ReadOnlyProperty
-	private PartyType manufacturer;
 	// Transportation Service Details
 	@Indexed(name=SERVICE_TYPE_FIELD)
 	private Set<String> serviceType;
@@ -129,19 +115,140 @@ public class ItemType implements ICatalogueItem, Serializable {
 	@Indexed(name=EMISSION_STANDARD_FIELD)
 	private String emissionStandard;
 	
-	@Indexed(name=PACKAGE_TYPE_FIELD)
-	private String packageType;
+
 	/**
 	 * Possibility for joining to product class index
 	 */
 	@Indexed(name=COMMODITY_CLASSIFICATION_URI_FIELD)
-	private List<String> commodityClassification;
-	// 
-	private Map<String, String> propertyMap;
-	private Map<String, String> stringValue;
-	private Map<String, Boolean> booleanValue;
-	private Map<String, Double> doubleValue;
+	private List<String> classificationUri;
+	//
+	@Indexed(name=QUALIFIED_KEY_FIELD) @Dynamic
+	private Map<String, String> propertyMap = new HashMap<>();
+	@Indexed(name=QUALIFIED_STRING_FIELD, type="string") @Dynamic
+	private Map<String, Collection<String>> stringValue = new HashMap<>();
+	@Indexed(name=QUALIFIED_BOOLEAN_FIELD, type="boolean") @Dynamic
+	private Map<String, Boolean> booleanValue = new HashMap<>();
+	@Indexed(name=QUALIFIED_DOUBLE_FIELD, type="pdouble") @Dynamic
+	private Map<String, Collection<Double>> doubleValue = new HashMap<>();
 	
+	
+	@Indexed(name=IMAGE_URI_FIELD)
+	private Collection<String> imgageUri;
+	/**
+	 * List containing multilingual labels for product classification
+	 * 
+	 */
+	@ReadOnlyProperty
+	private List<Concept> classification;
+	/**
+	 * Read only field - used to provide the manufacturer's details
+	 * in a search result
+	 */
+	@ReadOnlyProperty
+	private PartyType manufacturer;
+	
+	
+	public void setStringProperty(String qualifier, Collection<String> values) {
+		this.stringValue.put(dynamicKey(qualifier, propertyMap), values);
+	}
+
+	public void addProperty(String qualifier, String value) {
+		String key = dynamicKey(qualifier, propertyMap);
+		Collection<String> values = stringValue.get(key);
+		if ( values == null ) {
+			values = new HashSet<String>();
+			this.stringValue.put(key, values);
+		}
+		//
+		values.add(value);
+	}
+	public void setDoubleProperty(String qualifier, Collection<Double> values) {
+		this.doubleValue.put(dynamicKey(qualifier, propertyMap), values);
+	}
+	public void addProperty(String qualifier, Double value) {
+		String key = dynamicKey(qualifier, propertyMap);
+		Collection<Double> values = doubleValue.get(key);
+		if ( values == null ) {
+			values = new HashSet<Double>();
+			this.doubleValue.put(key, values);
+		}
+		//
+		values.add(value);
+	}
+	public Map<String, Boolean> getBooleanValue() {
+		Map<String, Boolean> result = new HashMap<>();
+		for ( String dynUnitKey : this.propertyMap.keySet()) {
+			if ( booleanValue.containsKey(dynUnitKey)) {
+				result.put(propertyMap.get(dynUnitKey), booleanValue.get(dynUnitKey));
+			}
+		}
+		return result;
+	}
+
+	public void setBooleanValue(Map<String, Boolean> booleanValue) {
+		if ( booleanValue != null ) {
+			for (String key :  booleanValue.keySet()) {
+				this.booleanValue.put(dynamicKey(key, propertyMap), booleanValue.get(key));
+			}
+		}
+		else {
+			this.booleanValue = booleanValue;
+		}
+	}
+
+	public Map<String, Collection<String>> getStringValue() {
+		Map<String, Collection<String>> result = new HashMap<>();
+		for ( String dynUnitKey : this.propertyMap.keySet()) {
+			if ( stringValue.containsKey(dynUnitKey)) {
+				result.put(propertyMap.get(dynUnitKey), stringValue.get(dynUnitKey));
+			}
+		}
+		return result;
+	}
+	
+	public Map<String, Collection<Double>> getDoubleValue() {
+		Map<String, Collection<Double>> result = new HashMap<>();
+		for ( String dynUnitKey : this.propertyMap.keySet()) {
+			if ( doubleValue.containsKey(dynUnitKey)) {
+				result.put(propertyMap.get(dynUnitKey), doubleValue.get(dynUnitKey));
+			}
+		}
+		return result;
+	}
+	public void setStringValue(Map<String, Collection<String>> stringValue) {
+		if ( stringValue != null ) {
+			for (String key :  stringValue.keySet()) {
+				setStringProperty(key, stringValue.get(key));
+			}
+		}
+		else {
+			this.stringValue = stringValue;
+		}
+	}
+	public void setDoubleValue(Map<String, Collection<Double>> doubleValue) {
+		if ( doubleValue != null ) {
+			for (String key :  doubleValue.keySet()) {
+				setDoubleProperty(key, doubleValue.get(key));
+			}
+		}
+		else {
+			this.doubleValue = doubleValue;
+		}
+	}
+	
+	public void setProperty(String qualifier, Boolean value) {
+		this.booleanValue.put(dynamicKey(qualifier,propertyMap), value);
+	}
+//	
+//	public Collection<String> getProperties() {
+//		return propertyMap.values();
+//	}
+//	public void setProperties(Collection<String> qualifier) {
+//		this.propertyMap.clear();
+//		for ( String c : qualifier) {
+//			dynamicKey(c, this.propertyMap);
+//		}
+//	}
 	/**
 	 * GETTER for the URI
 	 * @return
@@ -222,32 +329,36 @@ public class ItemType implements ICatalogueItem, Serializable {
 		this.applicableCountries = applicableCountries;
 	}
 
-	/**
-	 * Obtain the list of indexed additional properties
-	 * 
-	 * @return The list of additional properties
-	 */
-	public Collection<AdditionalProperty> getAdditionalProperty() {
-		if ( this.additionalProperty == null) {
-			this.additionalProperty = new HashSet<>();
-		}
-		return additionalProperty;
-	}
-	/** 
-	 * Convenience method to add a AdditionalProperty to the item
-	 * @param prop
-	 */
-	public void addAdditionalProperty(AdditionalProperty prop) {
-		getAdditionalProperty().add(prop);
-	}
-	/**
-	 * Store the list of additional properties
-	 * @param additionalProperty
-	 */
-	public void setAdditionalProperty(Collection<AdditionalProperty> additionalProperty) {
-		this.additionalProperty = additionalProperty;
-	}
+//	/**
+//	 * Obtain the list of indexed additional properties
+//	 * 
+//	 * @return The list of additional properties
+//	 */
+//	public Collection<AdditionalProperty> getAdditionalProperty() {
+//		if ( this.additionalProperty == null) {
+//			this.additionalProperty = new HashSet<>();
+//		}
+//		return additionalProperty;
+//	}
+//	/** 
+//	 * Convenience method to add a AdditionalProperty to the item
+//	 * @param prop
+//	 */
+//	public void addAdditionalProperty(AdditionalProperty prop) {
+//		
+//		getAdditionalProperty().add(prop);
+//	}
+//	/**
+//	 * Store the list of additional properties
+//	 * @param additionalProperty
+//	 */
+//	public void setAdditionalProperty(Collection<AdditionalProperty> additionalProperty) {
+//		this.additionalProperty = additionalProperty;
+//	}
 	public String getManufacturerId() {
+		if (manufacturer != null && manufacturer.getId() != null) {
+			return manufacturer.getId();
+		}
 		return manufacturerId;
 	}
 	public void setManufacturerId(String manufacturerId) {
@@ -420,7 +531,13 @@ public class ItemType implements ICatalogueItem, Serializable {
 			addPackageAmounts(key, packageAmountPerUnit.get(key));
 		}
 	}
-	
+	/**
+	 * Helper method to create the index field's name part and
+	 * to maintain the label for the corresponding name map
+	 * @param keyVal
+	 * @param keyMap
+	 * @return
+	 */
 	private String dynamicKey(String keyVal, Map<String, String> keyMap) {
 		String key = ItemUtils.dynamicFieldPart(keyVal);
 		keyMap.put(key, keyVal);
@@ -432,10 +549,31 @@ public class ItemType implements ICatalogueItem, Serializable {
 	public void setManufacturer(PartyType manufacturer) {
 		this.manufacturer = manufacturer;
 	}
-	public List<String> getCommodityClassification() {
-		return commodityClassification;
+	public List<Concept> getClassification() {
+		if ( classification == null) {
+			classification = new ArrayList<>();
+		}
+		return classification;
 	}
-	public void setCommodityClassification(List<String> commodityClassification) {
-		this.commodityClassification = commodityClassification;
+	public void addClassification(Concept c) {
+		getClassification().add(c);
 	}
+	public void setClassification(List<Concept> classification) {
+		this.classification = classification;
+	}
+	public List<String> getClassificationUri() {
+		return classificationUri;
+	}
+	public void setClassificationUri(List<String> classificationUri) {
+		this.classificationUri = classificationUri;
+	}
+	public Collection<String> getImgageUri() {
+		return imgageUri;
+	}
+	public void setImgageUri(Collection<String> imgageUri) {
+		this.imgageUri = imgageUri;
+	}
+	
+	
+
 }
