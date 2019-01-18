@@ -5,36 +5,32 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Dynamic;
 import org.springframework.data.solr.core.mapping.Indexed;
 
-public abstract class Named {
+public abstract class Named implements INamed {
 	/**
 	 * The uri of the property including namespace
 	 */
 	
 	@Id
-	@Field("id")
-	@Indexed(required=true, name="id", type="string") 
+	@Indexed(required=true, name=ID_FIELD) 
 	protected String uri;
 
-	@Indexed
+	@Indexed(name=LOCAL_NAME_FIELD)
 	public String localName;
 	
-	@Indexed
+	@Indexed(name=NAME_SPACE_FIELD)
 	public String nameSpace;	
 
-	@Indexed
+	@Indexed(name=LANGUAGES_FIELD)
 	protected Collection<String> languages;
-	@Indexed
+	@Indexed(name=LABEL_FIELD, copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
 	@Dynamic
-	@Field("label_*")
 	protected Map<String, String> label;
-	@Indexed
+	@Indexed(name=COMMENT_FIELD,copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
 	@Dynamic
-	@Field("comment_*")
 	protected Map<String, String> comment;
 
 	public Named() {
