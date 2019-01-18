@@ -15,11 +15,11 @@ public interface PropertyService {
 
 	public List<PropertyType> getProperties(String forClass);
 	
-	public List<PropertyType> getPropertiesByName(List<String> names);
+	public List<PropertyType> getPropertiesByName(String nameSpace, Set<String> names);
 	
 	public List<PropertyType> getPropertiesByIndexName(Set<String> names);
 	
-	public List<PropertyType> getPropertiesByUri(List<String> uri);
+	public List<PropertyType> getPropertiesByUri(Set<String> uri);
 	
 
 }

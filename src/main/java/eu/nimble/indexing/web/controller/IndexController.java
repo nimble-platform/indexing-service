@@ -48,10 +48,25 @@ public class IndexController {
 	}
 	@GetMapping("/classes")
 	public ResponseEntity<List<ClassType>> getClasses(    		
-//			@RequestHeader(value = "Authorization") String bearerToken, 
-			@RequestParam String property) {
-		List<ClassType> result = classes.getClasses(property);
-		return ResponseEntity.ok(result);
+//			@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(required=false) Set<String> uri,
+			@RequestParam(required=false) String nameSpace,
+			@RequestParam(required=false) Set<String> localName,
+			@RequestParam(required=false) String property) {
+		if ( property != null) {
+			List<ClassType> result = classes.getClassesForProperty(property);
+			return ResponseEntity.ok(result);
+		}
+		if ( uri!=null && !uri.isEmpty()) {
+			List<ClassType> result = classes.getClasses(uri);
+			return ResponseEntity.ok(result);
+			
+		}
+		if ( nameSpace !=null && localName!=null && !localName.isEmpty()) {
+			List<ClassType> result = classes.getClasses(uri);
+			return ResponseEntity.ok(result);
+		}
+		return ResponseEntity.ok(new ArrayList<>());
 	}
 	@DeleteMapping("/class")
 	public ResponseEntity<Boolean> removeClass(    		
@@ -104,9 +119,15 @@ public class IndexController {
 	@GetMapping("/properties")
 	public ResponseEntity<List<PropertyType>> getProperties(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
+			@RequestParam(name="uri", required=false) Set<String> uri,
 			@RequestParam(name="product", required=false) String productType,
-			@RequestParam(name="localName", required=false) List<String> localNames,
+			@RequestParam(name="nameSpace", required=false) String nameSpace,
+			@RequestParam(name="localName", required=false) Set<String> localNames,
 			@RequestParam(name="idxName", required=false) Set<String> idxName) {
+		if ( uri!=null && !uri.isEmpty()) {
+			List<PropertyType> prop = properties.getPropertiesByUri(uri);
+			return ResponseEntity.ok(prop);
+		}
 		if ( productType != null) {
 			List<PropertyType> prop = properties.getProperties(productType);
 			return ResponseEntity.ok(prop);
@@ -115,8 +136,8 @@ public class IndexController {
 			List<PropertyType> prop = properties.getPropertiesByIndexName(idxName);
 			return ResponseEntity.ok(prop);
 		}
-		if ( localNames != null) {
-			List<PropertyType> prop = properties.getPropertiesByName(localNames);
+		if ( nameSpace!=null && localNames != null && !localNames.isEmpty()) {
+			List<PropertyType> prop = properties.getPropertiesByName(nameSpace, localNames);
 			return ResponseEntity.ok(prop);
 			
 		}

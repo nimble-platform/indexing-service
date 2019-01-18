@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.stereotype.Repository;
 
+import eu.nimble.indexing.repository.model.owl.ClassType;
 import eu.nimble.indexing.repository.model.owl.PropertyType;
 
 @Repository
@@ -37,11 +38,18 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 	 */
 	List<PropertyType> findByLocalNameIn(List<String> names);
 	/**
+	 * 
+	 * @param namespace
+	 * @param localNames
+	 * @return
+	 */
+	List<PropertyType> findByNameSpaceAndLocalNameIn(String namespace, Set<String> localNames);
+	/**
 	 * Retrieve multiple properties by their uri
 	 * @param uri list of URI's to resolve
 	 * @return
 	 */
-	List<PropertyType> findByUriIn(List<String> uri);
+	List<PropertyType> findByUriIn(Set<String> uri);
 	/**
 	 * Retrieve multiple properties by the index field name they serve as a label
 	 * @param itemFieldNames
