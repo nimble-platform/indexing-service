@@ -16,6 +16,13 @@ public class SearchResult<T> {
 	public SearchResult(List<T> result) {
 		this.result = result;
 	}
+	public SearchResult(List<T> result, int currentPage, int pageSize, long totalElements, long totalPages) {
+		this.result = result;
+		this.currentPage = currentPage;
+		this.pageSize = pageSize;
+		this.totalElements = totalElements;
+		this.totalPages = totalPages;
+	}
 
 	public List<T> getResult() {
 		return result;
