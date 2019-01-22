@@ -61,6 +61,15 @@ public class IndexController {
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
+	@PostMapping("/class")
+	public ResponseEntity<Boolean> setClass(
+//			@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestBody ClassType prop
+	){
+		classes.setClass(prop);
+		return ResponseEntity.ok(Boolean.TRUE);
+	}
+
 	@GetMapping("/party")
 	public ResponseEntity<PartyType> getParty(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
