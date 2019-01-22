@@ -1,6 +1,7 @@
 package eu.nimble.indexing.service;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
@@ -20,6 +21,11 @@ public interface CatalogueService {
 	 * @param item
 	 */
 	public void setItem(ItemType item);
+	/**
+	 * Store a list of items
+	 * @param items
+	 */
+	public boolean setItems(List<ItemType> items);
 	/**
 	 * Delete an item from the index
 	 * @param uri
