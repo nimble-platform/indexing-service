@@ -29,6 +29,12 @@ public abstract class Named implements INamed {
 	@Indexed(name=LABEL_FIELD, copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
 	@Dynamic
 	protected Map<String, String> label;
+	@Indexed(name=ALTERNATE_LABEL_FIELD, type="string", copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
+	@Dynamic
+	protected Map<String, Collection<String>> alternateLabel;
+	@Indexed(name=HIDDEN_LABEL_FIELD, type="string", copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
+	@Dynamic
+	protected Map<String, Collection<String>> hiddenLabel;
 	@Indexed(name=DESCRIPTION_FIELD,copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
 	@Dynamic
 	protected Map<String, String> description;

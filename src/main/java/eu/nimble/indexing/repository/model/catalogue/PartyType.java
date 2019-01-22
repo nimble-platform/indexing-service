@@ -2,20 +2,21 @@ package eu.nimble.indexing.repository.model.catalogue;
 
 import java.util.Collection;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
+
+import eu.nimble.indexing.repository.model.owl.Named;
 /**
  * Class representing a manufacturer in the SOLR index
  * @author dglachs
  *
  */
 @SolrDocument(collection=IParty.COLLECTION_NAME)
-public class PartyType implements IParty {
+public class PartyType extends Named implements IParty {
 
-	@Id
-	@Indexed(name=ID_FIELD)
-	private String id;
+//	@Id
+//	@Indexed(name=IParty.ID_FIELD)
+//	private String id;
 	@Indexed(name=NAME_FIELD)
 	private String name;
 	@Indexed(name=ORIGIN_FIELD)
@@ -41,10 +42,10 @@ public class PartyType implements IParty {
 	@Indexed(name=TRUST_NUMBER_OF_TRANSACTIONS_FIELD, type="pdouble")
 	private Double trustNumberOfTransactions;
 	public String getId() {
-		return id;
+		return getUri();
 	}
 	public void setId(String id) {
-		this.id = id;
+		setUri(id);
 	}
 	public String getName() {
 		return name;

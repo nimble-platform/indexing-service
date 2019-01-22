@@ -11,6 +11,14 @@ public interface INamed {
 	 */
 	String LABEL_FIELD = "*_label";
 	/**
+	 * The language based label, e.g. <code><i>en</i>_alternate</code> for english alternate label
+	 */
+	String ALTERNATE_LABEL_FIELD = "*_alternate";
+	/**
+	 * The language based label, e.g. <code><i>en</i>_label</code> for english label
+	 */
+	String HIDDEN_LABEL_FIELD = "*_hidden";
+	/**
 	 * Copy Field, language based. The language based label and description are stored in this field
 	 * Final used index name is <code><i>en</i>_txt</code> for english text (label, description)
 	 */
