@@ -7,25 +7,26 @@ import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
 
 @SolrDocument(collection="class")
-public class ClassType extends Named {
-	private static final String TYPE = "class"; 
+public class ClassType extends Named implements IClassType {
 	
-	@Indexed(defaultValue=TYPE, name="doctype")
-	private String type = TYPE;
+	@Indexed(defaultValue=TYPE_VALUE, name=TYPE_FIELD)
+	private String type = TYPE_VALUE;
 	
-	@Indexed(required=false, name="properties")
+	@Indexed(required=false, name=PROPERTIES_FIELD)
 	private Collection<String> properties;
 
-	@Indexed(required=false, name="parents")
+	@Indexed(required=false, name=PARENTS_FIELD)
 	private Collection<String> parents;
-	@Indexed(required=false, name="children")
+	@Indexed(required=false, name=CHILDREN_FIELD)
 	private Collection<String> children;
 	
-	@Indexed(required=false, name="allParents")
+	@Indexed(required=false, name=ALL_PARENTS_FIELD)
 	private Collection<String> allParents;
-	@Indexed(required=false, name="allChildren")
+	@Indexed(required=false, name=ALL_CHILDREN_FIELD)
 	private Collection<String> allChildren;
 
+	@Indexed(required=false, name=LEVEL_FIELD, type="pint")
+	private Integer level;
 	
 	public String getType() {
 		return type;
@@ -92,6 +93,12 @@ public class ClassType extends Named {
 	}
 	public void setAllChildren(Collection<String> child) {
 		this.allChildren = child;
+	}
+	public Integer getLevel() {
+		return level;
+	}
+	public void setLevel(Integer level) {
+		this.level = level;
 	}
 
 }

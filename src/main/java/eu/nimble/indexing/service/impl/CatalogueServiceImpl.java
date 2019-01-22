@@ -220,7 +220,65 @@ public class CatalogueServiceImpl implements CatalogueService {
 			itemRepo.delete(item);
 		}		
 	}
-	
+	 /*
+	  * path=/select params={q=canCompany
+	  * &facet.field=materialProperty_s
+	  * &facet.field=linkToConfigurator_s
+	  * &facet.field=palletDimensionGrossWeightKilos_q
+	  * &facet.field=palletDimensionGrossWeight_unit
+	  * &facet.field=weightOfTheIndividualPackagingKilos_q
+	  * &facet.field=weightGlm_q
+	  * &facet.field=trust_company_trading_volume&facet.field=prop_s&facet.field=color_s&facet.field=bxHxTCm_q&facet.field=productShape_s
+	  * &facet.field=hasAdjustableHeight_b
+	  * &facet.field=item_price_currency&facet.field=height_d&facet.field=colorCode_s&facet.field=manufacturerProductDescription_s
+	  * &facet.field=materialOfTheArmrestPadding_s&facet.field=adjustableArmrest_b&facet.field=bxHxT_value&facet.field=id&facet.field=season_s
+	  * &facet.field=nominalThickness_unit&facet.field=hasWeightInKilograms_d&facet.field=minHeightCm_q&facet.field=fabricCategory_s
+	  * &facet.field=manufacturerName_s&facet.field=supplierProductDesignation_s&facet.field=widthCm_q
+	  * &facet.field=weightOfTheContainedSubstanceSVHC_value&facet.field=item_commodity_classification_mix&facet.field=estimated_duration
+	  * &facet.field=item_commodity_classification&facet.field=robotjointspeed_unit&facet.field=bxHxT_unit&facet.field=prop1_s
+	  * &facet.field=palletDimensionGrossWeight_value&facet.field=weight_unit&facet.field=lmf.created&facet.field=supplierProductOrderSuffix_s
+	  * &facet.field=supported_cargo_type&facet.field=item_image&facet.field=width_unit&facet.field=width_value&facet.field=trust_company_trust_score
+	  * &facet.field=item_commodity_classification_uri&facet.field=hasWidth_d&facet.field=typeOfPackaging_s&facet.field=item_package_amount_unit
+	  * &facet.field=netWeightKilos_q&facet.field=quantityOfProductsPerPalletLayer_d&facet.field=length_value
+	  * &facet.field=manufacturer_ppap_compliance_level
+	  * &facet.field=p1_s&facet.field=lmf.indexed&facet.field=compliesWithLegislation_s
+	  * &facet.field=trust_company_rating
+	  * &facet.field=item_free_of_charge_indicator&facet.field=lmf.type&facet.field=technique_s&facet.field=retailerName_s&facet.field=productType_s
+	  * &facet.field=adjustmentRangeOfTheArmrestHeightDegrees_q&facet.field=customsTariffNumberTARIC_d&facet.field=nominalThickness_value
+	  * &facet.field=numberOfTilesPerSquareMeter_d&facet.field=finalUse_s&facet.field=trust_company_seller_communication
+	  * &facet.field=item_price&facet.field=productCheckDateSVHC_s&facet.field=robotjointspeedMs_q&facet.field=item_name&facet.field=floorTiles_s
+	  * &facet.field=robotjointspeed_value&facet.field=maxClearWidthOfArmrest_value&facet.field=heightCm_q&facet.field=nominalThicknessMm_q
+	  * &facet.field=sleve_s&facet.field=colorOfArmrest_s&facet.field=item_catalogue_id&facet.field=supported_product_nature
+	  * &facet.field=groundTiles_s&facet.field=lmf.spellcheck&facet.field=robotjointcolor_s&facet.field=item_description&facet.field=composition_s
+	  * &facet.field=madeInCountry_s&facet.field=materialOfTheArmrest_s&facet.field=productArticleNumberOfManufacturer_s&facet.field=minHeight_unit
+	  * &facet.field=collectionName_s&facet.field=item_manufacturer_name&facet.field=brand_s&facet.field=trust_company_fulfillment_of_terms
+	  * &facet.field=length_unit&facet.field=mode&facet.field=maxSeatHeightCm_q&facet.field=widthMm_q&facet.field=maxHeight_value
+	  * &facet.field=quantityOfLayersPerPallet_d&facet.field=item_commodity_classification_code&facet.field=estimated_duration_unit
+	  * &facet.field=item_manufacturer_id&facet.field=total_capacity&facet.field=antistaticPresent_b&facet.field=lengthM_q&facet.field=item_properties
+	  * &facet.field=hasColour_s&facet.field=gTIN_s&facet.field=emission_standard&facet.field=maxSeatHeight_value
+	  * &facet.field=toleranceClass_s&facet.field=hasHeight_d&facet.field=weightOfTheIndividualPackaging_value&facet.field=trust_company_delivery_packaging
+	  * &facet.field=line_s&facet.field=total_capacity_unit&facet.field=qualityCharacteristicRecordOfIngoingMaterial_s
+	  * &facet.field=adjustmentRangeOfTheArmrestHeight_value&facet.field=retailerIdentification_s&facet.field=materialOfTheSeatBack_s
+	  * &facet.field=supplierProductDescription_s&facet.field=manufacturerProductDesignation_s&facet.field=hasLength_d&facet.field=grade_s
+	  * &facet.field=item_package_type&facet.field=containsSubstanceAccordingToSVHC_b&facet.field=packagingDimensions_s&facet.field=heightM_q
+	  * &facet.field=item_certificate&facet.field=designation_s&facet.field=item_package_amount&facet.field=width_d
+	  * &facet.field=item_estimated_delivery_time_unit&facet.field=basin_s&facet.field=prop2_d&facet.field=conditionOfSurface_s
+	  * &facet.field=netWeight_unit&facet.field=maxHeightCm_q&facet.field=item_applicable_countries&facet.field=hasSeatBelt_b
+	  * &facet.field=item_manufacturer_origin&facet.field=minHeight_value&facet.field=material_s&facet.field=lmf.uri&facet.field=hasName_s
+	  * &facet.field=netWeight_value&facet.field=cardboardWeightPortionOfTheIndividualPackaging_value&facet.field=renderMaterial_s
+	  * &facet.field=materialOfTheFrame_s&facet.field=neck_s&facet.field=height_unit&facet.field=maxClearWidthOfArmrestCm_q
+	  * &facet.field=item_id&facet.field=weight_value&facet.field=weight_s&facet.field=supplierProductFamily_s
+	  * &facet.field=toilet_s&facet.field=adjustmentRangeOfTheArmrestHeight_unit&facet.field=manufacturer_certificate
+	  * &facet.field=service_type&facet.field=application_s&facet.field=colorOfSittingAreaOfSeat_s&facet.field=productArticleNumberOfSupplier_s
+	  * &facet.field=_version_&facet.field=item_estimated_delivery_time&facet.field=testCustomProperty_d
+	  * &facet.field=trust_company_number_of_transactions&facet.field=maxClearWidthOfArmrest_unit&facet.field=compliesWithRegulation_s
+	  * &facet.field=weightOfTheIndividualPackaging_unit&facet.field=applicationConditionsForCompositionOfPlates_s&facet.field=height_value
+	  * &facet.field=hasDescriptionOfMaterials_s&facet.field=hasDescription_s&json.nl=map&start=0&sort=score+desc&facet.mincount=1&rows=10
+	  * &facet=true&wt=json&facet.sort=count} hits=24 status=0 QTime=52 
+	  */
+	public SearchResult<ItemType> search(String query, Set<String> filterQuery, Set<String> facetField) {
+		return null;
+	}
 	@Override
 	public SearchResult<ItemType> search(String query, Pageable pageable) {
 		
@@ -326,6 +384,15 @@ public class CatalogueServiceImpl implements CatalogueService {
 		}
 		
 		return ffield;
+	}
+	@Override
+	public boolean setItems(List<ItemType> items) {
+//		Map<String, PartyType> manufacturer = new HashMap<>();
+		// @TODO : extract all manufacturers from the items and do a bunch checking
+		for ( ItemType i : items) {
+			setItem(i);
+		}
+		return true;
 	}
 	
 }

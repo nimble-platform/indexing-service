@@ -9,6 +9,7 @@ public interface IParty {
 	public String COLLECTION_NAME = "party";
 	public String ID_FIELD = "id";
 	public String NAME_FIELD = "name";
+	public String NAME_ML_FIELD = "*_name";
 	public String ORIGIN_FIELD = "origin";
 	public String CERTIFICATE_TYPE_FIELD = "certificateType";
 	public String PPAP_COMPLIANCE_LEVEL_FIELD = "ppapComplianceLevel";

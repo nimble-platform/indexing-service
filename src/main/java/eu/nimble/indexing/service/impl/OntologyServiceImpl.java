@@ -27,6 +27,7 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.jena.vocabulary.XSD;
@@ -52,7 +53,8 @@ public class OntologyServiceImpl implements OntologyService {
 	private PropertyRepository propRepo;
 	@Autowired 
 	private ClassRepository classRepository;
-
+//	@Autowired
+//	PropertyService propRepo;
 	@Override
 	public boolean deleteNamespace(String namespace) {
 		propRepo.deleteByNameSpace(namespace);
@@ -135,8 +137,9 @@ public class OntologyServiceImpl implements OntologyService {
 			index.setUri(clazz.getURI());
 			index.setLocalName(clazz.getLocalName());
 			index.setNameSpace(clazz.getNameSpace());
-			index.setLabel(obtainMultilingualValues(clazz, RDFS.label, SKOS.prefLabel));
-			index.setComment(obtainMultilingualValues(clazz, RDFS.comment, SKOS.definition));
+			index.setLabel(obtainMultilingualValues(clazz, RDFS.label, DC.title, SKOS.prefLabel));
+			index.setDescription(obtainMultilingualValues(clazz, DC.description));
+			index.setComment(obtainMultilingualValues(clazz, RDFS.comment, DC.description, SKOS.definition));
 			// search for properties (including properties of super classes
 			index.setProperties(getProperties(clazz, availableProps));
 			// search for parent / super classes
@@ -184,6 +187,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @return
 	 */
 	private PropertyType processProperty(OntModel model, OntProperty prop) {
+		
 		PropertyType index = new PropertyType();
 		index.setUri(prop.getURI());
 		if ( prop.getRange()!= null) {

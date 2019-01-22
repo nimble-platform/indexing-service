@@ -5,36 +5,41 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.apache.solr.client.solrj.beans.Field;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Dynamic;
 import org.springframework.data.solr.core.mapping.Indexed;
 
-public abstract class Named {
+public abstract class Named implements INamed {
 	/**
 	 * The uri of the property including namespace
 	 */
 	
 	@Id
-	@Field("id")
-	@Indexed(required=true, name="id", type="string") 
+	@Indexed(required=true, name=ID_FIELD) 
 	protected String uri;
 
-	@Indexed
-	public String localName;
+	@Indexed(name=LOCAL_NAME_FIELD)
+	protected String localName;
 	
-	@Indexed
-	public String nameSpace;	
+	@Indexed(name=NAME_SPACE_FIELD)
+	protected String nameSpace;	
 
-	@Indexed
+	@Indexed(name=LANGUAGES_FIELD)
 	protected Collection<String> languages;
-	@Indexed
+	@Indexed(name=LABEL_FIELD, copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
 	@Dynamic
-	@Field("label_*")
 	protected Map<String, String> label;
-	@Indexed
+	@Indexed(name=ALTERNATE_LABEL_FIELD, type="string", copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
 	@Dynamic
-	@Field("comment_*")
+	protected Map<String, Collection<String>> alternateLabel;
+	@Indexed(name=HIDDEN_LABEL_FIELD, type="string", copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
+	@Dynamic
+	protected Map<String, Collection<String>> hiddenLabel;
+	@Indexed(name=DESCRIPTION_FIELD,copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
+	@Dynamic
+	protected Map<String, String> description;
+	@Indexed(name=COMMENT_FIELD,copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
+	@Dynamic
 	protected Map<String, String> comment;
 
 	public Named() {
@@ -100,7 +105,28 @@ public abstract class Named {
 			this.comment = null;
 		}
 	}
+	public void addDescription(String language, String desc) {
+		if ( this.description == null) {
+			this.description = new HashMap<>();
+		}
+		this.description.put(language, desc);
+		// be sure to have all stored languages in the language list
+		addLanguage(language);
+	}
+	public Map<String, String> getDescription() {
+		return description;
+	}
 
+	public void setDescription(Map<String, String> descMap) {
+		if ( descMap != null ) {
+			for ( String key : descMap.keySet() ) {
+				addComment(key, descMap.get(key));
+			}
+		}
+		else {
+			this.comment = null;
+		}
+	}
 	public String getUri() {
 		return uri;
 	}

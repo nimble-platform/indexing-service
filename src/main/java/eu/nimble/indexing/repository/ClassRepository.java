@@ -29,6 +29,13 @@ public interface ClassRepository  extends SolrCrudRepository<ClassType, String>{
 	 * @return
 	 */
 	List<ClassType> findByUriIn(Set<String> uri);
+	/**
+	 * 
+	 * @param namespace
+	 * @param localNames
+	 * @return
+	 */
+	List<ClassType> findByNameSpaceAndLocalNameIn(String namespace, Set<String> localNames);
 }
 
 

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.model.ItemUtils;
 import eu.nimble.indexing.repository.model.PartyTypeUtils;
 import eu.nimble.indexing.repository.model.catalogue.ItemType;
@@ -48,10 +51,25 @@ public class IndexController {
 	}
 	@GetMapping("/classes")
 	public ResponseEntity<List<ClassType>> getClasses(    		
-//			@RequestHeader(value = "Authorization") String bearerToken, 
-			@RequestParam String property) {
-		List<ClassType> result = classes.getClasses(property);
-		return ResponseEntity.ok(result);
+//			@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(required=false) Set<String> uri,
+			@RequestParam(required=false) String nameSpace,
+			@RequestParam(required=false) Set<String> localName,
+			@RequestParam(required=false) String property) {
+		if ( property != null) {
+			List<ClassType> result = classes.getClassesForProperty(property);
+			return ResponseEntity.ok(result);
+		}
+		if ( uri!=null && !uri.isEmpty()) {
+			List<ClassType> result = classes.getClasses(uri);
+			return ResponseEntity.ok(result);
+			
+		}
+		if ( nameSpace !=null && localName!=null && !localName.isEmpty()) {
+			List<ClassType> result = classes.getClasses(uri);
+			return ResponseEntity.ok(result);
+		}
+		return ResponseEntity.ok(new ArrayList<>());
 	}
 	@DeleteMapping("/class")
 	public ResponseEntity<Boolean> removeClass(    		
@@ -113,9 +131,15 @@ public class IndexController {
 	@GetMapping("/properties")
 	public ResponseEntity<List<PropertyType>> getProperties(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
+			@RequestParam(name="uri", required=false) Set<String> uri,
 			@RequestParam(name="product", required=false) String productType,
-			@RequestParam(name="localName", required=false) List<String> localNames,
+			@RequestParam(name="nameSpace", required=false) String nameSpace,
+			@RequestParam(name="localName", required=false) Set<String> localNames,
 			@RequestParam(name="idxName", required=false) Set<String> idxName) {
+		if ( uri!=null && !uri.isEmpty()) {
+			List<PropertyType> prop = properties.getPropertiesByUri(uri);
+			return ResponseEntity.ok(prop);
+		}
 		if ( productType != null) {
 			List<PropertyType> prop = properties.getProperties(productType);
 			return ResponseEntity.ok(prop);
@@ -124,12 +148,25 @@ public class IndexController {
 			List<PropertyType> prop = properties.getPropertiesByIndexName(idxName);
 			return ResponseEntity.ok(prop);
 		}
-		if ( localNames != null) {
-			List<PropertyType> prop = properties.getPropertiesByName(localNames);
+		if ( nameSpace!=null && localNames != null && !localNames.isEmpty()) {
+			List<PropertyType> prop = properties.getPropertiesByName(nameSpace, localNames);
 			return ResponseEntity.ok(prop);
 			
 		}
 		return ResponseEntity.ok(new ArrayList<>());
+	}
+	@GetMapping("/properties/search")
+	public ResponseEntity<SearchResult<PropertyType>> searchProperties(    		
+//			@RequestHeader(value = "Authorization") String bearerToken, 
+			@RequestParam(name="q", required=true) String query,
+			@RequestParam(name="lang", required=false) String lang,
+			@RequestParam(name="start", required=false, defaultValue="0") Integer start,
+			@RequestParam(name="rows", required=false, defaultValue="10") Integer rows
+			
+			) {
+		Pageable page = new SolrPageRequest(start, rows);
+		SearchResult<PropertyType> result =  properties.search(query, lang, page);
+		return ResponseEntity.ok(result);
 	}
 	@DeleteMapping("/property")
 	public ResponseEntity<Boolean> removeProperty(    		
@@ -168,6 +205,15 @@ public class IndexController {
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
+	@PostMapping("/items")
+	public ResponseEntity<Boolean> setItems(
+//			@RequestHeader(value = "Authorization") String bearerToken, 
+    		@RequestBody List<ItemType> store
+    		) {
+		boolean result = items.setItems(store);
+		return ResponseEntity.ok(result);
+	}
+	
 	@PostMapping("/item")
 	public ResponseEntity<Boolean> setItem(
 //			@RequestHeader(value = "Authorization") String bearerToken, 

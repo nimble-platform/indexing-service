@@ -5,6 +5,8 @@ import java.util.HashSet;
 
 import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * SOLR Document holding the properties out of 
  * any ontologies including label, range and 
@@ -13,26 +15,31 @@ import org.springframework.data.solr.core.mapping.SolrDocument;
  * @author dglachs
  *
  */
-@SolrDocument(collection="props")
-public class PropertyType extends Named {
-	static final String TYPE = "property"; 
+@SolrDocument(collection=IPropertyType.COLLECTION)
+public class PropertyType extends Named implements IPropertyType {
 	/**
 	 * The uri of the property including namespace
 	 */
-	@Indexed(defaultValue=TYPE, name="doctype")
-	private String type = TYPE;
+	@Indexed(defaultValue=TYPE_VALUE, name=TYPE_FIELD)
+	private String type = TYPE_VALUE;
 
-	@Indexed(required=false, name="range") 
+	@Indexed(required=false, name=RANGE_FIELD) 
 	private String range;
 	
-	@Indexed(required=false, name="valueQualifier")
+	@Indexed(required=false, name=VALUE_QUALIFIER_FIELD)
 	private String valueQualifier;
 	
-	@Indexed(required=false, name="used_in")
+	@Indexed(required=false, name=USED_WITH_FIELD)
 	private Collection<String> product;
 	
-	@Indexed(required=false, name="idxField")
+	@Indexed(required=false, name=IDX_FIELD_NAME_FIELD)
 	private Collection<String> itemFieldNames;
+	
+	@Indexed(required=false, name=IS_FACET_FIELD)
+	private boolean facet = true;
+	
+	@Indexed(required=false, name=BOOST_FIELD, type="pdouble")
+	private Double boost;
 
 	public String getRange() {
 		return range;
@@ -79,6 +86,22 @@ public class PropertyType extends Named {
 
 	public void setValueQualifier(String valueQualifier) {
 		this.valueQualifier = valueQualifier;
+	}
+	@JsonIgnore
+	public boolean isFacet() {
+		return facet;
+	}
+
+	public void setFacet(boolean facet) {
+		this.facet = facet;
+	}
+	@JsonIgnore
+	public Double getBoost() {
+		return boost;
+	}
+
+	public void setBoost(Double boost) {
+		this.boost = boost;
 	}
 
 
