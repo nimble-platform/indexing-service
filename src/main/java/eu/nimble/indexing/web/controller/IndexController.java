@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.model.ItemUtils;
 import eu.nimble.indexing.repository.model.PartyTypeUtils;
 import eu.nimble.indexing.repository.model.catalogue.ItemType;
@@ -143,6 +146,19 @@ public class IndexController {
 		}
 		return ResponseEntity.ok(new ArrayList<>());
 	}
+	@GetMapping("/properties/search")
+	public ResponseEntity<SearchResult<PropertyType>> searchProperties(    		
+//			@RequestHeader(value = "Authorization") String bearerToken, 
+			@RequestParam(name="q", required=true) String query,
+			@RequestParam(name="lang", required=false) String lang,
+			@RequestParam(name="start", required=false, defaultValue="0") Integer start,
+			@RequestParam(name="rows", required=false, defaultValue="10") Integer rows
+			
+			) {
+		Pageable page = new SolrPageRequest(start, rows);
+		SearchResult<PropertyType> result =  properties.search(query, lang, page);
+		return ResponseEntity.ok(result);
+	}
 	@DeleteMapping("/property")
 	public ResponseEntity<Boolean> removeProperty(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
@@ -180,6 +196,15 @@ public class IndexController {
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
+	@PostMapping("/items")
+	public ResponseEntity<Boolean> setItems(
+//			@RequestHeader(value = "Authorization") String bearerToken, 
+    		@RequestBody List<ItemType> store
+    		) {
+		boolean result = items.setItems(store);
+		return ResponseEntity.ok(result);
+	}
+	
 	@PostMapping("/item")
 	public ResponseEntity<Boolean> setItem(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
