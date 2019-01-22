@@ -25,6 +25,8 @@ public class ClassType extends Named implements IClassType {
 	@Indexed(required=false, name=ALL_CHILDREN_FIELD)
 	private Collection<String> allChildren;
 
+	@Indexed(required=false, name=LEVEL_FIELD, type="pint")
+	private Integer level;
 	
 	public String getType() {
 		return type;
@@ -91,6 +93,12 @@ public class ClassType extends Named implements IClassType {
 	}
 	public void setAllChildren(Collection<String> child) {
 		this.allChildren = child;
+	}
+	public Integer getLevel() {
+		return level;
+	}
+	public void setLevel(Integer level) {
+		this.level = level;
 	}
 
 }

@@ -9,4 +9,6 @@ public interface IClassType extends INamed {
 	String CHILDREN_FIELD ="children";
 	String ALL_CHILDREN_FIELD ="allChildren";
 	
+	String LEVEL_FIELD = "level";
+	
 }

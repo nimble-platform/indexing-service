@@ -19,16 +19,19 @@ public abstract class Named implements INamed {
 	protected String uri;
 
 	@Indexed(name=LOCAL_NAME_FIELD)
-	public String localName;
+	protected String localName;
 	
 	@Indexed(name=NAME_SPACE_FIELD)
-	public String nameSpace;	
+	protected String nameSpace;	
 
 	@Indexed(name=LANGUAGES_FIELD)
 	protected Collection<String> languages;
 	@Indexed(name=LABEL_FIELD, copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
 	@Dynamic
 	protected Map<String, String> label;
+	@Indexed(name=DESCRIPTION_FIELD,copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
+	@Dynamic
+	protected Map<String, String> description;
 	@Indexed(name=COMMENT_FIELD,copyTo= {LANGUAGE_TXT_FIELD, TEXT_FIELD})
 	@Dynamic
 	protected Map<String, String> comment;
@@ -96,7 +99,28 @@ public abstract class Named implements INamed {
 			this.comment = null;
 		}
 	}
+	public void addDescription(String language, String desc) {
+		if ( this.description == null) {
+			this.description = new HashMap<>();
+		}
+		this.description.put(language, desc);
+		// be sure to have all stored languages in the language list
+		addLanguage(language);
+	}
+	public Map<String, String> getDescription() {
+		return description;
+	}
 
+	public void setDescription(Map<String, String> descMap) {
+		if ( descMap != null ) {
+			for ( String key : descMap.keySet() ) {
+				addComment(key, descMap.get(key));
+			}
+		}
+		else {
+			this.comment = null;
+		}
+	}
 	public String getUri() {
 		return uri;
 	}

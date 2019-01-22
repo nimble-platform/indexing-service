@@ -25,5 +25,6 @@ public interface INamed {
 	String COMMENT_FIELD = "*_comment";
 	String NAME_SPACE_FIELD = "nameSpace";
 	String LOCAL_NAME_FIELD = "localName"; 
+	String DESCRIPTION_FIELD = "*_desc";
 
 }
