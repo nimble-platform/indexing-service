@@ -4,11 +4,19 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.SolrTemplate;
+import org.springframework.data.solr.core.query.Criteria;
+import org.springframework.data.solr.core.query.SimpleQuery;
+import org.springframework.data.solr.core.query.result.ScoredPage;
 import org.springframework.stereotype.Service;
 
+import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.PropertyRepository;
+import eu.nimble.indexing.repository.model.owl.IPropertyType;
 import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.PropertyService;
 
@@ -16,6 +24,9 @@ import eu.nimble.indexing.service.PropertyService;
 public class PropertyServiceImpl implements PropertyService {
 	// injected via Autowired
 	private PropertyRepository propRepo;
+	
+	@Resource
+	private SolrTemplate solrTemplate;
 	
 	@PostConstruct
 	public void init() {
@@ -43,6 +54,19 @@ public class PropertyServiceImpl implements PropertyService {
 			propRepo.delete(prop);
 		}
 	}
+	@Override
+	public SearchResult<PropertyType> search(String search, String language, Pageable page) {
+		String field = IPropertyType.TEXT_FIELD;
+		if ( language !=null ) {
+			field = IPropertyType.LANGUAGE_TXT_FIELD.replace("*", language);
+		}
+		Criteria crit = Criteria.where(field).contains(search);
+		SimpleQuery query = new SimpleQuery(crit, page);
+		ScoredPage<PropertyType> result = solrTemplate.queryForPage(IPropertyType.COLLECTION, query, PropertyType.class);
+		return new SearchResult<>(result.getContent(), result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages());
+	}
+
+	
 
 	@Autowired
 	public void setPropertyRepository(PropertyRepository repository) {
@@ -64,6 +88,10 @@ public class PropertyServiceImpl implements PropertyService {
 	@Override
 	public List<PropertyType> getPropertiesByIndexName(Set<String> names) {
 		return propRepo.findByItemFieldNamesIn(names);
+	}
+	@Override
+	public void removeByNamespace(String namespace) {
+		propRepo.deleteByNameSpace(namespace);
 	}
 	
 }
