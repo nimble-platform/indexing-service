@@ -19,9 +19,7 @@ import eu.nimble.indexing.solr.schema.SolrTemplate;
 
 @Configuration
 @EnableSolrRepositories(basePackages= {
-			"eu.nimble.indexing.repository",
-			"eu.nimble.indexing.repository.impl",
-			"eu.nimble.indexing.repository.model"
+			"eu.nimble.indexing.repository"
 		}, 
 		schemaCreationSupport=true)
 public class SolrContext {

@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.ClassRepository;
-import eu.nimble.indexing.repository.model.owl.ClassType;
 import eu.nimble.indexing.service.ClassService;
+import eu.nimble.service.model.solr.owl.ClassType;
 
 @Service
 public class ClassServiceImpl implements ClassService {

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 import eu.nimble.indexing.model.IndexField;
 import eu.nimble.indexing.model.SearchResult;
-import eu.nimble.indexing.repository.model.catalogue.ItemType;
+import eu.nimble.service.model.solr.item.ItemType;
 
 public interface CatalogueService {
 	/**

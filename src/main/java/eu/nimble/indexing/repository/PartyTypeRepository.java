@@ -1,11 +1,12 @@
 package eu.nimble.indexing.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.stereotype.Repository;
 
-import eu.nimble.indexing.repository.model.catalogue.PartyType;
+import eu.nimble.service.model.solr.party.PartyType;
 
 @Repository
 public interface PartyTypeRepository extends SolrCrudRepository<PartyType, String> {
@@ -14,6 +15,6 @@ public interface PartyTypeRepository extends SolrCrudRepository<PartyType, Strin
 	 * @param id
 	 * @return
 	 */
-	List<PartyType> findByIdIn(List<String> id);
+	List<PartyType> findByIdIn(Set<String> id);
 
 }

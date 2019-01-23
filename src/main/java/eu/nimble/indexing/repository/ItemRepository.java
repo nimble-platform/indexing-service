@@ -6,7 +6,7 @@ import org.springframework.data.solr.repository.Query;
 import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.stereotype.Repository;
 
-import eu.nimble.indexing.repository.model.catalogue.ItemType;
+import eu.nimble.service.model.solr.item.ItemType;
 
 @Repository
 public interface ItemRepository extends SolrCrudRepository<ItemType, String>, CustomizedItemRepository {

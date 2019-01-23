@@ -35,21 +35,20 @@ import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.FacetPage;
 import org.springframework.stereotype.Service;
 
-import eu.nimble.indexing.model.Concept;
 import eu.nimble.indexing.model.IndexField;
 import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.repository.ItemRepository;
-import eu.nimble.indexing.repository.PartyTypeRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
-import eu.nimble.indexing.repository.model.ItemUtils;
-import eu.nimble.indexing.repository.model.catalogue.IParty;
-import eu.nimble.indexing.repository.model.catalogue.ItemType;
-import eu.nimble.indexing.repository.model.catalogue.PartyType;
-import eu.nimble.indexing.repository.model.owl.ClassType;
-import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.CatalogueService;
-import eu.nimble.indexing.solr.query.ParentFilterField;
+import eu.nimble.indexing.service.PartyTypeService;
+import eu.nimble.indexing.utils.ItemUtils;
+import eu.nimble.service.model.solr.item.ItemType;
+import eu.nimble.service.model.solr.owl.ClassType;
+import eu.nimble.service.model.solr.owl.Concept;
+import eu.nimble.service.model.solr.owl.PropertyType;
+import eu.nimble.service.model.solr.party.IParty;
+import eu.nimble.service.model.solr.party.PartyType;
 
 @Service
 public class CatalogueServiceImpl implements CatalogueService {
@@ -60,7 +59,8 @@ public class CatalogueServiceImpl implements CatalogueService {
 	private PropertyRepository propertyRepo;
 	private ClassRepository classRepo;
 
-	private PartyTypeRepository partyRepo;
+	@Autowired
+	private PartyTypeService partyService;
 
 	@Autowired
 	public void setItemRepository(ItemRepository itemRepo) {
@@ -74,10 +74,10 @@ public class CatalogueServiceImpl implements CatalogueService {
 	public void setClassRepository(ClassRepository repo) {
 		this.classRepo = repo;
 	}
-	@Autowired
-	public void setPartyRepository(PartyTypeRepository repo) {
-		this.partyRepo = repo;
-	}
+//	@Autowired
+//	public void setPartyRepository(PartyTypeRepository repo) {
+//		this.partyRepo = repo;
+//	}
 
 	@Resource
 	private SolrTemplate solrTemplate;
@@ -106,10 +106,10 @@ public class CatalogueServiceImpl implements CatalogueService {
 	 */
 	private void processManufacturerFromItem(ItemType item) {
 		if ( item.getManufacturer()!=null) {
-			Optional<PartyType> pt = partyRepo.findById(item.getManufacturer().getId());
+			Optional<PartyType> pt = partyService.findById(item.getManufacturer().getId());
 			if (! pt.isPresent() ) {
 				// be sure to have the manufacturer in the index
-				partyRepo.save(item.getManufacturer());
+				partyService.setPartyType(item.getManufacturer());
 			}
 			// ensure the manufacturer id is in the indexed field 
 			item.setManufacturerId(item.getManufacturer().getId());
@@ -118,7 +118,7 @@ public class CatalogueServiceImpl implements CatalogueService {
 	}
 	private ItemType enrichFromSolr(ItemType item) {
 		if ( item.getManufacturerId()!=null) {
-			Optional<PartyType> p = partyRepo.findById(item.getManufacturerId());
+			Optional<PartyType> p = partyService.findById(item.getManufacturerId());
 			if ( p.isPresent()) {
 				item.setManufacturer(p.get());
 				item.setManufacturerId(null);
@@ -134,39 +134,29 @@ public class CatalogueServiceImpl implements CatalogueService {
 		}
 		return item;
 	}
-	/**
-	 * Helper method to enrich an result set with the corresponding
-	 * manufacturers.
-	 * 
-	 * @param items
-	 */
-	private void processManufacturersFromList(Iterable<ItemType> items) {
-		final List<String> manufacturers = new ArrayList<>(); 
-							
+	private Set<String> extractManufacturers(List<ItemType> items) {
+		return items.stream()
+				.map(ItemType::getManufacturerId)
+				.collect(Collectors.toSet());
+	}
+
+	
+	private void enrichManufacturers(List<ItemType> items) {
+		// read all existing manufacturers
+		final Map<String, PartyType> map = partyService.getPartyTypes(extractManufacturers(items));
 		items.forEach(new Consumer<ItemType>() {
 
 			@Override
 			public void accept(ItemType t) {
-				String id = t.getManufacturerId();
-				if ( id!=null && ! manufacturers.contains(id))
-					manufacturers.add(id);
-				
-			}
-			
-		});
-		final Map<String,PartyType> mList = partyRepo.findByIdIn(manufacturers)
-				.stream()
-				.collect(Collectors.toMap(PartyType::getId, c -> c));
-		
-		items.forEach(new Consumer<ItemType>() {
-
-			@Override
-			public void accept(ItemType t) {
-				t.setManufacturer(mList.get(t.getManufacturerId()));
-				
+				if ( map.containsKey(t.getManufacturerId())) {
+					// add the retrieved customer to the actual list
+					t.setManufacturer(map.get(t.getManufacturerId()));
+				}
 			}
 		});
 	}
+
+	
 	/**
 	 * Helper method to enrich a result set with he commodity classification 
 	 * @param items
@@ -298,8 +288,8 @@ public class CatalogueServiceImpl implements CatalogueService {
 				).setFacetMinCount(0));	
 		// run the query
 		FacetPage<ItemType> result = solrTemplate.queryForFacetPage("item",fq, ItemType.class);
-		// 
-		processManufacturersFromList(result.getContent());
+		// retrieve the manufacturers
+		enrichManufacturers(result.getContent());
 		//
 		processCommodityFromList(result.getContent());
 		SearchResult<ItemType> res = new SearchResult<>(result.getContent());
@@ -387,6 +377,7 @@ public class CatalogueServiceImpl implements CatalogueService {
 	}
 	@Override
 	public boolean setItems(List<ItemType> items) {
+		Set<String> manufacturers = extractManufacturers(items);
 //		Map<String, PartyType> manufacturer = new HashMap<>();
 		// @TODO : extract all manufacturers from the items and do a bunch checking
 		for ( ItemType i : items) {
