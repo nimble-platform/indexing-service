@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.PropertyRepository;
-import eu.nimble.indexing.repository.model.owl.IPropertyType;
-import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.PropertyService;
+import eu.nimble.service.model.solr.owl.IPropertyType;
+import eu.nimble.service.model.solr.owl.PropertyType;
 
 @Service
 public class PropertyServiceImpl implements PropertyService {

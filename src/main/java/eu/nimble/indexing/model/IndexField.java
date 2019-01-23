@@ -5,7 +5,8 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import eu.nimble.indexing.repository.model.owl.Named;
+import eu.nimble.service.model.solr.owl.Concept;
+
 @JsonInclude(value=Include.NON_EMPTY)
 public class IndexField {
 	/**
@@ -62,11 +63,11 @@ public class IndexField {
 		this.dynamicBase = dynamicBase;
 	}
 	/**
-	 * Method to inject {@link Named#getUri()}, {@link Named#getLabel()} and 
-	 * {@link Named#getComment()} to the current field!
+	 * Method to inject {@link Concept#getUri()}, {@link Concept#getLabel()} and 
+	 * {@link Concept#getComment()} to the current field!
 	 * @param property
 	 */
-	public void withNamed(Named property) {
+	public void withNamed(Concept property) {
 		this.uri=property.getUri();
 		this.label = property.getLabel();
 		this.description = property.getComment();

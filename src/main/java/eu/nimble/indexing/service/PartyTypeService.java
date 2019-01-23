@@ -1,10 +1,10 @@
 package eu.nimble.indexing.service;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
-import org.springframework.data.solr.core.query.Query;
-
-import eu.nimble.indexing.repository.model.catalogue.PartyType;
+import eu.nimble.service.model.solr.party.PartyType;
 
 public interface PartyTypeService {
 	
@@ -14,6 +14,13 @@ public interface PartyTypeService {
 	
 	public void removePartyType(String uri);
 
-	public List<PartyType> getPartyTypes(Query forProperty);
+	/**
+	 * Retrieve a map with the {@link PartyType#getId()} as key
+	 * @param identifiers A list of id's to search
+	 * @return The constructed map
+	 */
+	public Map<String, PartyType> getPartyTypes(Set<String> identifiers);
+
+	Optional<PartyType> findById(String id);
 
 }

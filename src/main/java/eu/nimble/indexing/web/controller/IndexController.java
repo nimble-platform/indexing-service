@@ -16,16 +16,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import eu.nimble.indexing.model.SearchResult;
-import eu.nimble.indexing.repository.model.ItemUtils;
-import eu.nimble.indexing.repository.model.PartyTypeUtils;
-import eu.nimble.indexing.repository.model.catalogue.ItemType;
-import eu.nimble.indexing.repository.model.catalogue.PartyType;
-import eu.nimble.indexing.repository.model.owl.ClassType;
-import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.CatalogueService;
 import eu.nimble.indexing.service.ClassService;
 import eu.nimble.indexing.service.PartyTypeService;
 import eu.nimble.indexing.service.PropertyService;
+import eu.nimble.indexing.utils.ItemUtils;
+import eu.nimble.indexing.utils.PartyTypeUtils;
+import eu.nimble.service.model.solr.item.ItemType;
+import eu.nimble.service.model.solr.owl.ClassType;
+import eu.nimble.service.model.solr.owl.PropertyType;
+import eu.nimble.service.model.solr.party.PartyType;
 
 @RestController
 public class IndexController {
@@ -98,14 +98,14 @@ public class IndexController {
 		PartyType m = partyService.getPartyType(uri);
 		return ResponseEntity.ok(m);
 	}
-	@GetMapping("/parties")
-	public ResponseEntity<List<PartyType>> getParties(    		
-//			@RequestHeader(value = "Authorization") String bearerToken, 
-			@RequestParam String property) {
-		// TODO: check query options
-		List<PartyType> result = partyService.getPartyTypes(null);
-		return ResponseEntity.ok(result);
-	}
+//	@GetMapping("/parties")
+//	public ResponseEntity<List<PartyType>> getParties(    		
+////			@RequestHeader(value = "Authorization") String bearerToken, 
+//			@RequestParam String property) {
+//		// TODO: check query options
+//		List<PartyType> result = partyService.getPartyTypes(null);
+//		return ResponseEntity.ok(result);
+//	}
 	@DeleteMapping("/party")
 	public ResponseEntity<Boolean> removeManufacturer(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 

@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.nimble.indexing.model.IndexField;
 import eu.nimble.indexing.model.SearchResult;
-import eu.nimble.indexing.repository.model.catalogue.ItemType;
 import eu.nimble.indexing.service.CatalogueService;
+import eu.nimble.service.model.solr.item.ItemType;
 
 @RestController
 public class CatalogueController {

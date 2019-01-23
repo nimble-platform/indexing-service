@@ -6,7 +6,7 @@ import java.util.Set;
 import org.springframework.data.domain.Pageable;
 
 import eu.nimble.indexing.model.SearchResult;
-import eu.nimble.indexing.repository.model.owl.PropertyType;
+import eu.nimble.service.model.solr.owl.PropertyType;
 
 public interface PropertyService {
 	

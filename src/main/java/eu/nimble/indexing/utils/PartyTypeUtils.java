@@ -1,8 +1,8 @@
-package eu.nimble.indexing.repository.model;
+package eu.nimble.indexing.utils;
 
 import java.util.Collections;
 
-import eu.nimble.indexing.repository.model.catalogue.PartyType;
+import eu.nimble.service.model.solr.party.PartyType;
 
 public class PartyTypeUtils {
 	public static PartyType template() {

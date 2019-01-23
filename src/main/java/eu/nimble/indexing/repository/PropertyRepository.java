@@ -6,8 +6,7 @@ import java.util.Set;
 import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.stereotype.Repository;
 
-import eu.nimble.indexing.repository.model.owl.ClassType;
-import eu.nimble.indexing.repository.model.owl.PropertyType;
+import eu.nimble.service.model.solr.owl.PropertyType;
 
 @Repository
 public interface PropertyRepository  extends SolrCrudRepository<PropertyType, String>{

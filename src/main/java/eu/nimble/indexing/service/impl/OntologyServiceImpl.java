@@ -36,9 +36,9 @@ import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
-import eu.nimble.indexing.repository.model.owl.ClassType;
-import eu.nimble.indexing.repository.model.owl.PropertyType;
 import eu.nimble.indexing.service.OntologyService;
+import eu.nimble.service.model.solr.owl.ClassType;
+import eu.nimble.service.model.solr.owl.PropertyType;
 /**
  * Implementation for the Ontology Service
  * 

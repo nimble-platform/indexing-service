@@ -1,4 +1,4 @@
-package eu.nimble.indexing.repository.model;
+package eu.nimble.indexing.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,9 +8,9 @@ import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.SimpleFilterQuery;
 import org.springframework.util.StringUtils;
 
-import eu.nimble.indexing.repository.model.catalogue.ICatalogueItem;
-import eu.nimble.indexing.repository.model.catalogue.IParty;
-import eu.nimble.indexing.repository.model.catalogue.ItemType;
+import eu.nimble.service.model.solr.item.ICatalogueItem;
+import eu.nimble.service.model.solr.item.ItemType;
+import eu.nimble.service.model.solr.party.IParty;
 
 public class ItemUtils implements ICatalogueItem {
 //	public static String dynamicFieldPart(String ...strings ) {

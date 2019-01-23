@@ -7,7 +7,7 @@ import org.springframework.data.solr.repository.Query;
 import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.stereotype.Repository;
 
-import eu.nimble.indexing.repository.model.owl.ClassType;
+import eu.nimble.service.model.solr.owl.ClassType;
 
 @Repository
 public interface ClassRepository  extends SolrCrudRepository<ClassType, String>{

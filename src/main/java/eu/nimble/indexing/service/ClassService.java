@@ -3,7 +3,7 @@ package eu.nimble.indexing.service;
 import java.util.List;
 import java.util.Set;
 
-import eu.nimble.indexing.repository.model.owl.ClassType;
+import eu.nimble.service.model.solr.owl.ClassType;
 
 public interface ClassService {
 	
