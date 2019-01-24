@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -138,6 +139,11 @@ public class CatalogueServiceImpl implements CatalogueService {
 		return items.stream()
 				.map(ItemType::getManufacturerId)
 				.collect(Collectors.toSet());
+	}
+	private Map<String, PartyType> extractManufacturerMap(List<ItemType> items) {
+		return items.stream()
+				.map(ItemType::getManufacturer)
+				.collect(Collectors.toMap(PartyType::getId, p->p));
 	}
 
 	
@@ -384,6 +390,29 @@ public class CatalogueServiceImpl implements CatalogueService {
 			setItem(i);
 		}
 		return true;
+	}
+	@Override
+	public long deleteCatalogue(String catalogueId) {
+		// TODO Auto-generated method stub
+		return itemRepo.deleteByCatalogueId(catalogueId);
+	}
+	@Override
+	public long setCatalogue(final String catalogueId, List<ItemType> items) {
+		// try to delete an existing catalogue first
+		itemRepo.deleteByCatalogueId(catalogueId);
+		// add the new items
+		final List<String> idSaved = new ArrayList<String>();
+		items.forEach(new Consumer<ItemType>() {
+
+			@Override
+			public void accept(ItemType t) {
+				if (t.getCatalogueId().equals(catalogueId)) {
+					itemRepo.save(t);
+					idSaved.add(t.getUri());
+				}
+			}
+		});
+		return idSaved.size();
 	}
 	
 }
