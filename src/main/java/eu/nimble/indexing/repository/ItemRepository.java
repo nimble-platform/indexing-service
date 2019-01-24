@@ -20,5 +20,11 @@ public interface ItemRepository extends SolrCrudRepository<ItemType, String>, Cu
 	
 	@Query(value="label_?1:?0*", fields= {"*", PARENT_FILTER})
 	public List<ItemType> findByNameStartingWith(String name, String lang);
+	/**
+	 * Delete the items of the provided catalouge
+	 * @param catalogueId
+	 * @return
+	 */
+	public long deleteByCatalogueId(String catalogueId);
 
 }
