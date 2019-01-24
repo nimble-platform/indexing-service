@@ -40,4 +40,7 @@ public interface CatalogueService {
 	public SearchResult<ItemType> search(String query, Pageable pageable);
 	
 	public Collection<IndexField> fieldsInUse();
+	public long setCatalogue(String catalogueId, List<ItemType> items);
+	public long deleteCatalogue(String catalogueId);
+	
 }

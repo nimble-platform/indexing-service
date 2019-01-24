@@ -1,6 +1,7 @@
 package eu.nimble.indexing.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.jena.ext.com.google.common.base.CaseFormat;
@@ -87,7 +88,10 @@ public class ItemUtils implements ICatalogueItem {
 		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasColour", "blue");
 		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasColour", "red");
 		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasUnitsPerPack", 10.0);
+		
+		item.addProperty("length", "cm", 20.0);
 		item.setProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#isFireProof", Boolean.TRUE);
+		
 		return item;
 
 	}
