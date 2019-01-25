@@ -10,7 +10,14 @@ node('nimble-jenkins-slave') {
         stage('Clone and Update') {
             git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: env.BRANCH_NAME)
         }
-
+        stage('Build Dependencies') {
+            sh 'rm -rf common'
+            sh 'git clone https://github.com/nimble-platform/common'
+            dir('common') {
+                sh 'git checkout ' + env.BRANCH_NAME
+                sh 'mvn clean install'
+            }
+        }
 //        stage('Run Tests') {
 //            sh 'mvn clean test'
 //        }
@@ -40,6 +47,14 @@ node('nimble-jenkins-slave') {
         stage('Clone and Update') {
             git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: env.BRANCH_NAME)
         }
+        stage('Build Dependencies') {
+            sh 'rm -rf common'
+            sh 'git clone https://github.com/nimble-platform/common'
+            dir('common') {
+                sh 'git checkout ' + env.BRANCH_NAME
+                sh 'mvn clean install'
+            }
+        }
 
         stage('Run Tests') {
             sh 'mvn clean test'
@@ -57,6 +72,14 @@ node('nimble-jenkins-slave') {
 
 //        stage('Clone and Update') {
 //            git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: 'master')
+//        }
+//        stage('Build Dependencies') {
+//            sh 'rm -rf common'
+//            sh 'git clone https://github.com/nimble-platform/common'
+//            dir('common') {
+//                sh 'git checkout ' + env.BRANCH_NAME
+//                sh 'mvn clean install'
+//            }
 //        }
 //
 //        stage('Set version') {
