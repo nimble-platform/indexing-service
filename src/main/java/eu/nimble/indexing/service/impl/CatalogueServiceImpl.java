@@ -36,14 +36,14 @@ import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.FacetPage;
 import org.springframework.stereotype.Service;
 
-import eu.nimble.indexing.model.IndexField;
-import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.repository.ItemRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.CatalogueService;
 import eu.nimble.indexing.service.PartyTypeService;
 import eu.nimble.indexing.utils.ItemUtils;
+import eu.nimble.service.model.solr.IndexField;
+import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.Concept;

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
 
-import eu.nimble.indexing.model.SearchResult;
+import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.owl.ClassType;
 
 public interface ClassService {

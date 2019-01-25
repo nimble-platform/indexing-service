@@ -14,9 +14,9 @@ import org.springframework.data.solr.core.query.SimpleQuery;
 import org.springframework.data.solr.core.query.result.ScoredPage;
 import org.springframework.stereotype.Service;
 
-import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.PropertyService;
+import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.owl.IClassType;
 import eu.nimble.service.model.solr.owl.IPropertyType;
 import eu.nimble.service.model.solr.owl.PropertyType;

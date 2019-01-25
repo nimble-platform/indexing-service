@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import eu.nimble.indexing.model.IndexField;
-import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.service.CatalogueService;
+import eu.nimble.service.model.solr.IndexField;
+import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.item.ItemType;
 
 @RestController

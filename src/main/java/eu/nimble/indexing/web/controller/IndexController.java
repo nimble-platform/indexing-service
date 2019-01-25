@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.service.CatalogueService;
 import eu.nimble.indexing.service.ClassService;
 import eu.nimble.indexing.service.PartyTypeService;
 import eu.nimble.indexing.service.PropertyService;
 import eu.nimble.indexing.utils.ItemUtils;
 import eu.nimble.indexing.utils.PartyTypeUtils;
+import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.PropertyType;
