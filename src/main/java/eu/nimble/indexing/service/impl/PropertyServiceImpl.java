@@ -7,16 +7,19 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.SimpleQuery;
+import org.springframework.data.solr.core.query.SimpleStringCriteria;
 import org.springframework.data.solr.core.query.result.ScoredPage;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.PropertyService;
 import eu.nimble.service.model.solr.SearchResult;
+import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.IClassType;
 import eu.nimble.service.model.solr.owl.IPropertyType;
 import eu.nimble.service.model.solr.owl.PropertyType;
@@ -105,5 +108,10 @@ public class PropertyServiceImpl implements PropertyService {
 	public SearchResult<PropertyType> search(String search, String language, Pageable page) {
 		return search(search,language, false, page);
 	}
+	@Override
+	public SearchResult<PropertyType> search(String solrQuery, Pageable page) {
+		SimpleQuery q = new SimpleQuery(new SimpleStringCriteria(solrQuery), page);
+		Page<PropertyType> result = solrTemplate.queryForGroupPage(PropertyType.COLLECTION, q, PropertyType.class);
+		return new SearchResult<>(result);	}
 	
 }

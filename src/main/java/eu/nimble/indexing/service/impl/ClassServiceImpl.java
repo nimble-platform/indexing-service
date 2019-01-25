@@ -12,6 +12,7 @@ import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.AnyCriteria;
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.SimpleQuery;
+import org.springframework.data.solr.core.query.SimpleStringCriteria;
 import org.springframework.data.solr.core.query.result.ScoredPage;
 import org.springframework.stereotype.Service;
 
@@ -67,10 +68,10 @@ public class ClassServiceImpl implements ClassService {
 		return classRepo.findByNameSpaceAndLocalNameIn(nameSpace, localNames);
 	}
 	@Override
-	public List<ClassType> search(String solrQuery) {
-		SimpleQuery q = new SimpleQuery(solrQuery);
-		Page<ClassType> page = solrTemplate.queryForGroupPage(ClassType.COLLECTION, q, ClassType.class);
-		return page.getContent();
+	public SearchResult<ClassType> search(String solrQuery, Pageable page) {
+		SimpleQuery q = new SimpleQuery(new SimpleStringCriteria(solrQuery), page);
+		Page<ClassType> result = solrTemplate.queryForGroupPage(ClassType.COLLECTION, q, ClassType.class);
+		return new SearchResult<>(result);
 	}
 	@Override
 	public SearchResult<ClassType> search(String search, String language, boolean labelsOnly, Pageable page) {

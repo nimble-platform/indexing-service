@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.data.domain.Pageable;
 
 import eu.nimble.service.model.solr.SearchResult;
+import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.PropertyType;
 
 public interface PropertyService {
@@ -25,6 +26,7 @@ public interface PropertyService {
 	public List<PropertyType> getPropertiesByIndexName(Set<String> names);
 	
 	public List<PropertyType> getPropertiesByUri(Set<String> uri);
+	public SearchResult<PropertyType> search(String solrQuery, Pageable page);
 
 	public SearchResult<PropertyType> search(String search, String language, Pageable page);
 

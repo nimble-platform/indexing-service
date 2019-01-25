@@ -22,7 +22,7 @@ public interface ClassService {
 	
 	List<ClassType> getClassesForLocalNames(String nameSpace, Set<String> localNames);
 	
-	List<ClassType> search(String solrQuery);
+	SearchResult<ClassType> search(String solrQuery, Pageable page);
 
 	public SearchResult<ClassType> search(String query, String lang, boolean labelsOnly, Pageable page);
 }

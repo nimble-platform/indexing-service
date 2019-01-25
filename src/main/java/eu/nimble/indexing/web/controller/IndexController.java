@@ -58,15 +58,15 @@ public class IndexController {
 //	}
 	@GetMapping("/classes/search")
 	public ResponseEntity<SearchResult<ClassType>> searchClasses(    		
-//			@RequestHeader(value = "Authorization") String bearerToken, 
+//			@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name="q", required=true) String query,
-			@RequestParam(name="lang", required=false) String lang,
+//			@RequestParam(name="lang", required=false) String lang,
 			@RequestParam(name="start", required=false, defaultValue="0") Integer start,
 			@RequestParam(name="rows", required=false, defaultValue="10") Integer rows
 			
 			) {
 		Pageable page = new SolrPageRequest(start, rows);
-		SearchResult<ClassType> result =  classes.search(query, lang, false, page);
+		SearchResult<ClassType> result =  classes.search(query, page);
 		return ResponseEntity.ok(result);
 	}
 
@@ -87,7 +87,7 @@ public class IndexController {
 			
 		}
 		if ( nameSpace !=null && localName!=null && !localName.isEmpty()) {
-			List<ClassType> result = classes.getClasses(uri);
+			List<ClassType> result = classes.getClassesForLocalNames(nameSpace, localName);
 			return ResponseEntity.ok(result);
 		}
 		return ResponseEntity.ok(new ArrayList<>());
@@ -173,13 +173,13 @@ public class IndexController {
 	public ResponseEntity<SearchResult<PropertyType>> searchProperties(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 
 			@RequestParam(name="q", required=true) String query,
-			@RequestParam(name="lang", required=false) String lang,
+//			@RequestParam(name="lang", required=false) String lang,
 			@RequestParam(name="start", required=false, defaultValue="0") Integer start,
 			@RequestParam(name="rows", required=false, defaultValue="10") Integer rows
 			
 			) {
 		Pageable page = new SolrPageRequest(start, rows);
-		SearchResult<PropertyType> result =  properties.search(query, lang, page);
+		SearchResult<PropertyType> result =  properties.search(query, page);
 		return ResponseEntity.ok(result);
 	}
 	@DeleteMapping("/property")
