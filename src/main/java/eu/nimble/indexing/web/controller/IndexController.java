@@ -49,6 +49,27 @@ public class IndexController {
 		ClassType c = classes.getClass(uri);
 		return ResponseEntity.ok(c);
 	}
+//	@GetMapping("/classes/search")
+//	public ResponseEntity<List<ClassType>> searchClasses(
+//			@RequestParam(name="query") String query) {
+//		
+//		// 
+//		return ResponseEntity.ok(classes.search(query));
+//	}
+	@GetMapping("/classes/search")
+	public ResponseEntity<SearchResult<ClassType>> searchClasses(    		
+//			@RequestHeader(value = "Authorization") String bearerToken, 
+			@RequestParam(name="q", required=true) String query,
+			@RequestParam(name="lang", required=false) String lang,
+			@RequestParam(name="start", required=false, defaultValue="0") Integer start,
+			@RequestParam(name="rows", required=false, defaultValue="10") Integer rows
+			
+			) {
+		Pageable page = new SolrPageRequest(start, rows);
+		SearchResult<ClassType> result =  classes.search(query, lang, false, page);
+		return ResponseEntity.ok(result);
+	}
+
 	@GetMapping("/classes")
 	public ResponseEntity<List<ClassType>> getClasses(    		
 //			@RequestHeader(value = "Authorization") String bearerToken,
@@ -98,14 +119,7 @@ public class IndexController {
 		PartyType m = partyService.getPartyType(uri);
 		return ResponseEntity.ok(m);
 	}
-//	@GetMapping("/parties")
-//	public ResponseEntity<List<PartyType>> getParties(    		
-////			@RequestHeader(value = "Authorization") String bearerToken, 
-//			@RequestParam String property) {
-//		// TODO: check query options
-//		List<PartyType> result = partyService.getPartyTypes(null);
-//		return ResponseEntity.ok(result);
-//	}
+
 	@DeleteMapping("/party")
 	public ResponseEntity<Boolean> removeManufacturer(    		
 //			@RequestHeader(value = "Authorization") String bearerToken, 

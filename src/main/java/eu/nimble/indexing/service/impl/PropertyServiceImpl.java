@@ -54,11 +54,17 @@ public class PropertyServiceImpl implements PropertyService {
 			propRepo.delete(prop);
 		}
 	}
+	
 	@Override
-	public SearchResult<PropertyType> search(String search, String language, Pageable page) {
+	public SearchResult<PropertyType> search(String search, String language, boolean labelsOnly, Pageable page) {
 		String field = IPropertyType.TEXT_FIELD;
 		if ( language !=null ) {
 			field = IPropertyType.LANGUAGE_TXT_FIELD.replace("*", language);
+			//
+			if ( labelsOnly ) {
+				field = IPropertyType.LABEL_FIELD.replace("*", language);
+			}
+			
 		}
 		Criteria crit = Criteria.where(field).contains(search);
 		SimpleQuery query = new SimpleQuery(crit, page);
@@ -92,6 +98,10 @@ public class PropertyServiceImpl implements PropertyService {
 	@Override
 	public void removeByNamespace(String namespace) {
 		propRepo.deleteByNameSpace(namespace);
+	}
+	@Override
+	public SearchResult<PropertyType> search(String search, String language, Pageable page) {
+		return search(search,language, false, page);
 	}
 	
 }

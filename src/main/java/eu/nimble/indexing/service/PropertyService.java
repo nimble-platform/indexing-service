@@ -27,6 +27,8 @@ public interface PropertyService {
 	public List<PropertyType> getPropertiesByUri(Set<String> uri);
 
 	public SearchResult<PropertyType> search(String search, String language, Pageable page);
+
+	public SearchResult<PropertyType> search(String search, String language, boolean labelsOnly, Pageable page);
 	
 
 }
