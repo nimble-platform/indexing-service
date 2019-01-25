@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.SolrTemplate;
+import org.springframework.data.solr.core.query.AnyCriteria;
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.SimpleQuery;
 import org.springframework.data.solr.core.query.result.ScoredPage;
@@ -74,16 +75,18 @@ public class ClassServiceImpl implements ClassService {
 	@Override
 	public SearchResult<ClassType> search(String search, String language, boolean labelsOnly, Pageable page) {
 		String field = IClassType.TEXT_FIELD;
+		SimpleQuery q = new SimpleQuery(search, page);
 		if ( language !=null ) {
-			field = IPropertyType.LANGUAGE_TXT_FIELD.replace("*", language);
+			field = IClassType.LANGUAGE_TXT_FIELD.replace("*", language);
 			//
 			if ( labelsOnly ) {
-				field = IPropertyType.LABEL_FIELD.replace("*", language);
+				field = IClassType.LABEL_FIELD.replace("*", language);
 			}
+			Criteria crit = Criteria.where(field).contains(search);
+			q = new SimpleQuery(crit, page);
+			
 		}
-		Criteria crit = Criteria.where(field).contains(search);
-		SimpleQuery query = new SimpleQuery(crit, page);
-		ScoredPage<ClassType> result = solrTemplate.queryForPage(IClassType.COLLECTION, query, ClassType.class);
+		ScoredPage<ClassType> result = solrTemplate.queryForPage(IClassType.COLLECTION, q, ClassType.class);
 		return new SearchResult<>(result.getContent(), result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages());
 	}
 

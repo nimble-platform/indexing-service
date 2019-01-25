@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.PropertyService;
+import eu.nimble.service.model.solr.owl.IClassType;
 import eu.nimble.service.model.solr.owl.IPropertyType;
 import eu.nimble.service.model.solr.owl.PropertyType;
 
@@ -58,17 +59,18 @@ public class PropertyServiceImpl implements PropertyService {
 	@Override
 	public SearchResult<PropertyType> search(String search, String language, boolean labelsOnly, Pageable page) {
 		String field = IPropertyType.TEXT_FIELD;
+		SimpleQuery q = new SimpleQuery(search, page);
 		if ( language !=null ) {
 			field = IPropertyType.LANGUAGE_TXT_FIELD.replace("*", language);
 			//
 			if ( labelsOnly ) {
 				field = IPropertyType.LABEL_FIELD.replace("*", language);
 			}
+			Criteria crit = Criteria.where(field).contains(search);
+			q = new SimpleQuery(crit, page);
 			
 		}
-		Criteria crit = Criteria.where(field).contains(search);
-		SimpleQuery query = new SimpleQuery(crit, page);
-		ScoredPage<PropertyType> result = solrTemplate.queryForPage(IPropertyType.COLLECTION, query, PropertyType.class);
+		ScoredPage<PropertyType> result = solrTemplate.queryForPage(IPropertyType.COLLECTION, q, PropertyType.class);
 		return new SearchResult<>(result.getContent(), result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages());
 	}
 
