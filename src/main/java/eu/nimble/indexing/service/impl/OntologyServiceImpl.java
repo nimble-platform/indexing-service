@@ -302,7 +302,9 @@ public class OntologyServiceImpl implements OntologyService {
 		while (iter.hasNext()) {
 			OntClass superClass = iter.next();
 			if (! superClass.isAnon()) {
-				sup.add(superClass.getURI());
+				// exclude rdfs
+				if (!superClass.getNameSpace().equals(RDFS.uri))
+					sup.add(superClass.getURI());
 			}
 		}
 		return sup;
