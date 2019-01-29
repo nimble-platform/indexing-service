@@ -170,6 +170,8 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	}
 	private String getDatatype(Object type) {
 		switch(type.toString()){
+		case "pint":
+			return "int";
 		case "pdouble":
 			return "double";
 		case "text_general":

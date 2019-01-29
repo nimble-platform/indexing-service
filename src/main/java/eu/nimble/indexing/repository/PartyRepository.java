@@ -15,6 +15,6 @@ public interface PartyRepository extends SolrCrudRepository<PartyType, String> {
 	 * @param id
 	 * @return
 	 */
-	List<PartyType> findByIdIn(Set<String> id);
+	List<PartyType> findByUriIn(Set<String> id);
 
 }
