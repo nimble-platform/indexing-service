@@ -1,11 +1,12 @@
 package eu.nimble.indexing.web.controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,12 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import eu.nimble.indexing.service.CatalogueService;
 import eu.nimble.indexing.service.ClassService;
-import eu.nimble.indexing.service.PartyTypeService;
+import eu.nimble.indexing.service.ItemService;
+import eu.nimble.indexing.service.PartyService;
 import eu.nimble.indexing.service.PropertyService;
 import eu.nimble.indexing.utils.ItemUtils;
 import eu.nimble.indexing.utils.PartyTypeUtils;
+import eu.nimble.service.model.solr.IndexField;
 import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
@@ -29,26 +31,34 @@ import eu.nimble.service.model.solr.party.PartyType;
 
 @RestController
 public class IndexController {
-	
+
 	@Autowired
-	private PropertyService properties;
-	
+	private PropertyService propertyService;
+
 	@Autowired
-	private ClassService classes;
-	
+	private ClassService classService;
+
 	@Autowired
-	private PartyTypeService partyService;
-	
+	private PartyService partyService;
+
 	@Autowired
-	private CatalogueService items;
+	private ItemService itemService;
 
 	@GetMapping("/class")
-	public ResponseEntity<ClassType> getClass(    		
+	public ResponseEntity<ClassType> getClass(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestParam String uri) {
-		ClassType c = classes.getClass(uri);
-		return ResponseEntity.ok(c);
+			@RequestParam String uri) {
+		Optional<ClassType> c = classService.get(uri);
+		return ResponseEntity.of(c);
 	}
+	@GetMapping("/class/fields")
+	public ResponseEntity<Collection<IndexField>> classFields(
+//    		@RequestHeader(value = "Authorization") String bearerToken,
+	) {
+		Collection<IndexField> result = classService.fields(); // (query, new SolrPageRequest(0, 10));
+		return ResponseEntity.ok(result);
+	}
+
 //	@GetMapping("/classes/search")
 //	public ResponseEntity<List<ClassType>> searchClasses(
 //			@RequestParam(name="query") String query) {
@@ -56,184 +66,228 @@ public class IndexController {
 //		// 
 //		return ResponseEntity.ok(classes.search(query));
 //	}
-	@GetMapping("/classes/search")
-	public ResponseEntity<SearchResult<ClassType>> searchClasses(    		
+	@GetMapping("/class/select")
+	public ResponseEntity<SearchResult<ClassType>> searchClasses(
 //			@RequestHeader(value = "Authorization") String bearerToken,
-			@RequestParam(name="q", required=true) String query,
-//			@RequestParam(name="lang", required=false) String lang,
-			@RequestParam(name="start", required=false, defaultValue="0") Integer start,
-			@RequestParam(name="rows", required=false, defaultValue="10") Integer rows
-			
-			) {
-		Pageable page = new SolrPageRequest(start, rows);
-		SearchResult<ClassType> result =  classes.search(query, page);
+			@RequestParam(value = "q", required = false, defaultValue = "*:*") String query,
+			@RequestParam(value = "fq", required = false) List<String> filterQuery,
+			@RequestParam(value = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
+			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
+		SearchResult<ClassType> result = classService.select(query, filterQuery, facetFields,
+				new SolrPageRequest(start, rows));
 		return ResponseEntity.ok(result);
 	}
 
 	@GetMapping("/classes")
-	public ResponseEntity<List<ClassType>> getClasses(    		
+	public ResponseEntity<SearchResult<ClassType>> getClasses(
 //			@RequestHeader(value = "Authorization") String bearerToken,
-			@RequestParam(required=false) Set<String> uri,
-			@RequestParam(required=false) String nameSpace,
-			@RequestParam(required=false) Set<String> localName,
-			@RequestParam(required=false) String property) {
-		if ( property != null) {
-			List<ClassType> result = classes.getClassesForProperty(property);
+			@RequestParam(required = false) Set<String> uriList, 
+			@RequestParam(required = false) String nameSpace,
+			@RequestParam(required = false) Set<String> localNames, 
+			@RequestParam(required = false) String property) {
+		if (property != null) {
+			SearchResult<ClassType> result = classService.findByProperty(property);
 			return ResponseEntity.ok(result);
 		}
-		if ( uri!=null && !uri.isEmpty()) {
-			List<ClassType> result = classes.getClasses(uri);
+		if (uriList != null && !uriList.isEmpty()) {
+			SearchResult<ClassType> result = classService.findByUris(uriList);
 			return ResponseEntity.ok(result);
-			
+
 		}
-		if ( nameSpace !=null && localName!=null && !localName.isEmpty()) {
-			List<ClassType> result = classes.getClassesForLocalNames(nameSpace, localName);
+		if (nameSpace != null && localNames != null && !localNames.isEmpty()) {
+			SearchResult<ClassType> result = classService.findForNamespaceAndLocalNames(nameSpace, localNames);
 			return ResponseEntity.ok(result);
 		}
-		return ResponseEntity.ok(new ArrayList<>());
+		return ResponseEntity.ok(new SearchResult<>(new ArrayList<>()));
 	}
+
 	@DeleteMapping("/class")
-	public ResponseEntity<Boolean> removeClass(    		
+	public ResponseEntity<Boolean> removeClass(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestParam String uri) {
-		classes.removeClass(uri);
+			@RequestParam String uri) {
+		classService.remove(uri);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
 	@PostMapping("/class")
 	public ResponseEntity<Boolean> setClass(
 //			@RequestHeader(value = "Authorization") String bearerToken,
-			@RequestBody ClassType prop
-	){
-		classes.setClass(prop);
+			@RequestBody ClassType prop) {
+		classService.set(prop);
 		return ResponseEntity.ok(Boolean.TRUE);
+	}
+	@GetMapping("/party/fields")
+	public ResponseEntity<Collection<IndexField>> partyFields(
+//    		@RequestHeader(value = "Authorization") String bearerToken,
+	) {
+		Collection<IndexField> result = partyService.fields(); // (query, new SolrPageRequest(0, 10));
+		return ResponseEntity.ok(result);
+	}
+	@GetMapping("/party/select")
+	public ResponseEntity<SearchResult<PartyType>> searchParty(
+//			@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(value = "q", required = false, defaultValue = "*:*") String query,
+			@RequestParam(value = "fq", required = false) List<String> filterQuery,
+			@RequestParam(value = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
+			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
+		SearchResult<PartyType> result = partyService.select(query, filterQuery, facetFields,
+				new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
 	}
 
 	@GetMapping("/party")
-	public ResponseEntity<PartyType> getParty(    		
+	public ResponseEntity<PartyType> getParty(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestParam(defaultValue="null") String uri) {
-		if ( uri.equals("null") ) {
+			@RequestParam(defaultValue = "null") String uri) {
+		if (uri.equals("null")) {
 			return ResponseEntity.ok(PartyTypeUtils.template());
 		}
-		PartyType m = partyService.getPartyType(uri);
-		return ResponseEntity.ok(m);
+		Optional<PartyType> res = partyService.get(uri);
+		return ResponseEntity.of(res);
 	}
 
 	@DeleteMapping("/party")
-	public ResponseEntity<Boolean> removeManufacturer(    		
+	public ResponseEntity<Boolean> removeParty(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestParam String uri) {
-		partyService.removePartyType(uri);
-		return ResponseEntity.ok(Boolean.TRUE);
-	}
-	@PostMapping("/party")
-	public ResponseEntity<Boolean> setManufacturer(		
-//			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestBody PartyType party) {
-		partyService.setPartyType(party);
+			@RequestParam String uri) {
+		partyService.remove(uri);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
-	@GetMapping("/property")
-	public ResponseEntity<PropertyType> getProperty(    		
+	@PostMapping("/party")
+	public ResponseEntity<Boolean> setParty(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestParam String uri) {
-		PropertyType prop = properties.getProperty(uri);
-		return ResponseEntity.ok(prop);
+			@RequestBody PartyType party) {
+		partyService.set(party);
+		return ResponseEntity.ok(Boolean.TRUE);
 	}
-	@GetMapping("/properties")
-	public ResponseEntity<List<PropertyType>> getProperties(    		
-//			@RequestHeader(value = "Authorization") String bearerToken, 
-			@RequestParam(name="uri", required=false) Set<String> uri,
-			@RequestParam(name="product", required=false) String productType,
-			@RequestParam(name="nameSpace", required=false) String nameSpace,
-			@RequestParam(name="localName", required=false) Set<String> localNames,
-			@RequestParam(name="idxName", required=false) Set<String> idxName) {
-		if ( uri!=null && !uri.isEmpty()) {
-			List<PropertyType> prop = properties.getPropertiesByUri(uri);
-			return ResponseEntity.ok(prop);
-		}
-		if ( productType != null) {
-			List<PropertyType> prop = properties.getProperties(productType);
-			return ResponseEntity.ok(prop);
-		}
-		if ( idxName!=null) {
-			List<PropertyType> prop = properties.getPropertiesByIndexName(idxName);
-			return ResponseEntity.ok(prop);
-		}
-		if ( nameSpace!=null && localNames != null && !localNames.isEmpty()) {
-			List<PropertyType> prop = properties.getPropertiesByName(nameSpace, localNames);
-			return ResponseEntity.ok(prop);
-			
-		}
-		return ResponseEntity.ok(new ArrayList<>());
-	}
-	@GetMapping("/properties/search")
-	public ResponseEntity<SearchResult<PropertyType>> searchProperties(    		
-//			@RequestHeader(value = "Authorization") String bearerToken, 
-			@RequestParam(name="q", required=true) String query,
-//			@RequestParam(name="lang", required=false) String lang,
-			@RequestParam(name="start", required=false, defaultValue="0") Integer start,
-			@RequestParam(name="rows", required=false, defaultValue="10") Integer rows
-			
-			) {
-		Pageable page = new SolrPageRequest(start, rows);
-		SearchResult<PropertyType> result =  properties.search(query, page);
+	@GetMapping("/property/fields")
+	public ResponseEntity<Collection<IndexField>> propFields(
+//    		@RequestHeader(value = "Authorization") String bearerToken,
+	) {
+		Collection<IndexField> result = propertyService.fields(); // (query, new SolrPageRequest(0, 10));
 		return ResponseEntity.ok(result);
 	}
-	@DeleteMapping("/property")
-	public ResponseEntity<Boolean> removeProperty(    		
+
+	@GetMapping("/property")
+	public ResponseEntity<PropertyType> getProperty(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestParam String uri) {
-		properties.removeProperty(uri);
+			@RequestParam String uri) {
+		Optional<PropertyType> prop = propertyService.get(uri);
+		return ResponseEntity.of(prop);
+	}
+
+	@GetMapping("/properties")
+	public ResponseEntity<SearchResult<PropertyType>> getProperties(
+//			@RequestHeader(value = "Authorization") String bearerToken, 
+			@RequestParam(name = "uri", required = false) Set<String> uri,
+			@RequestParam(name = "class", required = false) String classType,
+			@RequestParam(name = "nameSpace", required = false) String nameSpace,
+			@RequestParam(name = "localName", required = false) Set<String> localNames,
+			@RequestParam(name = "idxName", required = false) Set<String> idxNames) {
+		if (uri != null && !uri.isEmpty()) {
+			SearchResult<PropertyType> prop = propertyService.findByUris(uri);
+			return ResponseEntity.ok(prop);
+		}
+		if (classType != null) {
+			SearchResult<PropertyType> prop = propertyService.findForClass(classType);
+			return ResponseEntity.ok(prop);
+		}
+		if (idxNames != null) {
+			SearchResult<PropertyType> prop = propertyService.findByIdxNames(idxNames);
+			return ResponseEntity.ok(prop);
+		}
+		if (nameSpace != null && localNames != null && !localNames.isEmpty()) {
+			SearchResult<PropertyType> prop = propertyService.findForNamespaceAndLocalNames(nameSpace, localNames);
+			return ResponseEntity.ok(prop);
+
+		}
+		return ResponseEntity.ok(new SearchResult<>(new ArrayList<>()));
+	}
+
+	@GetMapping("/property/select")
+	public ResponseEntity<SearchResult<PropertyType>> searchProperties(
+			@RequestParam(value = "q", required = false, defaultValue = "*:*") String query,
+			@RequestParam(value = "fq", required = false) List<String> filterQuery,
+			@RequestParam(value = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
+			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
+		SearchResult<PropertyType> result = propertyService.select(query, filterQuery, facetFields,
+				new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
+	}
+
+	@DeleteMapping("/property")
+	public ResponseEntity<Boolean> removeProperty(
+//			@RequestHeader(value = "Authorization") String bearerToken, 
+			@RequestParam String uri) {
+		propertyService.remove(uri);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
 	@PostMapping("/property")
 	public ResponseEntity<Boolean> setProperty(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestBody PropertyType prop
-    		) {
-		properties.setProperty(prop);
+			@RequestBody PropertyType prop) {
+		propertyService.set(prop);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
-	
+
+	@GetMapping("/item/select")
+	public ResponseEntity<SearchResult<ItemType>> select(
+//    		@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
+			@RequestParam(name = "fq", required = false) List<String> filterQuery,
+			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
+			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
+		SearchResult<ItemType> result = itemService.select(query, filterQuery, facetFields, new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
+	}
 
 	@GetMapping("/item")
-	public ResponseEntity<ItemType> getItem(    		
+	public ResponseEntity<ItemType> getItem(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestParam(defaultValue="null") String uri) {
-		if ( uri.equals("null")) {
+			@RequestParam(defaultValue = "null") String uri) {
+		if (uri.equals("null")) {
 			return ResponseEntity.ok(ItemUtils.template());
 		}
-		ItemType prop = items.getItem(uri);
-		return ResponseEntity.ok(prop);
+		Optional<ItemType> result = itemService.get(uri);
+
+		return ResponseEntity.of(result);
 	}
 
 	@DeleteMapping("/item")
-	public ResponseEntity<Boolean> removeItem(    		
+	public ResponseEntity<Boolean> removeItem(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestParam String uri) {
-		items.removeItem(uri);
+			@RequestParam String uri) {
+		itemService.remove(uri);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
 	@PostMapping("/items")
 	public ResponseEntity<Boolean> setItems(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestBody List<ItemType> store
-    		) {
-		boolean result = items.setItems(store);
+			@RequestBody List<ItemType> store) {
+		boolean result = itemService.set(store);
 		return ResponseEntity.ok(result);
 	}
-	
+
+	@GetMapping("/item/fields")
+	public ResponseEntity<Collection<IndexField>> itemFields(
+//    		@RequestHeader(value = "Authorization") String bearerToken,
+	) {
+		Collection<IndexField> result = itemService.fields(); // (query, new SolrPageRequest(0, 10));
+		return ResponseEntity.ok(result);
+	}
+
 	@PostMapping("/item")
 	public ResponseEntity<Boolean> setItem(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
-    		@RequestBody ItemType prop
-    		) {
-		items.setItem(prop);
+			@RequestBody ItemType prop) {
+		itemService.set(prop);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 

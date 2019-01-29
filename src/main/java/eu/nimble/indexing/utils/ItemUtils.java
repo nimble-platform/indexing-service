@@ -1,26 +1,18 @@
 package eu.nimble.indexing.utils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.jena.ext.com.google.common.base.CaseFormat;
 import org.springframework.data.solr.core.query.Criteria;
+import org.springframework.data.solr.core.query.Join;
 import org.springframework.data.solr.core.query.SimpleFilterQuery;
 import org.springframework.util.StringUtils;
 
-import eu.nimble.service.model.solr.item.ICatalogueItem;
 import eu.nimble.service.model.solr.item.ItemType;
-import eu.nimble.service.model.solr.party.IParty;
 
-public class ItemUtils implements ICatalogueItem {
-//	public static String dynamicFieldPart(String ...strings ) {
-//		StringBuilder sb = new StringBuilder("");
-//		for (String s : strings) {
-//			sb.append(s+"_");
-//		}
-//		return dynamicFieldPart(sb.toString());
-//	}
+public class ItemUtils {
+
 	public static String dynamicFieldPart(String fieldPart) {
 		if (! StringUtils.hasText(fieldPart)) {
 			// when no unit code specified - use "undefined";
@@ -43,9 +35,45 @@ public class ItemUtils implements ICatalogueItem {
 		System.out.println(extractFromTemplate(qualified, template));
 		System.out.println(extractFromTemplate(qualitfied1, template1));
 		System.out.println(dynamicFieldPart("http://www.aidimme.es./FurnitureSectorTaxonomy.owl#hasItemPerPack"));
-		
+		String fq = "manufacturer.trustScore:[1 TO 4]";
+		SimpleFilterQuery q = parseFilterQuery(fq);
+		SimpleFilterQuery c = parseFilterQuery("classification.en_label:*Desk*");
 		ItemType t = template();
 		t.getPrice();
+	}
+	public static SimpleFilterQuery parseFilterQuery(String fromString) {
+		int fieldDelimPos = fromString.indexOf(":");
+		String fieldName = fromString.substring(0,fieldDelimPos);
+		int joinDelimPos = fieldName.indexOf(".");
+		Criteria crit = null;
+		Join join = null;
+		if ( joinDelimPos > 0 ) {
+			String joinName = fieldName.substring(0,joinDelimPos);
+			String joinedFieldName = fieldName.substring(joinDelimPos+1);
+			join = getJoin(joinName);
+			crit = Criteria.where(joinedFieldName).expression(fromString.substring(fieldDelimPos+1));			
+		}
+		else {
+			crit = Criteria.where(fieldName).expression(fromString.substring(fieldDelimPos+1));
+		}
+		SimpleFilterQuery q =  new SimpleFilterQuery(crit);
+		if ( join!=null) {
+			q.setJoin(join);
+		}
+		return q;
+	}
+
+	public static Join getJoin(String field) {
+		try {
+			// check for ItemType JOINS
+			ItemType.JOIN_TO join = ItemType.JOIN_TO.valueOf(field);
+			// 
+			return join.getJoin();
+		} catch (Exception e) {
+			// TODO add error handling
+			return null;
+		}
+		
 	}
 	public static String extractFromTemplate(String qualified, String template) {
 		int starPos = template.indexOf("*");
@@ -70,8 +98,8 @@ public class ItemUtils implements ICatalogueItem {
 	public static ItemType template() {
 		ItemType item = new ItemType();
 		item.setUri("uri");
-		item.addName("en", "English Name");
-		item.addName("es", "Espana");
+		item.addLabel("en", "English Name");
+		item.addLabel("es", "Espana");
 		item.addDescription("en", "English desc");
 		item.setCatalogueId("cat_id");
 		item.setEmissionStandard("emission");
@@ -101,17 +129,5 @@ public class ItemUtils implements ICatalogueItem {
 			set.add(t);
 		}
 		return set;
-	}
-	public static SimpleFilterQuery doctypeFilter() {
-		return new SimpleFilterQuery(Criteria.where(TYPE_FIELD).is(TYPE_VALUE));
-	}
-//	public static SimpleFilterQuery nestedFieldFilter(String field, String query) {
-//		Criteria crit = Criteria.where(String.format("{!parent which=%s:%s} %s", TYPE_FIELD, TYPE_VALUE, field));
-//		return new SimpleFilterQuery(crit.expression(query));
-//	}
-	public static SimpleFilterQuery filterManufacturerField(String queryField, String query) {
-		Criteria crit = Criteria.where(String.format("{!join from=%s to=%s fromIndex=%s} %s", IParty.ID_FIELD, MANUFACTURER_ID_FIELD, IParty.COLLECTION_NAME, queryField));
-		return new SimpleFilterQuery(crit.expression(query));
-		
 	}
 }

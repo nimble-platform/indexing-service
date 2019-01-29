@@ -23,20 +23,6 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 	 */
 	List<PropertyType> findByProduct(String product);
 	/**
-	 * Retrieve all properties for a distinct product which a label in the 
-	 * desired language
-	 * @param product The product's uri
-	 * @param language The language code such as <code>en</code> ...
-	 * @return
-	 */
-	List<PropertyType> findByProductAndLanguages(String product, String language);
-	/**
-	 * Retrieve multiple properties by their localName
-	 * @param names The list of localName's (without namespace)
-	 * @return
-	 */
-	List<PropertyType> findByLocalNameIn(List<String> names);
-	/**
 	 * 
 	 * @param namespace
 	 * @param localNames
