@@ -82,9 +82,9 @@ public class IndexController {
 	@GetMapping("/classes")
 	public ResponseEntity<SearchResult<ClassType>> getClasses(
 //			@RequestHeader(value = "Authorization") String bearerToken,
-			@RequestParam(required = false) Set<String> uriList, 
-			@RequestParam(required = false) String nameSpace,
-			@RequestParam(required = false) Set<String> localNames, 
+			@RequestParam(name="uri", required = false) Set<String> uriList, 
+			@RequestParam(name="nameSpace", required = false) String nameSpace,
+			@RequestParam(name="localName", required = false) Set<String> localNames, 
 			@RequestParam(required = false) String property) {
 		if (property != null) {
 			SearchResult<ClassType> result = classService.findByProperty(property);
