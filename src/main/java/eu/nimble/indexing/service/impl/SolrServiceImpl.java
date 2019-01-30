@@ -1,6 +1,8 @@
 package eu.nimble.indexing.service.impl;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,6 +26,7 @@ import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.FacetOptions;
 import org.springframework.data.solr.core.query.FacetQuery;
+import org.springframework.data.solr.core.query.Join;
 import org.springframework.data.solr.core.query.SimpleFacetQuery;
 import org.springframework.data.solr.core.query.SimpleFilterQuery;
 import org.springframework.data.solr.core.query.SimpleStringCriteria;
@@ -90,7 +93,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		if ( filterQueries != null && !filterQueries.isEmpty()) {
 			// 
 			for (String filter : filterQueries) {
-				fq.addFilterQuery(enrichFilterQuery(filter));
+				fq.addFilterQuery(parseFilterQuery(filter));
 			}
 		}
 		if ( facetFields != null && !facetFields.isEmpty()) {
@@ -141,9 +144,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	protected void postSelect(T t) {
 		
 	}
-	protected SimpleFilterQuery enrichFilterQuery(String filterQuery) {
-		return new SimpleFilterQuery();
-	}
+
 	@SuppressWarnings("unchecked")
 	private Map<String, IndexField> getFields(NamedList<Object> fields)  {
 		Map<String, IndexField> ffield = new HashMap<>();
@@ -170,6 +171,8 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	}
 	private String getDatatype(Object type) {
 		switch(type.toString()){
+		case "plong":
+			return "long";
 		case "pint":
 			return "int";
 		case "pdouble":
@@ -177,6 +180,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		case "text_general":
 			return "string";
 		default:
+			// string & boolean
 			return type.toString();
 		}
 	}
@@ -194,4 +198,43 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 		return set;
 	}
+	protected Join getJoin(String joinName) {
+		return null;
+	}
+	
+	private SimpleFilterQuery parseFilterQuery(String fromString) {
+		int fieldDelimPos = fromString.indexOf(":");
+		String fieldName = fromString.substring(0,fieldDelimPos);
+		int joinDelimPos = fieldName.indexOf(".");
+		Criteria crit = null;
+		Join join = null;
+		if ( joinDelimPos > 0 ) {
+			String joinName = fieldName.substring(0,joinDelimPos);
+			String joinedFieldName = fieldName.substring(joinDelimPos+1);
+			join = getJoin(joinName);
+			crit = Criteria.where(joinedFieldName).expression(encode(fromString.substring(fieldDelimPos+1)));			
+		}
+		else {
+			crit = Criteria.where(fieldName).expression(encode(fromString.substring(fieldDelimPos+1)));
+		}
+		SimpleFilterQuery q =  new SimpleFilterQuery(crit);
+		if ( join!=null) {
+			q.setJoin(join);
+		}
+		return q;
+	}
+	public static String encode(String in) {
+		try {
+			if ( URLEncoder.encode(in,"utf8").length() == in.length()) {
+				return in;
+			}
+			else {
+				return String.format("\"%s\"", in);
+			}
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			return in;
+		}
+	}
+
 }

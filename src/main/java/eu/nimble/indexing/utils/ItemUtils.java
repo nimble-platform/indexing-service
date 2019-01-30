@@ -1,5 +1,7 @@
 package eu.nimble.indexing.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,16 +53,24 @@ public class ItemUtils {
 			String joinName = fieldName.substring(0,joinDelimPos);
 			String joinedFieldName = fieldName.substring(joinDelimPos+1);
 			join = getJoin(joinName);
-			crit = Criteria.where(joinedFieldName).expression(fromString.substring(fieldDelimPos+1));			
+			crit = Criteria.where(joinedFieldName).expression(encode(fromString.substring(fieldDelimPos+1)));			
 		}
 		else {
-			crit = Criteria.where(fieldName).expression(fromString.substring(fieldDelimPos+1));
+			crit = Criteria.where(fieldName).expression(encode(fromString.substring(fieldDelimPos+1)));
 		}
 		SimpleFilterQuery q =  new SimpleFilterQuery(crit);
 		if ( join!=null) {
 			q.setJoin(join);
 		}
 		return q;
+	}
+	public static String encode(String in) {
+		try {
+			return URLEncoder.encode(in, "utf8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			return in;
+		}
 	}
 
 	public static Join getJoin(String field) {

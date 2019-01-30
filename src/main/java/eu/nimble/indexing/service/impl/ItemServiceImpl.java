@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.solr.core.query.SimpleFilterQuery;
+import org.springframework.data.solr.core.query.Join;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.ClassRepository;
@@ -18,7 +18,6 @@ import eu.nimble.indexing.repository.ItemRepository;
 import eu.nimble.indexing.repository.PartyRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.ItemService;
-import eu.nimble.indexing.utils.ItemUtils;
 import eu.nimble.service.model.solr.IndexField;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
@@ -113,9 +112,16 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 
 
 	@Override
-	protected SimpleFilterQuery enrichFilterQuery(String filterQuery) {
-		// checks for joins
-		return ItemUtils.parseFilterQuery(filterQuery);
+	protected Join getJoin(String name) {
+		try {
+			// check for ItemType JOINS
+			ItemType.JOIN_TO join = ItemType.JOIN_TO.valueOf(name);
+			// 
+			return join.getJoin();
+		} catch (Exception e) {
+			// invalid join
+			return null;
+		}
 	}
 	private void postProcessManufacturer(ItemType t) {
 		if ( t.getManufacturerId() != null ) {
