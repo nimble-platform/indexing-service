@@ -40,6 +40,7 @@ import eu.nimble.service.model.solr.SearchResult;
 
 @Service
 public abstract class SolrServiceImpl<T> implements SolrService<T> {
+	private static final String QUOTE = "\"";
 	@Autowired
 	private SolrCrudRepository<T, String> solr;
 	
@@ -110,7 +111,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 		
 		FacetPage<T> result = solrTemplate.queryForFacetPage(getCollection(),fq, getSolrClass());
-		// retrieve the manufacturers
+		// enrich content - to be overloaded by subclasses
 		enrichContent(result.getContent());
 		
 
@@ -127,6 +128,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			@SuppressWarnings("unchecked")
 			NamedList<Object> fields = (NamedList<Object>) resp.getResponse().get("fields");
 			Map<String,IndexField> inUse = getFields(fields);
+			//
 			enrichFields(inUse);
 			return inUse.values();
 		} catch (SolrServerException | IOException e) {
@@ -145,9 +147,13 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		// subclasses may override
 	}
 	protected void postSelect(T t) {
-		
+		// subclasses may override
 	}
-
+	protected Join getJoin(String joinName) {
+		// subclasses may override
+		return null;
+	}
+	
 	@SuppressWarnings("unchecked")
 	private Map<String, IndexField> getFields(NamedList<Object> fields)  {
 		Map<String, IndexField> ffield = new HashMap<>();
@@ -201,10 +207,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 		return set;
 	}
-	protected Join getJoin(String joinName) {
-		return null;
-	}
-	
+
 	private SimpleFilterQuery parseFilterQuery(String fromString) {
 		int fieldDelimPos = fromString.indexOf(":");
 		String fieldName = fromString.substring(0,fieldDelimPos);
@@ -232,7 +235,11 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 				return in;
 			}
 			else {
-				return String.format("\"%s\"", in);
+				if ( ! ( in.startsWith(QUOTE)) && in.endsWith(QUOTE) ) {
+					return String.format("%s%s%s", QUOTE, in, QUOTE);
+				}
+				// 
+				return in;
 			}
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block

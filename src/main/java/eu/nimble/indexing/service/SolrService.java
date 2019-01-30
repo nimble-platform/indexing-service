@@ -33,9 +33,26 @@ public interface SolrService<T> {
 	 * @param uri
 	 */
 	public void remove(String uri);
-
+	/**
+	 * Retrieve the {@link IndexField} descriptors for the
+	 * collection. The {@link IndexField} denotes
+	 * <ul>
+	 * <li>fieldName: as used in the collection
+	 * <li>dataType: one of string, int, double, boolean
+	 * <li>docCount: the number of documents containing this field
+	 * <li>dynamicBase: the dynamic field used for deriving the fieldName
+	 * </ul>
+	 * @return
+	 */
 	public Collection<IndexField> fields();
-	
+	/**
+	 * Perform a select query against the collection
+	 * @param query The query term used with the <code>q</code> query parameter
+	 * @param filterQueries The filter terms uses as <code>fq</code> query parameters
+	 * @param facetFields The names used for faceting, e.g. <code>facet.field</code> parameters
+	 * @param page The pageable pointing to the current page & size
+	 * @return
+	 */
 	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, Pageable page);
 	
 	public SearchResult<T> select(Criteria query, List<String> filterQueries, List<String> facetFields, Pageable page);
