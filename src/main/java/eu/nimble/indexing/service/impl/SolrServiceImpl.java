@@ -83,6 +83,9 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 
 	@Override
 	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, Pageable page) {
+		if (query.indexOf(":") == -1 && query.indexOf("*") == -1)   {
+			query = String.format("*%s*", query);
+		}
 		Criteria qCriteria = new SimpleStringCriteria(query);
 		return select(qCriteria, filterQueries, facetFields, page);
 	}
