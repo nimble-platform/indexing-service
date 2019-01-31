@@ -103,10 +103,12 @@ public class OntologyServiceImpl implements OntologyService {
 		Iterator<OntProperty> properties = ontModel.listAllOntProperties();
 		while ( properties.hasNext()) {
 			OntProperty p = properties.next();
-			PropertyType prop = processProperty(ontModel, p);
-			if ( prop != null) {
-				propRepo.save(prop);
-				indexedProp.add(prop);
+			if ( !p.isOntLanguageTerm()) {
+				PropertyType prop = processProperty(ontModel, p);
+				if ( prop != null) {
+					propRepo.save(prop);
+					indexedProp.add(prop);
+				}
 			}
 		}
 		/*
@@ -116,9 +118,11 @@ public class OntologyServiceImpl implements OntologyService {
 		Iterator<OntClass> classes = ontModel.listClasses();
 		while ( classes.hasNext()) {
 			OntClass c = classes.next();
-			ClassType clazz = processClazz(ontModel, c, indexedProp);
-			if ( clazz != null) {
-				classRepository.save(clazz);
+			if ( !c.isOntLanguageTerm()) {
+				ClassType clazz = processClazz(ontModel, c, indexedProp);
+				if ( clazz != null) {
+					classRepository.save(clazz);
+				}
 			}
 		}
 	}
@@ -218,7 +222,7 @@ public class OntologyServiceImpl implements OntologyService {
 		}
 		index.setLocalName(prop.getLocalName());
 		index.setNameSpace(prop.getNameSpace());
-		//
+
 		// try to find labels by searching rdfs:label and skos:prefLabel
 		index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
 		// try to find labels by searching rdfs:comment and skos:definition
@@ -231,6 +235,10 @@ public class OntologyServiceImpl implements OntologyService {
 			index.getProduct().addAll(usage);
 		}
 		// 
+		Resource rdfType = prop.getRDFType();
+		if ( rdfType != null ) {
+			index.setPropertyType(rdfType.getLocalName());
+		}
 		return index;
 	}
 	/**
@@ -302,43 +310,16 @@ public class OntologyServiceImpl implements OntologyService {
 		while (iter.hasNext()) {
 			OntClass superClass = iter.next();
 			if (! superClass.isAnon()) {
-				// exclude rdfs
-				if (!superClass.getNameSpace().equals(RDFS.uri))
+//				if (!superClass.getNameSpace().equals(RDFS.uri))
+				// exclude rdfs, rdf, owl
+				if (!superClass.isOntLanguageTerm()) {
 					sup.add(superClass.getURI());
+				}
 			}
 		}
 		return sup;
 	}
-//	private Set<String> getProperties(OntClass clazz, boolean includeSuper) {
-//		Set<String> props = getProperties(clazz);
-//		if ( includeSuper) {
-//			props.addAll(getSuperProperties(clazz));
-//		}
-//		return props;
-//	}
-//	private Set<String> getSuperProperties(OntClass clazz) {
-//		Set<String> props = new HashSet<>();
-//		ExtendedIterator<OntClass> iter = clazz.listSuperClasses();
-//		while (iter.hasNext()) {
-//			OntClass sup = iter.next();
-//			if (! sup.isAnon()) {
-//				props.addAll(getProperties(sup));
-//			}
-//		}
-//		return props;
-//	}
-//	private Set<String> getProperties(OntClass clazz) {
-//		Set<String> props = new HashSet<>();
-//		ExtendedIterator<OntProperty> iter = clazz.listDeclaredProperties();
-//		while (iter.hasNext()) {
-//			OntProperty s = iter.next();
-//			if ( !s.isAnon()) {
-//				props.add(s.getURI());
-//			}
-//		}
-//		return props;
-//		
-//	}
+
 	@SuppressWarnings("unused")
 	private Set<String> getDomain(OntProperty prop) {
 		if ( prop.getDomain() == null) {

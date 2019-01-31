@@ -234,11 +234,13 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			if ( URLEncoder.encode(in,"utf8").length() == in.length()) {
 				return in;
 			}
+			// special characters present, need to wrap in quotes
 			else {
+				// no quotes present 
 				if ( ! ( in.startsWith(QUOTE)) && in.endsWith(QUOTE) ) {
 					return String.format("%s%s%s", QUOTE, in, QUOTE);
 				}
-				// 
+				// quotes present
 				return in;
 			}
 		} catch (UnsupportedEncodingException e) {
