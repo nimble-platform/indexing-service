@@ -84,7 +84,8 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 
 	@Override
 	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, Pageable page) {
-		if (query.indexOf(":") == -1 && query.indexOf("*") == -1)   {
+		// expand main query to a wild card search when it is only a single word
+		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
 			query = String.format("*%s*", query);
 		}
 		Criteria qCriteria = new SimpleStringCriteria(query);
@@ -236,12 +237,12 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			}
 			// special characters present, need to wrap in quotes
 			else {
-				// no quotes present 
-				if ( ! ( in.startsWith(QUOTE)) && in.endsWith(QUOTE) ) {
-					return String.format("%s%s%s", QUOTE, in, QUOTE);
+				if (  ( in.startsWith(QUOTE)) && in.endsWith(QUOTE) ) {
+					// quotes present
+					return in;
 				}
-				// quotes present
-				return in;
+				// no quotes present 
+				return String.format("%s%s%s", QUOTE, in, QUOTE);
 			}
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
