@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.solr.core.query.Join;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.service.ClassService;
 import eu.nimble.service.model.solr.SearchResult;
+import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 
 @Service
@@ -41,6 +43,19 @@ public class ClassServiceImpl extends SolrServiceImpl<ClassType> implements Clas
 	public SearchResult<ClassType> findForNamespaceAndLocalNames(String nameSpace, Set<String> localNames) {
 		List<ClassType> result = classRepo.findByNameSpaceAndLocalNameIn(nameSpace, localNames);
 		return new SearchResult<ClassType>(result);
+	}
+
+	@Override
+	protected Join getJoin(String joinName) {
+		try {
+			// check for ItemType JOINS
+			ClassType.JOIN_TO join = ClassType.JOIN_TO.valueOf(joinName);
+			// 
+			return join.getJoin();
+		} catch (Exception e) {
+			// invalid join
+			return null;
+		}
 	}
 
 
