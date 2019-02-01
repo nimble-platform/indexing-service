@@ -19,6 +19,7 @@ import eu.nimble.indexing.repository.PartyRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.ItemService;
 import eu.nimble.service.model.solr.IndexField;
+import eu.nimble.service.model.solr.item.ICatalogueItem;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.Concept;
@@ -89,8 +90,15 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 		Set<String> itemFieldNames = new HashSet<>();
 		for (IndexField s : inUse.values()) {
 			itemFieldNames.add(s.getFieldName());
-			if (s.getDynamicBase()!=null )
+			if (s.getDynamicBase()!=null ) {
+				if ( ICatalogueItem.isFixedDynamic(s.getDynamicBase())) {
+					itemFieldNames.add(s.getDynamicBase());
+				}
+				if ( ICatalogueItem.isQualifiedDynamic(s.getDynamicBase())) {
+					itemFieldNames.add(s.getDynamicPart());
+				}
 				itemFieldNames.add(s.getDynamicBase());
+			}
 		}
 		if ( itemFieldNames.size()>0 ) {
 			// obtain a map of matching properties
