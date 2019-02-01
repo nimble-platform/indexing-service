@@ -1,6 +1,8 @@
 package eu.nimble.indexing.service.impl;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.apache.jena.vocabulary.XSD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.solr.core.query.Join;
 import org.springframework.stereotype.Service;
@@ -71,6 +74,8 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 	@Override
 	protected void prePersist(ItemType t) {
 		preProcessPartyType(t, t.getManufacturer());
+		// check for non-existing properties
+		preProcessCustomProperties(t, t.getCustomProperties());
 	}
 	
 	@Override
@@ -161,6 +166,50 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 			// ensure the manufacturer id is in the indexed field 
 			t.setManufacturerId(m.getId());
 		}
+	}
+	
+	private void preProcessCustomProperties(ItemType t, Map<String, Concept> cp) {
+		if ( cp != null && !cp.isEmpty()) {
+			List<PropertyType> existing = propRepo.findByItemFieldNamesIn(cp.keySet());
+			//
+			// remove existing properties
+			for ( PropertyType pt : existing) {
+				for ( String name : pt.getItemFieldNames()) {
+					if (cp.containsKey(name) ) {
+						cp.remove(name);
+					}
+				}
+			}
+			// cp contains new concepts ...
+			for ( String key : cp.keySet()) {
+				Concept c = cp.get(key);
+				PropertyType pt = new PropertyType();
+				// how to specify uri, localName & nameSpace
+				pt.setUri("urn:nimble:custom:"+ key);
+				pt.setNameSpace("urn:nimble:custom:");
+				pt.setLocalName(key);
+				pt.setItemFieldNames(Collections.singleton(key));
+				pt.setLabel(c.getLabel());
+				pt.setComment(c.getComment());
+				pt.setDescription(c.getDescription());
+				// 
+				if ( t.getBooleanValue().containsKey(key)) {
+					pt.setRange(XSD.xboolean.getURI());
+					pt.setValueQualifier("BOOLEAN");
+				}
+				if ( t.getStringValue().containsKey(key)) {
+					pt.setRange(XSD.xstring.getURI());
+					pt.setValueQualifier("TEXT");
+				}
+				if ( t.getDoubleValue().containsKey(key)) {
+					pt.setRange(XSD.xdouble.getURI());
+					pt.setValueQualifier("REAL_MEASURE");
+				}
+				
+				propRepo.save(pt);
+			}
+		}
+		
 	}
 	private Set<String> extractManufacturers(List<ItemType> items) {
 		return items.stream()

@@ -12,6 +12,7 @@ import org.springframework.data.solr.core.query.SimpleFilterQuery;
 import org.springframework.util.StringUtils;
 
 import eu.nimble.service.model.solr.item.ItemType;
+import eu.nimble.service.model.solr.owl.Concept;
 
 public class ItemUtils {
 
@@ -129,7 +130,11 @@ public class ItemUtils {
 		
 		item.addProperty("length", "cm", 20.0);
 		item.setProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#isFireProof", Boolean.TRUE);
-		
+		Concept c = Concept.buildNew();
+		c.addLabel("en", "English label for custom property");
+		c.addComment("en", "a comment for this particular custom property");
+		c.addDescription("en", "some description for the custom property");
+		item.addProperty("reallyCustom", 3.1415, c);
 		return item;
 
 	}
