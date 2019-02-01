@@ -181,6 +181,7 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 				pt.setLabel(c.getLabel());
 				pt.setComment(c.getComment());
 				pt.setDescription(c.getDescription());
+				pt.setPropertyType("CustomProperty");
 				// 
 				if ( t.getBooleanValue().containsKey(key)) {
 					pt.setRange(XSD.xboolean.getURI());
