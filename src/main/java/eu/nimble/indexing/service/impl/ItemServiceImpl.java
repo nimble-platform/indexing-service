@@ -174,6 +174,7 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 				Concept c = cp.get(key);
 				PropertyType pt = new PropertyType();
 				// how to specify uri, localName & nameSpace
+				// TODO - use namespace from config
 				pt.setUri("urn:nimble:custom:"+ key);
 				pt.setNameSpace("urn:nimble:custom:");
 				pt.setLocalName(key);
@@ -206,11 +207,6 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 				.map(ItemType::getManufacturerId)
 				.collect(Collectors.toSet());
 	}
-//	private Map<String, PartyType> extractManufacturerMap(List<ItemType> items) {
-//		return items.stream()
-//				.map(ItemType::getManufacturer)
-//				.collect(Collectors.toMap(PartyType::getId, p->p));
-//	}
 	private void enrichManufacturers(List<ItemType> items) {
 		// read all existing manufacturers
 		if ( items != null && !items.isEmpty()) {
