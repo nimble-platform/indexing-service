@@ -2,7 +2,6 @@ package eu.nimble.indexing.service.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,6 @@ import eu.nimble.indexing.repository.PartyRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.ItemService;
 import eu.nimble.service.model.solr.IndexField;
-import eu.nimble.service.model.solr.item.ICatalogueItem;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.Concept;
@@ -94,16 +92,7 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 	protected void enrichFields(Map<String, IndexField> inUse) {
 		Set<String> itemFieldNames = new HashSet<>();
 		for (IndexField s : inUse.values()) {
-			itemFieldNames.add(s.getFieldName());
-			if (s.getDynamicBase()!=null ) {
-				if ( ICatalogueItem.isFixedDynamic(s.getDynamicBase())) {
-					itemFieldNames.add(s.getDynamicBase());
-				}
-				if ( ICatalogueItem.isQualifiedDynamic(s.getDynamicBase())) {
-					itemFieldNames.add(s.getDynamicPart());
-				}
-				itemFieldNames.add(s.getDynamicBase());
-			}
+			itemFieldNames.add(s.getMappedName());
 		}
 		if ( itemFieldNames.size()>0 ) {
 			// obtain a map of matching properties
@@ -114,7 +103,7 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 			// 
 			for ( IndexField s : inUse.values()) {
 				for (Collection<String> keys : properties.keySet()) {
-					if ( keys.contains(s.getFieldName()) || keys.contains(s.getDynamicBase()) ) {
+					if ( keys.contains(s.getMappedName() )) {
 						PropertyType p = properties.get(keys);
 						s.withNamed(p);
 					}
