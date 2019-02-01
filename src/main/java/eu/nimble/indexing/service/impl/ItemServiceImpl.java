@@ -166,19 +166,21 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 //	}
 	private void enrichManufacturers(List<ItemType> items) {
 		// read all existing manufacturers
-		final Map<String, PartyType> map = partyRepo.findByUriIn(extractManufacturers(items)).stream()
-				.collect(Collectors.toMap(PartyType::getUri, p->p));
-		
-		items.forEach(new Consumer<ItemType>() {
-
-			@Override
-			public void accept(ItemType t) {
-				if ( map.containsKey(t.getManufacturerId())) {
-					// add the retrieved customer to the actual list
-					t.setManufacturer(map.get(t.getManufacturerId()));
+		if ( items != null && !items.isEmpty()) {
+			final Map<String, PartyType> map = partyRepo.findByUriIn(extractManufacturers(items)).stream()
+					.collect(Collectors.toMap(PartyType::getUri, p->p));
+			
+			items.forEach(new Consumer<ItemType>() {
+				
+				@Override
+				public void accept(ItemType t) {
+					if ( map.containsKey(t.getManufacturerId())) {
+						// add the retrieved customer to the actual list
+						t.setManufacturer(map.get(t.getManufacturerId()));
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 
