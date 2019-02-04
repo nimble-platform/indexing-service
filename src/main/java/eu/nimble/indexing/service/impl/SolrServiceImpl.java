@@ -84,15 +84,16 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	}
 
 	@Override
-	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, Pageable page) {
+	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, int facetLimit, Pageable page) {
 		// expand main query to a wild card search when it is only a single word
 		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
 			query = String.format("*%s*", query);
 		}
 		Criteria qCriteria = new SimpleStringCriteria(query);
-		return select(qCriteria, filterQueries, facetFields, page);
+		return select(qCriteria, filterQueries, facetFields, facetLimit, page);
 	}
-	public SearchResult<T> select(Criteria query, List<String> filterQueries, List<String> facetFields, Pageable page) {
+	@Override
+	public SearchResult<T> select(Criteria query, List<String> filterQueries, List<String> facetFields, int facetLimit, Pageable page) {
 		
 		FacetQuery fq = new SimpleFacetQuery(query, page);
 		// add filter queries 
@@ -109,6 +110,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			}
 			// 
 			facetOptions.setFacetMinCount(1);
+			facetOptions.setFacetLimit(facetLimit);
 			fq.setFacetOptions(facetOptions);
 		}
 		

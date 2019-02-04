@@ -69,12 +69,13 @@ public class IndexController {
 	@GetMapping("/class/select")
 	public ResponseEntity<SearchResult<ClassType>> searchClasses(
 //			@RequestHeader(value = "Authorization") String bearerToken,
-			@RequestParam(value = "q", required = false, defaultValue = "*:*") String query,
-			@RequestParam(value = "fq", required = false) List<String> filterQuery,
-			@RequestParam(value = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
+			@RequestParam(name = "fq", required = false) List<String> filterQuery,
+			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
 			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
-		SearchResult<ClassType> result = classService.select(query, filterQuery, facetFields,
+		SearchResult<ClassType> result = classService.select(query, filterQuery, facetFields, facetLimit,
 				new SolrPageRequest(start, rows));
 		return ResponseEntity.ok(result);
 	}
@@ -127,12 +128,13 @@ public class IndexController {
 	@GetMapping("/party/select")
 	public ResponseEntity<SearchResult<PartyType>> searchParty(
 //			@RequestHeader(value = "Authorization") String bearerToken,
-			@RequestParam(value = "q", required = false, defaultValue = "*:*") String query,
-			@RequestParam(value = "fq", required = false) List<String> filterQuery,
-			@RequestParam(value = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
+			@RequestParam(name = "fq", required = false) List<String> filterQuery,
+			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
 			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
-		SearchResult<PartyType> result = partyService.select(query, filterQuery, facetFields,
+		SearchResult<PartyType> result = partyService.select(query, filterQuery, facetFields, facetLimit,
 				new SolrPageRequest(start, rows));
 		return ResponseEntity.ok(result);
 	}
@@ -209,12 +211,13 @@ public class IndexController {
 
 	@GetMapping("/property/select")
 	public ResponseEntity<SearchResult<PropertyType>> searchProperties(
-			@RequestParam(value = "q", required = false, defaultValue = "*:*") String query,
-			@RequestParam(value = "fq", required = false) List<String> filterQuery,
-			@RequestParam(value = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
+			@RequestParam(name = "fq", required = false) List<String> filterQuery,
+			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
 			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
-		SearchResult<PropertyType> result = propertyService.select(query, filterQuery, facetFields,
+		SearchResult<PropertyType> result = propertyService.select(query, filterQuery, facetFields, facetLimit,
 				new SolrPageRequest(start, rows));
 		return ResponseEntity.ok(result);
 	}
@@ -241,9 +244,11 @@ public class IndexController {
 			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
 			@RequestParam(name = "fq", required = false) List<String> filterQuery,
 			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
 			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
-		SearchResult<ItemType> result = itemService.select(query, filterQuery, facetFields, new SolrPageRequest(start, rows));
+		SearchResult<ItemType> result = itemService.select(query, filterQuery, facetFields, facetLimit, 
+				new SolrPageRequest(start, rows));
 		return ResponseEntity.ok(result);
 	}
 
