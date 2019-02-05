@@ -1,8 +1,6 @@
 package eu.nimble.indexing.service.impl;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,10 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.annotation.Resource;
 
@@ -29,6 +26,7 @@ import org.springframework.data.solr.core.query.FacetOptions;
 import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.Join;
 import org.springframework.data.solr.core.query.SimpleFacetQuery;
+import org.springframework.data.solr.core.query.SimpleField;
 import org.springframework.data.solr.core.query.SimpleFilterQuery;
 import org.springframework.data.solr.core.query.SimpleStringCriteria;
 import org.springframework.data.solr.core.query.result.FacetPage;
@@ -103,6 +101,9 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 				fq.addFilterQuery(parseFilterQuery(filter));
 			}
 		}
+		for (String f : getSelectFieldList()) {
+			fq.addProjectionOnField(new SimpleField(f));
+		}
 		if ( facetFields != null && !facetFields.isEmpty()) {
 			FacetOptions facetOptions = new FacetOptions();
 			for (String facetField : facetFields) {
@@ -156,6 +157,9 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	protected Join getJoin(String joinName) {
 		// subclasses may override
 		return null;
+	}
+	protected String[] getSelectFieldList() {
+		return new String[] {};
 	}
 	
 	@SuppressWarnings("unchecked")
