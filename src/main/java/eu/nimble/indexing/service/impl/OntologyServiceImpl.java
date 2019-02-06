@@ -2,6 +2,7 @@ package eu.nimble.indexing.service.impl;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Service;
 import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.OntologyService;
+import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.PropertyType;
 /**
@@ -227,6 +229,12 @@ public class OntologyServiceImpl implements OntologyService {
 		index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
 		// try to find labels by searching rdfs:comment and skos:definition
 		index.setComment(obtainMultilingualValues(prop, RDFS.comment, SKOS.definition));
+		if ( index.getLabel() != null ) {
+			for ( String label : index.getLabel().values()) {
+				index.addItemFieldName(ItemType.dynamicFieldPart(label));
+			}
+		}
+		index.addItemFieldName(prop.getLocalName());
 		
 //		index.setLabels(processPropertyLabel(prop));
 		prop.listDomain();
