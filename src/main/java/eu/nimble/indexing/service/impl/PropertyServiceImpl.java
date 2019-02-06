@@ -56,7 +56,7 @@ public class PropertyServiceImpl extends SolrServiceImpl<PropertyType> implement
 	@Override
 	protected String[] getSelectFieldList() {
 		// 
-		return IPropertyType.fieldList();
+		return IPropertyType.defaultFieldList();
 	}
 
 }
