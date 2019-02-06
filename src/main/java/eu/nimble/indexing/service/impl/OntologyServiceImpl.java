@@ -234,7 +234,10 @@ public class OntologyServiceImpl implements OntologyService {
 				index.addItemFieldName(ItemType.dynamicFieldPart(label));
 			}
 		}
+		// add the local name
 		index.addItemFieldName(prop.getLocalName());
+		// add the uri
+		index.addItemFieldName(ItemType.dynamicFieldPart(prop.getURI()));
 		
 //		index.setLabels(processPropertyLabel(prop));
 		prop.listDomain();
