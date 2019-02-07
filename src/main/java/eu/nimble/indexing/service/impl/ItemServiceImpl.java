@@ -115,15 +115,7 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 
 	@Override
 	protected Join getJoin(String name) {
-		try {
-			// check for ItemType JOINS
-			ItemType.JOIN_TO join = ItemType.JOIN_TO.valueOf(name);
-			// 
-			return join.getJoin();
-		} catch (Exception e) {
-			// invalid join
-			return null;
-		}
+		return ItemType.JOIN_TO.getJoin(name);
 	}
 	private void postProcessManufacturer(ItemType t) {
 		if ( t.getManufacturerId() != null ) {

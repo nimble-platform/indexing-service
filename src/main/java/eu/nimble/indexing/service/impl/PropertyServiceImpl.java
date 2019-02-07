@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.solr.core.query.Field;
+import org.springframework.data.solr.core.query.Join;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.PropertyRepository;
@@ -58,6 +58,12 @@ public class PropertyServiceImpl extends SolrServiceImpl<PropertyType> implement
 		// return the field list without the link to the product classes
 		// which is too long
 		return IPropertyType.defaultFieldList();
+	}
+	
+
+	@Override
+	protected Join getJoin(String joinName) {
+		return PropertyType.JOIN_TO.getJoin(joinName);
 	}
 
 	@Override

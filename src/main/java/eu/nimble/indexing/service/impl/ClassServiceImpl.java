@@ -47,15 +47,7 @@ public class ClassServiceImpl extends SolrServiceImpl<ClassType> implements Clas
 
 	@Override
 	protected Join getJoin(String joinName) {
-		try {
-			// check for ItemType JOINS
-			ClassType.JOIN_TO join = ClassType.JOIN_TO.valueOf(joinName);
-			// 
-			return join.getJoin();
-		} catch (Exception e) {
-			// invalid join
-			return null;
-		}
+		return ClassType.JOIN_TO.getJoin(joinName);
 	}
 
 

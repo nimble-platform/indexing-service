@@ -238,24 +238,16 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		return q;
 	}
 	public static String encode(String in) {
+		// check for a colon - ensure URI's are quoted
+		if (in.contains(":")) {
+			if (  ( in.startsWith(QUOTE)) && in.endsWith(QUOTE) ) {
+				// quotes present
+				return in;
+			}
+			// no quotes present 
+			return String.format("%s%s%s", QUOTE, in, QUOTE);
+		}
 		return in;
-//		try {
-//			if ( URLEncoder.encode(in,"utf8").length() == in.length()) {
-//				return in;
-//			}
-//			// special characters present, need to wrap in quotes
-//			else {
-//				if (  ( in.startsWith(QUOTE)) && in.endsWith(QUOTE) ) {
-//					// quotes present
-//					return in;
-//				}
-//				// no quotes present 
-//				return String.format("%s%s%s", QUOTE, in, QUOTE);
-//			}
-//		} catch (UnsupportedEncodingException e) {
-//			// TODO Auto-generated catch block
-//			return in;
-//		}
 	}
 
 }
