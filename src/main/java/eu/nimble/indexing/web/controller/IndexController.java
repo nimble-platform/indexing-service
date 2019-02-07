@@ -185,7 +185,7 @@ public class IndexController {
 	public ResponseEntity<SearchResult<PropertyType>> getProperties(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
 			@RequestParam(name = "uri", required = false) Set<String> uri,
-			@RequestParam(name = "class", required = false) String classType,
+			@RequestParam(name = "class", required = false) Set<String> classType,
 			@RequestParam(name = "nameSpace", required = false) String nameSpace,
 			@RequestParam(name = "localName", required = false) Set<String> localNames,
 			@RequestParam(name = "idxName", required = false) Set<String> idxNames) {
@@ -193,8 +193,8 @@ public class IndexController {
 			SearchResult<PropertyType> prop = propertyService.findByUris(uri);
 			return ResponseEntity.ok(prop);
 		}
-		if (classType != null) {
-			SearchResult<PropertyType> prop = propertyService.findForClass(classType);
+		if (classType != null && !classType.isEmpty()) {
+			SearchResult<PropertyType> prop = propertyService.findForClasses(classType);
 			return ResponseEntity.ok(prop);
 		}
 		if (idxNames != null) {

@@ -55,8 +55,15 @@ public class PropertyServiceImpl extends SolrServiceImpl<PropertyType> implement
 
 	@Override
 	protected String[] getSelectFieldList() {
-		// 
+		// return the field list without the link to the product classes
+		// which is too long
 		return IPropertyType.defaultFieldList();
+	}
+
+	@Override
+	public SearchResult<PropertyType> findForClasses(Set<String> classTypes) {
+		List<PropertyType> result = propRepo.findByProductIn(classTypes);
+		return new SearchResult<PropertyType>(result);
 	}
 
 }

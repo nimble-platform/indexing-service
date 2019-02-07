@@ -12,8 +12,10 @@ public interface PropertyService extends SolrService<PropertyType> {
 	SearchResult<PropertyType> findForNamespaceAndLocalNames(String nameSpace, Set<String> localNames);
 
 	SearchResult<PropertyType> findForClass(String classType);
+	
+	SearchResult<PropertyType> findForClasses(Set<String> classTypes);
 
 	SearchResult<PropertyType> findByIdxNames(Set<String> idxNames);
 
-
+	
 }
