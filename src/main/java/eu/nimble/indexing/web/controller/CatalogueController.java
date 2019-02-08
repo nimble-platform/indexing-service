@@ -1,6 +1,6 @@
 package eu.nimble.indexing.web.controller;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class CatalogueController {
 	@PostMapping("/catalogue")
 	public ResponseEntity<Boolean> postCatalogue(
 			@RequestParam(value="catalogueId") String catalogueId,
-			List<ItemType> catalogueItems) {
+			ArrayList<ItemType> catalogueItems) {
 		return ResponseEntity.ok(items.set(catalogueItems));
 	}    
 }
