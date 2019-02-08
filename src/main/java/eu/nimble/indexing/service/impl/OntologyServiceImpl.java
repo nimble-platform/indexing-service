@@ -211,7 +211,8 @@ public class OntologyServiceImpl implements OntologyService {
 				case "double":
 				case "decimal":
 				case "int":
-					index.setValueQualifier("REAL_MEASURE");
+					// accordig to discussion
+					index.setValueQualifier("NUMBER");
 					break;
 				case "boolean":
 					index.setValueQualifier("BOOLEAN");

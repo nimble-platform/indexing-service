@@ -74,6 +74,7 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 		preProcessPartyType(t, t.getManufacturer());
 		// check for non-existing properties
 		preProcessCustomProperties(t, t.getCustomProperties());
+		//
 	}
 	
 	@Override
@@ -148,8 +149,8 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 			t.setManufacturerId(m.getId());
 		}
 	}
-	
-	private void preProcessCustomProperties(ItemType t, Map<String, Concept> cp) {
+
+	private void preProcessCustomProperties(ItemType t, Map<String, PropertyType> cp) {
 		if ( cp != null && !cp.isEmpty()) {
 			List<PropertyType> existing = propRepo.findByItemFieldNamesIn(cp.keySet());
 			//
@@ -163,7 +164,7 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 			}
 			// cp contains new concepts ...
 			for ( String key : cp.keySet()) {
-				Concept c = cp.get(key);
+				PropertyType c = cp.get(key);
 				PropertyType pt = new PropertyType();
 				// how to specify uri, localName & nameSpace
 				// TODO - use namespace from config
@@ -177,22 +178,24 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 				pt.setPropertyType("CustomProperty");
 				// 
 				if ( t.getBooleanValue().containsKey(key)) {
+					// will (most likely) not happen
 					pt.setRange(XSD.xboolean.getURI());
 					pt.setValueQualifier("BOOLEAN");
 				}
 				if ( t.getStringValue().containsKey(key)) {
+					// will (most likely) not happen
 					pt.setRange(XSD.xstring.getURI());
 					pt.setValueQualifier("TEXT");
 				}
 				if ( t.getDoubleValue().containsKey(key)) {
 					pt.setRange(XSD.xdouble.getURI());
-					pt.setValueQualifier("REAL_MEASURE");
+					// 
+					pt.setValueQualifier(c.getValueQualifier());
 				}
 				
 				propRepo.save(pt);
 			}
 		}
-		
 	}
 	private Set<String> extractManufacturers(List<ItemType> items) {
 		return items.stream()
