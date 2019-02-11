@@ -3,6 +3,7 @@ package eu.nimble.indexing.service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.Criteria;
@@ -45,6 +46,7 @@ public interface SolrService<T> {
 	 * @return
 	 */
 	public Collection<IndexField> fields();
+	public Collection<IndexField> fields(Set<String> fields);
 	/**
 	 * Perform a select query against the collection
 	 * @param query The query term used with the <code>q</code> query parameter

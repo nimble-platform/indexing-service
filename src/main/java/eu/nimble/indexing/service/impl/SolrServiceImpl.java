@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.annotation.Resource;
 
@@ -124,6 +125,9 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	}
 	@Override
 	public Collection<IndexField> fields() {
+		return fields(null);
+	}
+	public Collection<IndexField> fields(Set<String> fieldNames) {
 		
 		LukeRequest luke = new LukeRequest();
 		luke.setShowSchema(false);
@@ -132,8 +136,8 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			
 			@SuppressWarnings("unchecked")
 			NamedList<Object> fields = (NamedList<Object>) resp.getResponse().get("fields");
-			Map<String,IndexField> inUse = getFields(fields);
-			//
+			Map<String,IndexField> inUse = getFields(fields, fieldNames);
+			// enrich required fields
 			enrichFields(inUse);
 			return inUse.values();
 		} catch (SolrServerException | IOException e) {
@@ -141,6 +145,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			e.printStackTrace();
 		}
 		return new ArrayList<>();
+		
 	}
 	protected void enrichFields(Map<String, IndexField> inUse) {
 		// subclasses may override
@@ -163,28 +168,50 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Map<String, IndexField> getFields(NamedList<Object> fields)  {
+	private Map<String, IndexField> getFields(NamedList<Object> fields, Set<String> requested)  {
 		Map<String, IndexField> ffield = new HashMap<>();
 		for (Map.Entry<String, Object> field : fields) {
 			String name = field.getKey();
-			IndexField f = new IndexField(name);
-			for (Entry<String, Object> prop : (NamedList<Object>)field.getValue()) {
-				switch(prop.getKey()) {
-				case "type":
-					f.setDataType(getDatatype(prop.getValue()));
-					break;
-				case "docs":
-					f.setDocCount(Integer.valueOf(prop.getValue().toString()));
-					break;
-				case "dynamicBase":
-					f.setDynamicBase(prop.getValue().toString());
-					break;
+			if ( (requested == null || requested.isEmpty()) 
+				// when requested list present and not empty
+				|| isRequestedField(requested, name)) {
+				
+				IndexField f = new IndexField(name);
+				for (Entry<String, Object> prop : (NamedList<Object>)field.getValue()) {
+					switch(prop.getKey()) {
+					case "type":
+						f.setDataType(getDatatype(prop.getValue()));
+						break;
+					case "docs":
+						f.setDocCount(Integer.valueOf(prop.getValue().toString()));
+						break;
+					case "dynamicBase":
+						f.setDynamicBase(prop.getValue().toString());
+						break;
+					}
 				}
+				ffield.put(name, f);
 			}
-			ffield.put(name, f);
 		}
 		
 		return ffield;
+	}
+	private boolean isRequestedField(Set<String> requested, final String current) {
+		Optional<String> found = requested.stream().filter(new Predicate<String>() {
+
+			@Override
+			public boolean test(String t) {
+				if ( t.startsWith("*")) {
+					return current.endsWith(t.substring(1));
+				}
+				else if ( t.endsWith("*")) {
+					return current.startsWith(t.substring(0,  t.length()-1));
+				}
+				else {
+					return t.equals(current);
+				}
+			}}).findFirst();
+		return found.isPresent(); 
 	}
 	private String getDatatype(Object type) {
 		switch(type.toString()){

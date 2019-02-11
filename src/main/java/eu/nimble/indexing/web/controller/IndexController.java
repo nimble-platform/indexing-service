@@ -54,8 +54,9 @@ public class IndexController {
 	@GetMapping("/class/fields")
 	public ResponseEntity<Collection<IndexField>> classFields(
 //    		@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(name="fieldName", required=false) Set<String> fieldNames
 	) {
-		Collection<IndexField> result = classService.fields(); // (query, new SolrPageRequest(0, 10));
+		Collection<IndexField> result = itemService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
 		return ResponseEntity.ok(result);
 	}
 
@@ -121,8 +122,9 @@ public class IndexController {
 	@GetMapping("/party/fields")
 	public ResponseEntity<Collection<IndexField>> partyFields(
 //    		@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(name="fieldName", required=false) Set<String> fieldNames
 	) {
-		Collection<IndexField> result = partyService.fields(); // (query, new SolrPageRequest(0, 10));
+		Collection<IndexField> result = itemService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
 		return ResponseEntity.ok(result);
 	}
 	@GetMapping("/party/select")
@@ -168,8 +170,9 @@ public class IndexController {
 	@GetMapping("/property/fields")
 	public ResponseEntity<Collection<IndexField>> propFields(
 //    		@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(name="fieldName", required=false) Set<String> fieldNames
 	) {
-		Collection<IndexField> result = propertyService.fields(); // (query, new SolrPageRequest(0, 10));
+		Collection<IndexField> result = itemService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
 		return ResponseEntity.ok(result);
 	}
 
@@ -283,8 +286,9 @@ public class IndexController {
 	@GetMapping("/item/fields")
 	public ResponseEntity<Collection<IndexField>> itemFields(
 //    		@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(name="fieldName", required=false) Set<String> fieldNames
 	) {
-		Collection<IndexField> result = itemService.fields(); // (query, new SolrPageRequest(0, 10));
+		Collection<IndexField> result = itemService.fields(fieldNames); // (query, new SolrPageRequest(0, 10));
 		return ResponseEntity.ok(result);
 	}
 
