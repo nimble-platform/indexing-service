@@ -74,9 +74,10 @@ public class IndexController {
 			@RequestParam(name = "fq", required = false) List<String> filterQuery,
 			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
 			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
+			@RequestParam(name = "facet.mincount", required = false, defaultValue = "1") int facetMinCount,
 			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
-		SearchResult<ClassType> result = classService.select(query, filterQuery, facetFields, facetLimit,
+		SearchResult<ClassType> result = classService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
 		return ResponseEntity.ok(result);
 	}
@@ -134,9 +135,10 @@ public class IndexController {
 			@RequestParam(name = "fq", required = false) List<String> filterQuery,
 			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
 			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
+			@RequestParam(name = "facet.mincount", required = false, defaultValue = "1") int facetMinCount,
 			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
-		SearchResult<PartyType> result = partyService.select(query, filterQuery, facetFields, facetLimit,
+		SearchResult<PartyType> result = partyService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
 		return ResponseEntity.ok(result);
 	}
@@ -218,9 +220,10 @@ public class IndexController {
 			@RequestParam(name = "fq", required = false) List<String> filterQuery,
 			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
 			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
+			@RequestParam(name = "facet.mincount", required = false, defaultValue = "1") int facetMinCount,
 			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
-		SearchResult<PropertyType> result = propertyService.select(query, filterQuery, facetFields, facetLimit,
+		SearchResult<PropertyType> result = propertyService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
 		return ResponseEntity.ok(result);
 	}
@@ -248,9 +251,10 @@ public class IndexController {
 			@RequestParam(name = "fq", required = false) List<String> filterQuery,
 			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
 			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
+			@RequestParam(name = "facet.mincount", required = false, defaultValue = "1") int facetMinCount,
 			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
-		SearchResult<ItemType> result = itemService.select(query, filterQuery, facetFields, facetLimit, 
+		SearchResult<ItemType> result = itemService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
 		return ResponseEntity.ok(result);
 	}

@@ -83,16 +83,16 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	}
 
 	@Override
-	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, int facetLimit, Pageable page) {
+	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, int facetLimit, int facetMinCount, Pageable page) {
 		// expand main query to a wild card search when it is only a single word
 		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
 			query = String.format("*%s*", query);
 		}
 		Criteria qCriteria = new SimpleStringCriteria(query);
-		return select(qCriteria, filterQueries, facetFields, facetLimit, page);
+		return select(qCriteria, filterQueries, facetFields, facetLimit, facetMinCount, page);
 	}
 	@Override
-	public SearchResult<T> select(Criteria query, List<String> filterQueries, List<String> facetFields, int facetLimit, Pageable page) {
+	public SearchResult<T> select(Criteria query, List<String> filterQueries, List<String> facetFields, int facetLimit, int facetMinCount, Pageable page) {
 		
 		FacetQuery fq = new SimpleFacetQuery(query, page);
 		// add filter queries 
@@ -111,7 +111,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 				facetOptions.addFacetOnField(facetField);
 			}
 			// 
-			facetOptions.setFacetMinCount(1);
+			facetOptions.setFacetMinCount(facetMinCount);
 			facetOptions.setFacetLimit(facetLimit);
 			fq.setFacetOptions(facetOptions);
 		}

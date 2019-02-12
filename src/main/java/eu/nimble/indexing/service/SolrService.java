@@ -55,8 +55,8 @@ public interface SolrService<T> {
 	 * @param page The pageable pointing to the current page & size
 	 * @return
 	 */
-	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, int facetLimit, Pageable page);
+	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, int facetLimit, int facetMinCount, Pageable page);
 	
-	public SearchResult<T> select(Criteria query, List<String> filterQueries, List<String> facetFields, int facetLimit, Pageable page);
+	public SearchResult<T> select(Criteria query, List<String> filterQueries, List<String> facetFields, int facetLimit, int facetMinCount, Pageable page);
 
 }
