@@ -202,12 +202,18 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 					pt.setComment(newProp.getComment());
 					pt.setDescription(newProp.getDescription());
 					pt.setPropertyType("CustomProperty");
-					pt.setValueQualifier(newProp.getValueQualifier());
+					
+					pt.setValueQualifier(
+							newProp.getValueQualifier()!=null 
+							? newProp.getValueQualifier()
+							: "STRING");
 					switch (pt.getValueQualifier()) {
 					case "BOOLEAN":
 						pt.setRange(XSD.xboolean.getURI());
 						break;
 					case "TEXT":
+					case "STRING":
+						pt.setValueQualifier("STRING");
 						pt.setRange(XSD.xstring.getURI());
 						break;
 					default:
