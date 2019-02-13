@@ -56,7 +56,7 @@ public class IndexController {
 //    		@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name="fieldName", required=false) Set<String> fieldNames
 	) {
-		Collection<IndexField> result = itemService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
+		Collection<IndexField> result = classService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
 		return ResponseEntity.ok(result);
 	}
 
@@ -125,7 +125,7 @@ public class IndexController {
 //    		@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name="fieldName", required=false) Set<String> fieldNames
 	) {
-		Collection<IndexField> result = itemService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
+		Collection<IndexField> result = partyService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
 		return ResponseEntity.ok(result);
 	}
 	@GetMapping("/party/select")
@@ -174,7 +174,7 @@ public class IndexController {
 //    		@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name="fieldName", required=false) Set<String> fieldNames
 	) {
-		Collection<IndexField> result = itemService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
+		Collection<IndexField> result = propertyService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
 		return ResponseEntity.ok(result);
 	}
 
