@@ -2,11 +2,13 @@ package eu.nimble.indexing.service.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -152,48 +154,80 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 
 	private void preProcessCustomProperties(ItemType t, Map<String, PropertyType> cp) {
 		if ( cp != null && !cp.isEmpty()) {
+			// 
+			
+			
 			List<PropertyType> existing = propRepo.findByItemFieldNamesIn(cp.keySet());
-			//
-			// remove existing properties
-			for ( PropertyType pt : existing) {
-				for ( String name : pt.getItemFieldNames()) {
-					if (cp.containsKey(name) ) {
-						cp.remove(name);
+			// keep a map of properties to change
+			Map<String,PropertyType> changed = new HashMap<String,PropertyType>();
+			
+			// check whether an existing property lacks a itemFieldName
+			existing.forEach(new Consumer<PropertyType>() {
+
+				@Override
+				public void accept(PropertyType c) {
+					// 
+					PropertyType change = cp.get(c.getLocalName());
+					if ( change != null ) {
+						// harmonize item field names
+						for (String idxField : change.getItemFieldNames()) {
+							if (! c.getItemFieldNames().contains(idxField)) {
+								c.addItemFieldName(idxField);
+								// add to changed to have it saved ...
+								changed.put(t.getLocalName(), c);
+							}
+						}
+						// harmonize labels
+						harmonizeLabels(c.getLabel(), change.getLabel());
+						harmonizeLabels(c.getComment(), change.getComment());
+						harmonizeLabels(c.getDescription(), change.getDescription());
+						// remove any existing property so that is not added twice  
+						cp.remove(c.getLocalName());
 					}
 				}
-			}
-			// cp contains new concepts ...
-			for ( String key : cp.keySet()) {
-				PropertyType c = cp.get(key);
-				PropertyType pt = new PropertyType();
-				// how to specify uri, localName & nameSpace
-				// TODO - use namespace from config
-				pt.setUri("urn:nimble:custom:"+ key);
-				pt.setNameSpace("urn:nimble:custom:");
-				pt.setLocalName(key);
-				pt.setItemFieldNames(Collections.singleton(key));
-				pt.setLabel(c.getLabel());
-				pt.setComment(c.getComment());
-				pt.setDescription(c.getDescription());
-				pt.setPropertyType("CustomProperty");
-				// 
-				if ( t.getBooleanValue().containsKey(key)) {
-					// will (most likely) not happen
-					pt.setRange(XSD.xboolean.getURI());
-					pt.setValueQualifier("BOOLEAN");
-				}
-				if ( t.getStringValue().containsKey(key)) {
-					// will (most likely) not happen
-					pt.setRange(XSD.xstring.getURI());
-					pt.setValueQualifier("TEXT");
-				}
-				if ( t.getDoubleValue().containsKey(key)) {
-					pt.setRange(XSD.xdouble.getURI());
+			});
+			// process the remainder
+			cp.forEach(new BiConsumer<String, PropertyType>() {
+
+				@Override
+				public void accept(String qualifier, PropertyType newProp) {
+					PropertyType pt = new PropertyType();
+					// how to specify uri, localName & nameSpace
+					// TODO - use namespace from config
+					pt.setUri("urn:nimble:custom:"+ qualifier);
+					pt.setNameSpace("urn:nimble:custom:");
+					pt.setLocalName(qualifier);
+					pt.setItemFieldNames(newProp.getItemFieldNames());
+					pt.setLabel(newProp.getLabel());
+					pt.setComment(newProp.getComment());
+					pt.setDescription(newProp.getDescription());
+					pt.setPropertyType("CustomProperty");
+					pt.setValueQualifier(newProp.getValueQualifier());
+					switch (pt.getValueQualifier()) {
+					case "BOOLEAN":
+						pt.setRange(XSD.xboolean.getURI());
+						break;
+					case "TEXT":
+						pt.setRange(XSD.xstring.getURI());
+						break;
+					default:
+						pt.setRange(XSD.xdouble.getURI());
+						break;
+					}
 					// 
-					pt.setValueQualifier(c.getValueQualifier());
-				}
-				
-				propRepo.save(pt);
+					changed.put(qualifier, pt);
+				}});
+
+			//
+			for ( PropertyType newPt : changed.values()) {
+				propRepo.save(newPt);
+			}
+		}
+	}
+	private void harmonizeLabels(Map<String,String> toAdd, Map<String, String> from) {
+		if ( toAdd != null && from != null) {
+			for ( String lang : from.keySet()) {
+				toAdd.putIfAbsent(lang,  from.get(lang));
 			}
 		}
 	}

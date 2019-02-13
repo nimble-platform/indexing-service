@@ -135,6 +135,13 @@ public class ItemUtils {
 		c.addComment("en", "a comment for this particular custom property");
 		c.addDescription("en", "some description for the custom property");
 		item.addProperty("reallyCustom", 3.1415, c);
+		
+		PropertyType cq = new PropertyType();
+		cq.addLabel("en", "English label for a qualified custom property");
+		cq.addComment("en", "a comment for this particular custom property");
+		cq.addDescription("en", "some description for the custom property");
+		item.addProperty("qualifiedCustom", "km", 20.0, cq);
+		item.addProperty("qualifiedCustom",  "m", 500.0, cq);
 		return item;
 
 	}

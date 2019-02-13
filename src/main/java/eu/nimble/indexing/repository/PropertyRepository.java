@@ -169,7 +169,7 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD
 		})
-	List<PropertyType> findByLocalNameOrItemFieldNamesIn(List<String> names);
+	List<PropertyType> findByLocalNameOrItemFieldNamesIn(Set<String> names);
 	/**
 	 * Remove all properties of the provided namespace
 	 * @param namespace
