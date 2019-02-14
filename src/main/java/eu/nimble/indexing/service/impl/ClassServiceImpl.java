@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.service.ClassService;
 import eu.nimble.service.model.solr.SearchResult;
-import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 
 @Service
