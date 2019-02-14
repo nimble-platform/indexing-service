@@ -42,6 +42,7 @@ public class ItemUtils {
 		SimpleFilterQuery q = parseFilterQuery(fq);
 		SimpleFilterQuery c = parseFilterQuery("classification.en_label:*Desk*");
 		ItemType t = template();
+		System.out.println(t.getMultiLingualProperty("qualifiedMulti", "de"));
 		t.getPrice();
 	}
 	public static SimpleFilterQuery parseFilterQuery(String fromString) {
@@ -142,6 +143,10 @@ public class ItemUtils {
 		cq.addDescription("en", "some description for the custom property");
 		item.addProperty("qualifiedCustom", "km", 20.0, cq);
 		item.addProperty("qualifiedCustom",  "m", 500.0, cq);
+		item.addMultiLingualProperty("qualifiedMulti", "en", "blue");
+		item.addMultiLingualProperty("qualifiedMulti", "de", "blau");
+		
+		String v = item.getMultiLingualProperty("qualifiedMulti", "en");
 		return item;
 
 	}

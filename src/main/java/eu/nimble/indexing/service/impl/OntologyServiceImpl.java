@@ -41,6 +41,7 @@ import eu.nimble.indexing.service.OntologyService;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.PropertyType;
+import eu.nimble.service.model.solr.owl.ValueQualifier;
 /**
  * Implementation for the Ontology Service
  * 
@@ -205,20 +206,21 @@ public class OntologyServiceImpl implements OntologyService {
 				switch(prop.getRange().getLocalName()) {
 				case "string":
 				case "normalizedString":
-					index.setValueQualifier("TEXT");
+					index.setValueQualifier(ValueQualifier.STRING);
 					break;
 				case "float":
 				case "double":
 				case "decimal":
 				case "int":
 					// accordig to discussion
-					index.setValueQualifier("NUMBER");
+					index.setValueQualifier(ValueQualifier.NUMBER);
 					break;
 				case "boolean":
-					index.setValueQualifier("BOOLEAN");
+					index.setValueQualifier(ValueQualifier.BOOLEAN);
 					break;
 				default:
-					// no value qualifier
+					index.setValueQualifier(ValueQualifier.STRING);
+					break;
 				}
 				
 			}

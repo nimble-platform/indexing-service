@@ -27,6 +27,7 @@ import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.Concept;
 import eu.nimble.service.model.solr.owl.PropertyType;
+import eu.nimble.service.model.solr.owl.ValueQualifier;
 import eu.nimble.service.model.solr.party.PartyType;
 
 @Service
@@ -206,14 +207,14 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 					pt.setValueQualifier(
 							newProp.getValueQualifier()!=null 
 							? newProp.getValueQualifier()
-							: "STRING");
+							: ValueQualifier.STRING);
 					switch (pt.getValueQualifier()) {
-					case "BOOLEAN":
+					case BOOLEAN:
 						pt.setRange(XSD.xboolean.getURI());
 						break;
-					case "TEXT":
-					case "STRING":
-						pt.setValueQualifier("STRING");
+					case TEXT:
+					case STRING:
+						pt.setValueQualifier(ValueQualifier.STRING);
 						pt.setRange(XSD.xstring.getURI());
 						break;
 					default:
