@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.solr.core.query.Field;
 import org.springframework.data.solr.core.query.Join;
 import org.springframework.stereotype.Service;
 
@@ -54,10 +55,8 @@ public class PropertyServiceImpl extends SolrServiceImpl<PropertyType> implement
 	}
 
 	@Override
-	protected String[] getSelectFieldList() {
-		// return the field list without the link to the product classes
-		// which is too long
-		return IPropertyType.defaultFieldList();
+	protected List<Field> getSelectFieldList() {
+		return IPropertyType.defaultFields();
 	}
 	
 

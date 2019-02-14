@@ -25,6 +25,8 @@ import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.FacetOptions;
 import org.springframework.data.solr.core.query.FacetQuery;
+import org.springframework.data.solr.core.query.Field;
+import org.springframework.data.solr.core.query.FilterQuery;
 import org.springframework.data.solr.core.query.Join;
 import org.springframework.data.solr.core.query.SimpleFacetQuery;
 import org.springframework.data.solr.core.query.SimpleField;
@@ -89,25 +91,39 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			query = String.format("*%s*", query);
 		}
 		Criteria qCriteria = new SimpleStringCriteria(query);
-		return select(qCriteria, filterQueries, facetFields, facetLimit, facetMinCount, page);
-	}
-	@Override
-	public SearchResult<T> select(Criteria query, List<String> filterQueries, List<String> facetFields, int facetLimit, int facetMinCount, Pageable page) {
-		
-		FacetQuery fq = new SimpleFacetQuery(query, page);
-		// add filter queries 
+		List<FilterQuery> fqFilter = new ArrayList<>();
 		if ( filterQueries != null && !filterQueries.isEmpty()) {
 			// 
 			for (String filter : filterQueries) {
-				fq.addFilterQuery(parseFilterQuery(filter));
+				fqFilter.add(parseFilterQuery(filter));
 			}
 		}
-		for (String f : getSelectFieldList()) {
-			fq.addProjectionOnField(new SimpleField(f));
+		List<Field> fieldList = new ArrayList<>();
+		if ( facetFields != null && !facetFields.isEmpty()) {
+			for (String fieldName : facetFields ) {
+				fieldList.add(new SimpleField(fieldName));
+			}
+		}
+		return select(qCriteria, fqFilter, fieldList, facetLimit, facetMinCount, page);
+	}
+	@Override
+	public SearchResult<T> select(Criteria query, List<FilterQuery> filterQueries, List<Field> facetFields, int facetLimit, int facetMinCount, Pageable page) {
+		
+		FacetQuery fq = new SimpleFacetQuery(query, page);
+		// add filter queries
+
+		if ( filterQueries != null && !filterQueries.isEmpty()) {
+			// 
+			for (FilterQuery filter : filterQueries) {
+				fq.addFilterQuery(filter);
+			}
+		}
+		for (Field f : getSelectFieldList()) {
+			fq.addProjectionOnField(f);
 		}
 		if ( facetFields != null && !facetFields.isEmpty()) {
 			FacetOptions facetOptions = new FacetOptions();
-			for (String facetField : facetFields) {
+			for (Field facetField : facetFields) {
 				facetOptions.addFacetOnField(facetField);
 			}
 			// 
@@ -163,8 +179,8 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		// subclasses may override
 		return null;
 	}
-	protected String[] getSelectFieldList() {
-		return new String[] {};
+	protected Collection<Field> getSelectFieldList() {
+		return new ArrayList<>();
 	}
 	
 	@SuppressWarnings("unchecked")
