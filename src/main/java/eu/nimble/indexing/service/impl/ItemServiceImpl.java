@@ -170,27 +170,29 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 //					}
 				}
 			});
-			List<PropertyType> existing = propRepo.findByItemFieldNamesIn(fieldNames.keySet());
-			Set<PropertyType> changed = new HashSet<>();
-			existing.forEach(new Consumer<PropertyType>() {
-
-				@Override
-				public void accept(PropertyType t) {
-					for (String fn : t.getItemFieldNames()) {
-						if ( fieldNames.containsKey(fn)) {
-							for (String idxField : fieldNames.get(fn)) {
-								if ( ! t.getItemFieldNames().contains(idxField)) {
-									t.addItemFieldName(idxField);
-									t.setValueQualifier(ValueQualifier.QUANTITY);
-									changed.add(t);
+			if (! fieldNames.keySet().isEmpty()) {
+				List<PropertyType> existing = propRepo.findByItemFieldNamesIn(fieldNames.keySet());
+				Set<PropertyType> changed = new HashSet<>();
+				existing.forEach(new Consumer<PropertyType>() {
+					
+					@Override
+					public void accept(PropertyType t) {
+						for (String fn : t.getItemFieldNames()) {
+							if ( fieldNames.containsKey(fn)) {
+								for (String idxField : fieldNames.get(fn)) {
+									if ( ! t.getItemFieldNames().contains(idxField)) {
+										t.addItemFieldName(idxField);
+										t.setValueQualifier(ValueQualifier.QUANTITY);
+										changed.add(t);
+									}
 								}
 							}
 						}
 					}
+				});
+				for ( PropertyType newPt : changed) {
+					propRepo.save(newPt);
 				}
-			});
-			for ( PropertyType newPt : changed) {
-				propRepo.save(newPt);
 			}
 
 		}
