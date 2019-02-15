@@ -43,11 +43,4 @@ public class ClassServiceImpl extends SolrServiceImpl<ClassType> implements Clas
 		List<ClassType> result = classRepo.findByNameSpaceAndLocalNameIn(nameSpace, localNames);
 		return new SearchResult<ClassType>(result);
 	}
-
-	@Override
-	protected Join getJoin(String joinName) {
-		return ClassType.JOIN_TO.getJoin(joinName);
-	}
-
-
 }

@@ -59,12 +59,6 @@ public class PropertyServiceImpl extends SolrServiceImpl<PropertyType> implement
 		return IPropertyType.defaultFields();
 	}
 	
-
-	@Override
-	protected Join getJoin(String joinName) {
-		return PropertyType.JOIN_TO.getJoin(joinName);
-	}
-
 	@Override
 	public SearchResult<PropertyType> findForClasses(Set<String> classTypes) {
 		List<PropertyType> result = propRepo.findByProductIn(classTypes);

@@ -39,33 +39,11 @@ public class ItemUtils {
 		System.out.println(extractFromTemplate(qualitfied1, template1));
 		System.out.println(dynamicFieldPart("http://www.aidimme.es./FurnitureSectorTaxonomy.owl#hasItemPerPack"));
 		String fq = "manufacturer.trustScore:[1 TO 4]";
-		SimpleFilterQuery q = parseFilterQuery(fq);
-		SimpleFilterQuery c = parseFilterQuery("classification.en_label:*Desk*");
 		ItemType t = template();
 		System.out.println(t.getMultiLingualProperty("qualifiedMulti", "de"));
 		t.getPrice();
 	}
-	public static SimpleFilterQuery parseFilterQuery(String fromString) {
-		int fieldDelimPos = fromString.indexOf(":");
-		String fieldName = fromString.substring(0,fieldDelimPos);
-		int joinDelimPos = fieldName.indexOf(".");
-		Criteria crit = null;
-		Join join = null;
-		if ( joinDelimPos > 0 ) {
-			String joinName = fieldName.substring(0,joinDelimPos);
-			String joinedFieldName = fieldName.substring(joinDelimPos+1);
-			join = getJoin(joinName);
-			crit = Criteria.where(joinedFieldName).expression(encode(fromString.substring(fieldDelimPos+1)));			
-		}
-		else {
-			crit = Criteria.where(fieldName).expression(encode(fromString.substring(fieldDelimPos+1)));
-		}
-		SimpleFilterQuery q =  new SimpleFilterQuery(crit);
-		if ( join!=null) {
-			q.setJoin(join);
-		}
-		return q;
-	}
+
 	public static String encode(String in) {
 		try {
 			return URLEncoder.encode(in, "utf8");
@@ -75,18 +53,6 @@ public class ItemUtils {
 		}
 	}
 
-	public static Join getJoin(String field) {
-		try {
-			// check for ItemType JOINS
-			ItemType.JOIN_TO join = ItemType.JOIN_TO.valueOf(field);
-			// 
-			return join.getJoin();
-		} catch (Exception e) {
-			// TODO add error handling
-			return null;
-		}
-		
-	}
 	public static String extractFromTemplate(String qualified, String template) {
 		int starPos = template.indexOf("*");
 		
