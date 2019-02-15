@@ -124,25 +124,6 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 	 * @param itemFieldNames
 	 * @return
 	 */
-	@Query(fields={
-			IPropertyType.TYPE_FIELD, 
-			IPropertyType.IS_FACET_FIELD, 
-			IPropertyType.BOOST_FIELD, 
-			IPropertyType.IDX_FIELD_NAME_FIELD,
-			IPropertyType.PROPERTY_TYPE_FIELD, 
-			IPropertyType.LABEL_FIELD, 
-			IPropertyType.ALTERNATE_LABEL_FIELD, 
-			IPropertyType.HIDDEN_LABEL_FIELD,
-			IPropertyType.LANGUAGES_FIELD,
-			IPropertyType.LANGUAGE_TXT_FIELD,
-			IPropertyType.LOCAL_NAME_FIELD, 
-			IPropertyType.NAME_SPACE_FIELD, 
-			IPropertyType.ID_FIELD, 
-			IPropertyType.COMMENT_FIELD, 
-			IPropertyType.DESCRIPTION_FIELD, 
-			IPropertyType.RANGE_FIELD,
-			IPropertyType.VALUE_QUALIFIER_FIELD
-		})
 	List<PropertyType> findByItemFieldNamesIn(Set<String> itemFieldNames);
 	/**
 	 * Retrieve multiple fields by their local name OR the index field name 

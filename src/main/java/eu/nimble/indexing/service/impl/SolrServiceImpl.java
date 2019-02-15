@@ -176,11 +176,11 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			int facetMinCount,
 			Pageable page) {
 		
-		if ( toExtend.getFacets().containsKey(join.getField().getName()) ) {
-			// TODO: check whether we need to restrict the facet filter to the list of 
-			//       manufacturers (taken from facet)
-			
-		}
+//		if ( toExtend.getFacets().containsKey(join.getField().getName()) ) {
+//			// TODO: check whether we need to restrict the facet filter to the list of 
+//			//       manufacturers (taken from facet)
+//			
+//		}
 		FacetQuery fq = new SimpleFacetQuery(new SimpleStringCriteria("*:*"), page);
 		// we are interested in facets only
 		fq.setRows(0);
@@ -203,18 +203,16 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			fq.setFacetOptions(facetOptions);
 		}
 		FacetPage<?> result = solrTemplate.queryForFacetPage(join.getJoinedCollection(),fq, join.getJoinedType());
-		for ( Field f : result.getFacetFields()) {
-			for (Field field :  result.getFacetFields()) {
-				Page<FacetFieldEntry> facetResultPage = result.getFacetResultPage(field);
-				//
-				for (FacetFieldEntry entry : facetResultPage.getContent() ) {
-					// add the entry value with the mapped name
-					String mappedField = String.format("%s.%s",  joinName, entry.getField().getName());
-					toExtend.addFacet(mappedField, entry.getValue(), entry.getValueCount());
-				}
+		for (Field field :  result.getFacetFields()) {
+			Page<FacetFieldEntry> facetResultPage = result.getFacetResultPage(field);
+			//
+			for (FacetFieldEntry entry : facetResultPage.getContent() ) {
+				// add the entry value with the mapped name
+				String mappedField = String.format("%s.%s",  joinName, entry.getField().getName());
+				toExtend.addFacet(mappedField, entry.getValue(), entry.getValueCount());
 			}
-
 		}
+
 		return toExtend;
 	}
 
@@ -333,69 +331,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 		return set;
 	}
-//	private Field parseFacetField(String fieldName, JoinHelper joinFacets) {
-//		int joinDelimPos = fieldName.indexOf(".");
-//		Field field = null;
-//		JoinInfo joinInfo = null;
-//		if ( joinDelimPos > 0 ) {
-//			String joinName = fieldName.substring(0,joinDelimPos);
-//			// find the join info
-//			joinInfo = JoinInfo.getJoinInfo(joinName);
-//			String joinedFieldName = fieldName.substring(joinDelimPos+1);
-//			field = new SimpleField(joinedFieldName);
-//			joinFacets.addFacetField(joinInfo, field);
-//		}
-//		else {
-//			field = new SimpleField(fieldName);
-//		}
-//		// 
-//		return field;
-//	}
-//	private SimpleFilterQuery parseFilterQuery(String fromString, FacetingHelper joinFacets) {
-//		int fieldDelimPos = fromString.indexOf(":");
-//		String fieldName = fromString.substring(0,fieldDelimPos);
-//		int joinDelimPos = fieldName.indexOf(".");
-//		Criteria crit = null;
-//		JoinInfo joinInfo = null;
-//		if ( joinDelimPos > 0 ) {
-//			String joinName = fieldName.substring(0,joinDelimPos);
-//			// find the join info
-//			joinInfo = JoinInfo.getJoinInfo(joinName);
-//			String joinedFieldName = fieldName.substring(joinDelimPos+1);
-//			crit = Criteria.where(joinedFieldName).expression(encode(fromString.substring(fieldDelimPos+1)));
-//			joinFacets.addFilter(joinInfo, crit);
-//		}
-//		else {
-//			crit = Criteria.where(fieldName).expression(encode(fromString.substring(fieldDelimPos+1)));
-//		}
-//		SimpleFilterQuery q =  new SimpleFilterQuery(crit);
-//		if ( joinInfo!=null) {
-//			//
-//			q.setJoin(joinInfo.getJoin());
-//		}
-//		return q;
-//	}
-//	private SimpleFilterQuery parseFilterQuery(String fromString) {
-//		int fieldDelimPos = fromString.indexOf(":");
-//		String fieldName = fromString.substring(0,fieldDelimPos);
-//		int joinDelimPos = fieldName.indexOf(".");
-//		Criteria crit = null;
-//		Join join = null;
-//		if ( joinDelimPos > 0 ) {
-//			String joinName = fieldName.substring(0,joinDelimPos);
-//			String joinedFieldName = fieldName.substring(joinDelimPos+1);
-//			join = getJoin(joinName);
-//			crit = Criteria.where(joinedFieldName).expression(encode(fromString.substring(fieldDelimPos+1)));			
-//		}
-//		else {
-//			crit = Criteria.where(fieldName).expression(encode(fromString.substring(fieldDelimPos+1)));
-//		}
-//		SimpleFilterQuery q =  new SimpleFilterQuery(crit);
-//		if ( join!=null) {
-//			q.setJoin(join);
-//		}
-//		return q;
-//	}
+
 	public static String encode(String in) {
 		// check for a colon - ensure URI's are quoted
 		if (in.contains(":")) {

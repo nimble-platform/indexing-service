@@ -1,5 +1,6 @@
 package eu.nimble.indexing.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +14,6 @@ import java.util.stream.Collectors;
 
 import org.apache.jena.vocabulary.XSD;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.solr.core.query.Join;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.ClassRepository;
@@ -75,10 +75,12 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 	protected void prePersist(ItemType t) {
 		preProcessPartyType(t, t.getManufacturer());
 		// check for non-existing properties
+		preProcessPropertyMap(t, t.getPropertyMap());
 		preProcessCustomProperties(t, t.getCustomProperties());
 		//
 	}
 	
+
 	@Override
 	protected void postSelect(ItemType t) {
 		postProcessManufacturer(t);
@@ -145,6 +147,54 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 			// ensure the manufacturer id is in the indexed field 
 			t.setManufacturerId(m.getId());
 		}
+	}
+	private void preProcessPropertyMap(ItemType t, Map<String, String> propertyMap) {
+		if (propertyMap !=null && !propertyMap.isEmpty()) {
+			Map<String, Set<String>> fieldNames = new HashMap<>();
+			propertyMap.forEach(new BiConsumer<String, String>() {
+
+				@Override
+				public void accept(String t, String u) {
+					if ( u.contains(ItemType.QUALIFIED_DELIMITER)) {
+						String full = ItemType.qualifiedValue(u);
+						String qualifier = ItemType.dynamicFieldPart(full);
+						Set<String> set = fieldNames.get(qualifier);
+						if ( set==null) {
+							set = new HashSet<>();
+							fieldNames.put(qualifier,  set);
+						}
+						set.add(t);
+					}
+//					else {
+//						fieldNames.put(t, Collections.singleton(t));
+//					}
+				}
+			});
+			List<PropertyType> existing = propRepo.findByItemFieldNamesIn(fieldNames.keySet());
+			Set<PropertyType> changed = new HashSet<>();
+			existing.forEach(new Consumer<PropertyType>() {
+
+				@Override
+				public void accept(PropertyType t) {
+					for (String fn : t.getItemFieldNames()) {
+						if ( fieldNames.containsKey(fn)) {
+							for (String idxField : fieldNames.get(fn)) {
+								if ( ! t.getItemFieldNames().contains(idxField)) {
+									t.addItemFieldName(idxField);
+									t.setValueQualifier(ValueQualifier.QUANTITY);
+									changed.add(t);
+								}
+							}
+						}
+					}
+				}
+			});
+			for ( PropertyType newPt : changed) {
+				propRepo.save(newPt);
+			}
+
+		}
+		
 	}
 
 	private void preProcessCustomProperties(ItemType t, Map<String, PropertyType> cp) {

@@ -91,6 +91,7 @@ public class ItemUtils {
 		item.addDeliveryTime("Week(s)", 2.0);
 		item.addDeliveryTime("Day(s)", 14.0);
 		// 
+		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasLength", "cm", 200.0);
 		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasColour", "blue");
 		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasColour", "red");
 		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasUnitsPerPack", 10.0);
