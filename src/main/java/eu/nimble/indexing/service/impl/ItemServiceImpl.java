@@ -1,6 +1,5 @@
 package eu.nimble.indexing.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;

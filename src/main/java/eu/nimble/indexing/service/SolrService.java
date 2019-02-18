@@ -6,9 +6,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.solr.core.query.Criteria;
-import org.springframework.data.solr.core.query.Field;
-import org.springframework.data.solr.core.query.FilterQuery;
 
 import eu.nimble.service.model.solr.IndexField;
 import eu.nimble.service.model.solr.SearchResult;

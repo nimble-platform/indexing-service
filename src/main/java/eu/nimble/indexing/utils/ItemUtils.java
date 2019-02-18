@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.jena.ext.com.google.common.base.CaseFormat;
-import org.springframework.data.solr.core.query.Criteria;
-import org.springframework.data.solr.core.query.Join;
-import org.springframework.data.solr.core.query.SimpleFilterQuery;
 import org.springframework.util.StringUtils;
 
 import eu.nimble.service.model.solr.item.ItemType;
@@ -38,7 +35,7 @@ public class ItemUtils {
 		System.out.println(extractFromTemplate(qualified, template));
 		System.out.println(extractFromTemplate(qualitfied1, template1));
 		System.out.println(dynamicFieldPart("http://www.aidimme.es./FurnitureSectorTaxonomy.owl#hasItemPerPack"));
-		String fq = "manufacturer.trustScore:[1 TO 4]";
+//		String fq = "manufacturer.trustScore:[1 TO 4]";
 		ItemType t = template();
 		System.out.println(t.getMultiLingualProperty("qualifiedMulti", "de"));
 		t.getPrice();
@@ -113,7 +110,7 @@ public class ItemUtils {
 		item.addMultiLingualProperty("qualifiedMulti", "en", "blue");
 		item.addMultiLingualProperty("qualifiedMulti", "de", "blau");
 		
-		String v = item.getMultiLingualProperty("qualifiedMulti", "en");
+		item.getMultiLingualProperty("qualifiedMulti", "en");
 		return item;
 
 	}
