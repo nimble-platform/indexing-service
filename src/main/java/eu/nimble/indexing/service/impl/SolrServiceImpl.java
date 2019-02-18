@@ -28,10 +28,7 @@ import org.springframework.data.solr.core.query.FacetOptions;
 import org.springframework.data.solr.core.query.FacetQuery;
 import org.springframework.data.solr.core.query.Field;
 import org.springframework.data.solr.core.query.FilterQuery;
-import org.springframework.data.solr.core.query.Join;
 import org.springframework.data.solr.core.query.SimpleFacetQuery;
-import org.springframework.data.solr.core.query.SimpleField;
-import org.springframework.data.solr.core.query.SimpleFilterQuery;
 import org.springframework.data.solr.core.query.SimpleStringCriteria;
 import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.FacetPage;
@@ -39,8 +36,8 @@ import org.springframework.data.solr.repository.SolrCrudRepository;
 import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.service.SolrService;
-import eu.nimble.indexing.solr.query.JoinInfo;
 import eu.nimble.indexing.solr.query.JoinHelper;
+import eu.nimble.indexing.solr.query.JoinInfo;
 import eu.nimble.service.model.solr.IndexField;
 import eu.nimble.service.model.solr.SearchResult;
 
