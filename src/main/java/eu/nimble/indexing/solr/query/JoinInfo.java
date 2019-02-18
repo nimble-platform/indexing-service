@@ -11,7 +11,13 @@ import eu.nimble.service.model.solr.owl.IPropertyType;
 import eu.nimble.service.model.solr.owl.PropertyType;
 import eu.nimble.service.model.solr.party.IParty;
 import eu.nimble.service.model.solr.party.PartyType;
-
+/**
+ * 
+ * List of "allowed" join indicators in the <code>fq</code> and <code>facet.field</code> parameters 
+ * for the distinct ../select methods
+ * @author dglachs
+ *
+ */
 public enum JoinInfo {
 //	party(IParty.ID_FIELD, ItemType.MANUFACTURER_ID_FIELD, IParty.COLLECTION),
 	// join to party type (manufacturer)
