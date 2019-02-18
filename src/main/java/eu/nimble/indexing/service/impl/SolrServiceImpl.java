@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -299,6 +299,11 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			}}).findFirst();
 		return found.isPresent(); 
 	}
+	/**
+	 * Translate the solr datatype
+	 * @param type
+	 * @return
+	 */
 	private String getDatatype(Object type) {
 		switch(type.toString()){
 		case "plong":
@@ -314,19 +319,27 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			return type.toString();
 		}
 	}
-	protected <I> Set<I> asSet(Iterable<I> list) {
-		Set<I> set = new HashSet<>();
-		if ( list!=null) {
-			list.forEach(new Consumer<I>() {
-	
-				@Override
-				public void accept(I t) {
-					set.add(t);
-					
-				}
-			});
+	/**
+	 * Express the list as Set - removing (possible) duplicates
+	 * @param list
+	 * @return
+	 */
+	protected <I> Set<I> asSet(List<I> list) {
+		if ( list!= null && !list.isEmpty()) {
+			return list.stream().collect(Collectors.toSet());
 		}
-		return set;
+		return new HashSet<>();
+//		if ( list!=null) {
+//			list.forEach(new Consumer<I>() {
+//	
+//				@Override
+//				public void accept(I t) {
+//					set.add(t);
+//					
+//				}
+//			});
+//		}
+//		return set;
 	}
 
 	public static String encode(String in) {
