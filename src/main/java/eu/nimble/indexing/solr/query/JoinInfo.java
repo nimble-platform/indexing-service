@@ -32,6 +32,15 @@ import eu.nimble.service.model.solr.party.PartyType;
  * fq=manufacturer.trustScore:[5 TO 10]
  * fq=property.en_txt:*Rack*
  * </pre>
+ * <p>
+ * Faceting on joined collections is possible the adding the indicated field to the list of <code>facet.field</code> parameters.
+ * <pre>
+ * facet.field=party.trustScore
+ * facet.field=property.nameSpace
+ * </pre>
+ * this will issue a facet query on the joined collection and add the result to the main query. Join filters will be 
+ * applied to the facet query on the joined collection. 
+ * </p>
  * @author dglachs
  *
  */
