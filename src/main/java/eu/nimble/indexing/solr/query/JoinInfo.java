@@ -14,7 +14,24 @@ import eu.nimble.service.model.solr.party.PartyType;
 /**
  * 
  * List of "allowed" join indicators in the <code>fq</code> and <code>facet.field</code> parameters 
- * for the distinct ../select methods
+ * for the distinct ../select methods.
+ * <p>
+ * A join must be indicated by the join name, e.g. manufacturer, party, product, class followed by a dot "." and
+ * the respective filter or field expression. joined facets are computed and added to the main query. Possible 
+ * joins are
+ * 
+ * <ul>
+ * <li>item --> party via {@link ItemType#getManufacturerId()}: use join names <i>manufacturer</i> or <i>party</i> 
+ * <li>item --> classification via {@link ItemType#getClassificationUri()}: use join names <i>productType</i> or <i>classfication</i> 
+ * <li>class --> property via {@link ClassType#getProperties()}: use join names <i>property</i> or <i>prop</i> 
+ * <li>property --> class via {@link PropertyType#getProduct()}: use join names <i>product</i> or <i>productType</i> or <i>class</i> 
+ * </ul>
+ * </p>
+ * Example:
+ * <pre>
+ * fq=manufacturer.trustScore:[5 TO 10]
+ * fq=property.en_txt:*Rack*
+ * </pre>
  * @author dglachs
  *
  */
