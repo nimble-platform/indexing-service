@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.LukeRequest;
 import org.apache.solr.client.solrj.response.LukeResponse;
@@ -22,6 +23,7 @@ import org.apache.solr.common.util.NamedList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.solr.core.RequestMethod;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.FacetOptions;
@@ -165,7 +167,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			fq.setFacetOptions(facetOptions);
 		}
 		
-		FacetPage<T> result = solrTemplate.queryForFacetPage(getCollection(),fq, getSolrClass());
+		FacetPage<T> result = solrTemplate.queryForFacetPage(getCollection(),fq, getSolrClass(), RequestMethod.POST);
 		
 		
 		// enrich content - to be overloaded by subclasses
@@ -210,7 +212,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			facetOptions.setFacetLimit(facetLimit);
 			fq.setFacetOptions(facetOptions);
 		}
-		FacetPage<?> result = solrTemplate.queryForFacetPage(join.getJoinedCollection(),fq, join.getJoinedType());
+		FacetPage<?> result = solrTemplate.queryForFacetPage(join.getJoinedCollection(),fq, join.getJoinedType(), RequestMethod.POST);
 		for (Field field :  result.getFacetFields()) {
 			Page<FacetFieldEntry> facetResultPage = result.getFacetResultPage(field);
 			//
