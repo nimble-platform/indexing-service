@@ -39,6 +39,7 @@ import eu.nimble.indexing.service.SolrService;
 import eu.nimble.indexing.solr.query.JoinHelper;
 import eu.nimble.indexing.solr.query.JoinInfo;
 import eu.nimble.service.model.solr.IndexField;
+import eu.nimble.service.model.solr.Search;
 import eu.nimble.service.model.solr.SearchResult;
 
 @Service
@@ -86,6 +87,16 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	}
 
 	@Override
+	public SearchResult<T> search(Search search) {
+		return select(search.getQuery(),
+				search.getFilterQuery(),
+				search.getFacetFields(),
+				search.getFacetLimit(),
+				search.getFacetMinCount(),
+				search.getPage());
+	}
+
+	@Override
 	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, int facetLimit, int facetMinCount, Pageable page) {
 		// expand main query to a wild card search when it is only a single word
 		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
@@ -117,7 +128,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			// process join facets
 			if (!joinHelper.getFacetFields(join).isEmpty()) {
 				// process a query for the joined facet fields
-				joinFacets(result, join, joinHelper.getJoinInfo(join), joinHelper.getFilterQueries(join), joinHelper.getFacetFields(join), 100, 1, page);
+				joinFacets(result, join, joinHelper.getJoinInfo(join), joinHelper.getFilterQueries(join), joinHelper.getFacetFields(join), facetLimit, facetMinCount, page);
 			}
 			
 		}

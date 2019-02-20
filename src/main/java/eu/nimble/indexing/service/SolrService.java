@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.data.domain.Pageable;
 
 import eu.nimble.service.model.solr.IndexField;
+import eu.nimble.service.model.solr.Search;
 import eu.nimble.service.model.solr.SearchResult;
 
 public interface SolrService<T> {
@@ -52,6 +53,12 @@ public interface SolrService<T> {
 	 * @return
 	 */
 	public Collection<IndexField> fields(Set<String> fields);
+	/**
+	 * Perform a search against the collection
+	 * @param search The search definition holding query, filterQuery and faceting parameters
+	 * @return
+	 */
+	public SearchResult<T> search(Search search);
 	/**
 	 * Perform a select query against the collection
 	 * @param query The query term used with the <code>q</code> query parameter

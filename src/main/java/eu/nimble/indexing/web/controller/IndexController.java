@@ -23,6 +23,7 @@ import eu.nimble.indexing.service.PropertyService;
 import eu.nimble.indexing.utils.ItemUtils;
 import eu.nimble.indexing.utils.PartyTypeUtils;
 import eu.nimble.service.model.solr.IndexField;
+import eu.nimble.service.model.solr.Search;
 import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
@@ -68,7 +69,7 @@ public class IndexController {
 //		return ResponseEntity.ok(classes.search(query));
 //	}
 	@GetMapping("/class/select")
-	public ResponseEntity<SearchResult<ClassType>> searchClasses(
+	public ResponseEntity<SearchResult<ClassType>> selectClass(
 //			@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
 			@RequestParam(name = "fq", required = false) List<String> filterQuery,
@@ -79,6 +80,13 @@ public class IndexController {
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
 		SearchResult<ClassType> result = classService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
+	}
+
+	@PostMapping("/class/search")
+	public ResponseEntity<SearchResult<ClassType>> searchClass(
+			@RequestBody Search search) {
+		SearchResult<ClassType> result = classService.search(search);
 		return ResponseEntity.ok(result);
 	}
 
@@ -129,7 +137,7 @@ public class IndexController {
 		return ResponseEntity.ok(result);
 	}
 	@GetMapping("/party/select")
-	public ResponseEntity<SearchResult<PartyType>> searchParty(
+	public ResponseEntity<SearchResult<PartyType>> selectParty(
 //			@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
 			@RequestParam(name = "fq", required = false) List<String> filterQuery,
@@ -140,6 +148,13 @@ public class IndexController {
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
 		SearchResult<PartyType> result = partyService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
+	}
+
+	@PostMapping("/party/search")
+	public ResponseEntity<SearchResult<PartyType>> searchParty(
+			@RequestBody Search search) {
+		SearchResult<PartyType> result = partyService.search(search);
 		return ResponseEntity.ok(result);
 	}
 
@@ -215,7 +230,7 @@ public class IndexController {
 	}
 
 	@GetMapping("/property/select")
-	public ResponseEntity<SearchResult<PropertyType>> searchProperties(
+	public ResponseEntity<SearchResult<PropertyType>> selectProperties(
 			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
 			@RequestParam(name = "fq", required = false) List<String> filterQuery,
 			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
@@ -225,6 +240,13 @@ public class IndexController {
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
 		SearchResult<PropertyType> result = propertyService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
+	}
+
+	@PostMapping("/property/search")
+	public ResponseEntity<SearchResult<PropertyType>> searchProperties(
+			@RequestBody Search search) {
+		SearchResult<PropertyType> result = propertyService.search(search);
 		return ResponseEntity.ok(result);
 	}
 
@@ -245,7 +267,7 @@ public class IndexController {
 	}
 
 	@GetMapping("/item/select")
-	public ResponseEntity<SearchResult<ItemType>> select(
+	public ResponseEntity<SearchResult<ItemType>> selectItem(
 //    		@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
 			@RequestParam(name = "fq", required = false) List<String> filterQuery,
@@ -256,6 +278,22 @@ public class IndexController {
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
 		SearchResult<ItemType> result = itemService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
+	}
+	@GetMapping("/search/template") 	
+	public ResponseEntity<Search> searchTemplate(){
+		Search result = new Search("query")
+				.filter("fieldName:filter")
+				.facetField("fieldName");
+		
+		
+		return ResponseEntity.ok(result);
+	}
+
+	@PostMapping("/item/search")
+	public ResponseEntity<SearchResult<ItemType>> searchItem(
+			@RequestBody Search search) {
+		SearchResult<ItemType> result = itemService.search(search);
 		return ResponseEntity.ok(result);
 	}
 
