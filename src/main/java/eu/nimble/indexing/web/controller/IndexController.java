@@ -22,6 +22,7 @@ import eu.nimble.indexing.service.PartyService;
 import eu.nimble.indexing.service.PropertyService;
 import eu.nimble.indexing.utils.ItemUtils;
 import eu.nimble.indexing.utils.PartyTypeUtils;
+import eu.nimble.service.model.solr.FacetResult;
 import eu.nimble.service.model.solr.IndexField;
 import eu.nimble.service.model.solr.Search;
 import eu.nimble.service.model.solr.SearchResult;
@@ -80,6 +81,17 @@ public class IndexController {
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
 		SearchResult<ClassType> result = classService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
+	}
+	@GetMapping("/class/suggest")
+	public ResponseEntity<FacetResult> classSuggest(
+			@RequestParam(name = "q") String query,
+			@RequestParam(name = "field") String fieldName,
+			@RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
+			@RequestParam(name = "minCount", required = false, defaultValue = "1") int minCount
+			
+			) {
+		FacetResult result = classService.suggest(query, fieldName, limit, minCount);
 		return ResponseEntity.ok(result);
 	}
 
@@ -148,6 +160,17 @@ public class IndexController {
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
 		SearchResult<PartyType> result = partyService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
 				new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
+	}
+	@GetMapping("/party/suggest")
+	public ResponseEntity<FacetResult> partySuggest(
+			@RequestParam(name = "q") String query,
+			@RequestParam(name = "field") String fieldName,
+			@RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
+			@RequestParam(name = "minCount", required = false, defaultValue = "1") int minCount
+			
+			) {
+		FacetResult result = partyService.suggest(query, fieldName, limit, minCount);
 		return ResponseEntity.ok(result);
 	}
 
@@ -228,6 +251,17 @@ public class IndexController {
 		}
 		return ResponseEntity.ok(new SearchResult<>(new ArrayList<>()));
 	}
+	@GetMapping("/property/suggest")
+	public ResponseEntity<FacetResult> propertySuggest(
+			@RequestParam(name = "q") String query,
+			@RequestParam(name = "field") String fieldName,
+			@RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
+			@RequestParam(name = "minCount", required = false, defaultValue = "1") int minCount
+			
+			) {
+		FacetResult result = propertyService.suggest(query, fieldName, limit, minCount);
+		return ResponseEntity.ok(result);
+	}
 
 	@GetMapping("/property/select")
 	public ResponseEntity<SearchResult<PropertyType>> selectProperties(
@@ -265,7 +299,17 @@ public class IndexController {
 		propertyService.set(prop);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
-
+	@GetMapping("/item/suggest")
+	public ResponseEntity<FacetResult> itemSuggest(
+			@RequestParam(name = "q") String query,
+			@RequestParam(name = "field") String fieldName,
+			@RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
+			@RequestParam(name = "minCount", required = false, defaultValue = "1") int minCount
+			
+			) {
+		FacetResult result = itemService.suggest(query, fieldName, limit, minCount);
+		return ResponseEntity.ok(result);
+	}
 	@GetMapping("/item/select")
 	public ResponseEntity<SearchResult<ItemType>> selectItem(
 //    		@RequestHeader(value = "Authorization") String bearerToken,

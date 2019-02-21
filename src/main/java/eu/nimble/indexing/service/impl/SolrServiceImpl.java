@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.LukeRequest;
 import org.apache.solr.client.solrj.response.LukeResponse;
@@ -40,6 +39,7 @@ import org.springframework.stereotype.Service;
 import eu.nimble.indexing.service.SolrService;
 import eu.nimble.indexing.solr.query.JoinHelper;
 import eu.nimble.indexing.solr.query.JoinInfo;
+import eu.nimble.service.model.solr.FacetResult;
 import eu.nimble.service.model.solr.IndexField;
 import eu.nimble.service.model.solr.Search;
 import eu.nimble.service.model.solr.SearchResult;
@@ -224,6 +224,33 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 
 		return toExtend;
+	}
+
+	@Override
+	public FacetResult suggest(String query, String facetField, int facetLimit, int facetMinCount) {
+		// 
+		if (! query.contains("*")) {
+			query = "*"+query.trim()+"*";
+		}
+		// restrict the querying to the field, so one has a glue
+		FacetQuery fq = new SimpleFacetQuery(Criteria.where(facetField).expression(query));
+		// no need to return content
+		fq.setRows(0);
+	
+		FacetOptions facetOptions = new FacetOptions();
+		facetOptions.addFacetOnField(facetField);
+		// 
+		
+		facetOptions.setFacetMinCount(facetMinCount);
+		facetOptions.setFacetLimit(facetLimit);
+		fq.setFacetOptions(facetOptions);
+	
+		FacetPage<?> result = solrTemplate.queryForFacetPage(getCollection(),fq, getSolrClass(), RequestMethod.POST);
+		SearchResult<?> search = new SearchResult<>(result);
+		if ( search.getFacets() != null && search.getFacets().containsKey(facetField)) {
+			return search.getFacets().get(facetField);
+		}
+		return new FacetResult(facetField);
 	}
 
 	@Override
