@@ -298,29 +298,46 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		Map<String, IndexField> ffield = new HashMap<>();
 		for (Map.Entry<String, Object> field : fields) {
 			String name = field.getKey();
-			if ( (requested == null || requested.isEmpty()) 
-				// when requested list present and not empty
-				|| isRequestedField(requested, name)) {
-				
-				IndexField f = new IndexField(name);
-				for (Entry<String, Object> prop : (NamedList<Object>)field.getValue()) {
-					switch(prop.getKey()) {
-					case "type":
-						f.setDataType(getDatatype(prop.getValue()));
-						break;
-					case "docs":
-						f.setDocCount(Integer.valueOf(prop.getValue().toString()));
-						break;
-					case "dynamicBase":
-						f.setDynamicBase(prop.getValue().toString());
-						break;
+			// check whether to include a particular index field
+			if (includeField(name)) {
+				if ( (requested == null || requested.isEmpty()) 
+						// when requested list present and not empty
+						|| isRequestedField(requested, name)) {
+					
+					IndexField f = new IndexField(name);
+					for (Entry<String, Object> prop : (NamedList<Object>)field.getValue()) {
+						switch(prop.getKey()) {
+						case "type":
+							f.setDataType(getDatatype(prop.getValue()));
+							break;
+						case "docs":
+							f.setDocCount(Integer.valueOf(prop.getValue().toString()));
+							break;
+						case "dynamicBase":
+							f.setDynamicBase(prop.getValue().toString());
+							break;
+						}
 					}
+					ffield.put(name, f);
 				}
-				ffield.put(name, f);
 			}
 		}
 		
 		return ffield;
+	}
+	/**
+	 * exclude the main text field ... 
+	 * @param fieldName
+	 * @return
+	 */
+	private boolean includeField(String fieldName) {
+		switch(fieldName) {
+		case "_text_":
+		case "_version_":
+			return false;
+		default:
+			return isRelevantField(fieldName);
+		}
 	}
 	private boolean isRequestedField(Set<String> requested, final String current) {
 		Optional<String> found = requested.stream().filter(new Predicate<String>() {
@@ -393,6 +410,10 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			return String.format("%s%s%s", QUOTE, in, QUOTE);
 		}
 		return in;
+	}
+
+	protected boolean isRelevantField(String name) {
+		return true;
 	}
 
 }

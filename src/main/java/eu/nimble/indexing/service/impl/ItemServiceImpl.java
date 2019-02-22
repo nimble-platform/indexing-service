@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.jena.vocabulary.XSD;
@@ -91,9 +93,40 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 		enrichManufacturers(content);
 		
 	}
-
+	private static boolean hasDynamicBase(String qualified, String dynamicBase) {
+		int starPos = dynamicBase.indexOf("*");
+		
+		if (! (starPos < 0)) {
+			boolean leadingStar = dynamicBase.startsWith("*");
+			String strippedWildcard = dynamicBase.replace("*", "");
+			
+			if ( leadingStar) {
+				if ( qualified.endsWith(strippedWildcard)) {
+					return true;
+				}
+			}
+			else {
+				if ( qualified.startsWith(strippedWildcard)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	@Override
+	protected boolean isRelevantField(String name) {
+		return !hasDynamicBase(name, ItemType.QUALIFIED_KEY_FIELD);
+	}
 	@Override
 	protected void enrichFields(Map<String, IndexField> inUse) {
+		inUse.entrySet().removeIf(new Predicate<Map.Entry<String,IndexField>>() {
+
+			@Override
+			public boolean test(Entry<String, IndexField> t) {
+				// 
+				return hasDynamicBase(t.getKey(), ItemType.QUALIFIED_KEY_FIELD);
+			}
+		});
 		Set<String> itemFieldNames = new HashSet<>();
 		for (IndexField s : inUse.values()) {
 			itemFieldNames.add(s.getMappedName());
