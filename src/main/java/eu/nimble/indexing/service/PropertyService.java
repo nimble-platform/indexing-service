@@ -1,32 +1,21 @@
 package eu.nimble.indexing.service;
 
-import java.util.List;
 import java.util.Set;
 
-import org.springframework.data.domain.Pageable;
-
-import eu.nimble.indexing.model.SearchResult;
+import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.owl.PropertyType;
 
-public interface PropertyService {
-	
-	public PropertyType getProperty(String uri);
-	
-	public void setProperty(PropertyType prop);
-	
-	public void removeProperty(String uri);
-	
-	public void removeByNamespace(String namespace);
+public interface PropertyService extends SolrService<PropertyType> {
 
-	public List<PropertyType> getProperties(String forClass);
-	
-	public List<PropertyType> getPropertiesByName(String nameSpace, Set<String> names);
-	
-	public List<PropertyType> getPropertiesByIndexName(Set<String> names);
-	
-	public List<PropertyType> getPropertiesByUri(Set<String> uri);
+	SearchResult<PropertyType> findByUris(Set<String> uriSet);
 
-	public SearchResult<PropertyType> search(String search, String language, Pageable page);
-	
+	SearchResult<PropertyType> findForNamespaceAndLocalNames(String nameSpace, Set<String> localNames);
 
+	SearchResult<PropertyType> findForClass(String classType);
+	
+	SearchResult<PropertyType> findForClasses(Set<String> classTypes);
+
+	SearchResult<PropertyType> findByIdxNames(Set<String> idxNames);
+
+	
 }

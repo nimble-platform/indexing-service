@@ -37,8 +37,10 @@ import org.springframework.stereotype.Service;
 import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.OntologyService;
+import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.PropertyType;
+import eu.nimble.service.model.solr.owl.ValueQualifier;
 /**
  * Implementation for the Ontology Service
  * 
@@ -103,10 +105,12 @@ public class OntologyServiceImpl implements OntologyService {
 		Iterator<OntProperty> properties = ontModel.listAllOntProperties();
 		while ( properties.hasNext()) {
 			OntProperty p = properties.next();
-			PropertyType prop = processProperty(ontModel, p);
-			if ( prop != null) {
-				propRepo.save(prop);
-				indexedProp.add(prop);
+			if ( !p.isOntLanguageTerm()) {
+				PropertyType prop = processProperty(ontModel, p);
+				if ( prop != null) {
+					propRepo.save(prop);
+					indexedProp.add(prop);
+				}
 			}
 		}
 		/*
@@ -116,9 +120,11 @@ public class OntologyServiceImpl implements OntologyService {
 		Iterator<OntClass> classes = ontModel.listClasses();
 		while ( classes.hasNext()) {
 			OntClass c = classes.next();
-			ClassType clazz = processClazz(ontModel, c, indexedProp);
-			if ( clazz != null) {
-				classRepository.save(clazz);
+			if ( !c.isOntLanguageTerm()) {
+				ClassType clazz = processClazz(ontModel, c, indexedProp);
+				if ( clazz != null) {
+					classRepository.save(clazz);
+				}
 			}
 		}
 	}
@@ -199,30 +205,41 @@ public class OntologyServiceImpl implements OntologyService {
 				switch(prop.getRange().getLocalName()) {
 				case "string":
 				case "normalizedString":
-					index.setValueQualifier("TEXT");
+					index.setValueQualifier(ValueQualifier.STRING);
 					break;
 				case "float":
 				case "double":
 				case "decimal":
 				case "int":
-					index.setValueQualifier("REAL_MEASURE");
+					// accordig to discussion
+					index.setValueQualifier(ValueQualifier.NUMBER);
 					break;
 				case "boolean":
-					index.setValueQualifier("BOOLEAN");
+					index.setValueQualifier(ValueQualifier.BOOLEAN);
 					break;
 				default:
-					// no value qualifier
+					index.setValueQualifier(ValueQualifier.STRING);
+					break;
 				}
 				
 			}
 		}
 		index.setLocalName(prop.getLocalName());
 		index.setNameSpace(prop.getNameSpace());
-		//
+
 		// try to find labels by searching rdfs:label and skos:prefLabel
 		index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
 		// try to find labels by searching rdfs:comment and skos:definition
 		index.setComment(obtainMultilingualValues(prop, RDFS.comment, SKOS.definition));
+		if ( index.getLabel() != null ) {
+			for ( String label : index.getLabel().values()) {
+				index.addItemFieldName(ItemType.dynamicFieldPart(label));
+			}
+		}
+		// add the local name
+		index.addItemFieldName(prop.getLocalName());
+		// add the uri
+		index.addItemFieldName(ItemType.dynamicFieldPart(prop.getURI()));
 		
 //		index.setLabels(processPropertyLabel(prop));
 		prop.listDomain();
@@ -231,6 +248,10 @@ public class OntologyServiceImpl implements OntologyService {
 			index.getProduct().addAll(usage);
 		}
 		// 
+		Resource rdfType = prop.getRDFType();
+		if ( rdfType != null ) {
+			index.setPropertyType(rdfType.getLocalName());
+		}
 		return index;
 	}
 	/**
@@ -302,41 +323,16 @@ public class OntologyServiceImpl implements OntologyService {
 		while (iter.hasNext()) {
 			OntClass superClass = iter.next();
 			if (! superClass.isAnon()) {
-				sup.add(superClass.getURI());
+//				if (!superClass.getNameSpace().equals(RDFS.uri))
+				// exclude rdfs, rdf, owl
+				if (!superClass.isOntLanguageTerm()) {
+					sup.add(superClass.getURI());
+				}
 			}
 		}
 		return sup;
 	}
-//	private Set<String> getProperties(OntClass clazz, boolean includeSuper) {
-//		Set<String> props = getProperties(clazz);
-//		if ( includeSuper) {
-//			props.addAll(getSuperProperties(clazz));
-//		}
-//		return props;
-//	}
-//	private Set<String> getSuperProperties(OntClass clazz) {
-//		Set<String> props = new HashSet<>();
-//		ExtendedIterator<OntClass> iter = clazz.listSuperClasses();
-//		while (iter.hasNext()) {
-//			OntClass sup = iter.next();
-//			if (! sup.isAnon()) {
-//				props.addAll(getProperties(sup));
-//			}
-//		}
-//		return props;
-//	}
-//	private Set<String> getProperties(OntClass clazz) {
-//		Set<String> props = new HashSet<>();
-//		ExtendedIterator<OntProperty> iter = clazz.listDeclaredProperties();
-//		while (iter.hasNext()) {
-//			OntProperty s = iter.next();
-//			if ( !s.isAnon()) {
-//				props.add(s.getURI());
-//			}
-//		}
-//		return props;
-//		
-//	}
+
 	@SuppressWarnings("unused")
 	private Set<String> getDomain(OntProperty prop) {
 		if ( prop.getDomain() == null) {

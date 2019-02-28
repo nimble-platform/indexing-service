@@ -1,26 +1,18 @@
 package eu.nimble.indexing.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.jena.ext.com.google.common.base.CaseFormat;
-import org.springframework.data.solr.core.query.Criteria;
-import org.springframework.data.solr.core.query.SimpleFilterQuery;
 import org.springframework.util.StringUtils;
 
-import eu.nimble.service.model.solr.item.ICatalogueItem;
 import eu.nimble.service.model.solr.item.ItemType;
-import eu.nimble.service.model.solr.party.IParty;
+import eu.nimble.service.model.solr.owl.PropertyType;
 
-public class ItemUtils implements ICatalogueItem {
-//	public static String dynamicFieldPart(String ...strings ) {
-//		StringBuilder sb = new StringBuilder("");
-//		for (String s : strings) {
-//			sb.append(s+"_");
-//		}
-//		return dynamicFieldPart(sb.toString());
-//	}
+public class ItemUtils {
+
 	public static String dynamicFieldPart(String fieldPart) {
 		if (! StringUtils.hasText(fieldPart)) {
 			// when no unit code specified - use "undefined";
@@ -43,10 +35,21 @@ public class ItemUtils implements ICatalogueItem {
 		System.out.println(extractFromTemplate(qualified, template));
 		System.out.println(extractFromTemplate(qualitfied1, template1));
 		System.out.println(dynamicFieldPart("http://www.aidimme.es./FurnitureSectorTaxonomy.owl#hasItemPerPack"));
-		
+//		String fq = "manufacturer.trustScore:[1 TO 4]";
 		ItemType t = template();
+		System.out.println(t.getMultiLingualProperty("qualifiedMulti", "de"));
 		t.getPrice();
 	}
+
+	public static String encode(String in) {
+		try {
+			return URLEncoder.encode(in, "utf8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			return in;
+		}
+	}
+
 	public static String extractFromTemplate(String qualified, String template) {
 		int starPos = template.indexOf("*");
 		
@@ -70,8 +73,8 @@ public class ItemUtils implements ICatalogueItem {
 	public static ItemType template() {
 		ItemType item = new ItemType();
 		item.setUri("uri");
-		item.addName("en", "English Name");
-		item.addName("es", "Espana");
+		item.addLabel("en", "English Name");
+		item.addLabel("es", "Espana");
 		item.addDescription("en", "English desc");
 		item.setCatalogueId("cat_id");
 		item.setEmissionStandard("emission");
@@ -85,13 +88,29 @@ public class ItemUtils implements ICatalogueItem {
 		item.addDeliveryTime("Week(s)", 2.0);
 		item.addDeliveryTime("Day(s)", 14.0);
 		// 
+		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasLength", "cm", 200.0);
 		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasColour", "blue");
 		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasColour", "red");
 		item.addProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#hasUnitsPerPack", 10.0);
 		
 		item.addProperty("length", "cm", 20.0);
 		item.setProperty("http://www.aidimme.es/FurnitureSectorTaxonomy.owl#isFireProof", Boolean.TRUE);
+		PropertyType c = new PropertyType();
+		c.addLabel("en", "English label for custom property");
+		c.addComment("en", "a comment for this particular custom property");
+		c.addDescription("en", "some description for the custom property");
+		item.addProperty("reallyCustom", 3.1415, c);
 		
+		PropertyType cq = new PropertyType();
+		cq.addLabel("en", "English label for a qualified custom property");
+		cq.addComment("en", "a comment for this particular custom property");
+		cq.addDescription("en", "some description for the custom property");
+		item.addProperty("qualifiedCustom", "km", 20.0, cq);
+		item.addProperty("qualifiedCustom",  "m", 500.0, cq);
+		item.addMultiLingualProperty("qualifiedMulti", "en", "blue");
+		item.addMultiLingualProperty("qualifiedMulti", "de", "blau");
+		
+		item.getMultiLingualProperty("qualifiedMulti", "en");
 		return item;
 
 	}
@@ -101,17 +120,5 @@ public class ItemUtils implements ICatalogueItem {
 			set.add(t);
 		}
 		return set;
-	}
-	public static SimpleFilterQuery doctypeFilter() {
-		return new SimpleFilterQuery(Criteria.where(TYPE_FIELD).is(TYPE_VALUE));
-	}
-//	public static SimpleFilterQuery nestedFieldFilter(String field, String query) {
-//		Criteria crit = Criteria.where(String.format("{!parent which=%s:%s} %s", TYPE_FIELD, TYPE_VALUE, field));
-//		return new SimpleFilterQuery(crit.expression(query));
-//	}
-	public static SimpleFilterQuery filterManufacturerField(String queryField, String query) {
-		Criteria crit = Criteria.where(String.format("{!join from=%s to=%s fromIndex=%s} %s", IParty.ID_FIELD, MANUFACTURER_ID_FIELD, IParty.COLLECTION_NAME, queryField));
-		return new SimpleFilterQuery(crit.expression(query));
-		
 	}
 }

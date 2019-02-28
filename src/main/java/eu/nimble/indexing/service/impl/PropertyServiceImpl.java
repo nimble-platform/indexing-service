@@ -3,95 +3,65 @@ package eu.nimble.indexing.service.impl;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.solr.core.SolrTemplate;
-import org.springframework.data.solr.core.query.Criteria;
-import org.springframework.data.solr.core.query.SimpleQuery;
-import org.springframework.data.solr.core.query.result.ScoredPage;
+import org.springframework.data.solr.core.query.Field;
 import org.springframework.stereotype.Service;
 
-import eu.nimble.indexing.model.SearchResult;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.PropertyService;
+import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.owl.IPropertyType;
 import eu.nimble.service.model.solr.owl.PropertyType;
 
 @Service
-public class PropertyServiceImpl implements PropertyService {
-	// injected via Autowired
-	private PropertyRepository propRepo;
-	
-	@Resource
-	private SolrTemplate solrTemplate;
-	
-	@PostConstruct
-	public void init() {
-		
-	}
-	@Override
-	public PropertyType getProperty(String uri) {
-		// 
-		List<PropertyType> props = propRepo.findByUri(uri);//.orElse(null);
-		if (props.size() > 0) {
-			return props.get(0);
-		}
-		return null;
-	}
-
-	@Override
-	public void setProperty(PropertyType prop) {
-		propRepo.save(prop);
-	}
-
-	@Override
-	public void removeProperty(String uri) {
-		PropertyType prop  = getProperty(uri);
-		if ( prop != null) {
-			propRepo.delete(prop);
-		}
-	}
-	@Override
-	public SearchResult<PropertyType> search(String search, String language, Pageable page) {
-		String field = IPropertyType.TEXT_FIELD;
-		if ( language !=null ) {
-			field = IPropertyType.LANGUAGE_TXT_FIELD.replace("*", language);
-		}
-		Criteria crit = Criteria.where(field).contains(search);
-		SimpleQuery query = new SimpleQuery(crit, page);
-		ScoredPage<PropertyType> result = solrTemplate.queryForPage(IPropertyType.COLLECTION, query, PropertyType.class);
-		return new SearchResult<>(result.getContent(), result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages());
-	}
-
-	
-
+public class PropertyServiceImpl extends SolrServiceImpl<PropertyType> implements PropertyService
+{
 	@Autowired
-	public void setPropertyRepository(PropertyRepository repository) {
-		this.propRepo = repository;
+	private PropertyRepository propRepo;
+
+	@Override
+	public String getCollection() {
+		return PropertyType.COLLECTION;
 	}
 
 	@Override
-	public List<PropertyType> getProperties(String forClass) {
-		return propRepo.findByProduct(forClass);
+	public Class<PropertyType> getSolrClass() {
+		return PropertyType.class;
 	}
+
 	@Override
-	public List<PropertyType> getPropertiesByName(String nameSpace, Set<String> names) {
-		return propRepo.findByNameSpaceAndLocalNameIn(nameSpace, names);
+	public SearchResult<PropertyType> findByUris(Set<String> uriSet) {
+		List<PropertyType> result = propRepo.findByUriIn(uriSet);
+		return new SearchResult<PropertyType>(result);
 	}
+
 	@Override
-	public List<PropertyType> getPropertiesByUri(Set<String> uri) {
-		return propRepo.findByUriIn(uri);
+	public SearchResult<PropertyType> findForNamespaceAndLocalNames(String nameSpace, Set<String> localNames) {
+		List<PropertyType> result = propRepo.findByNameSpaceAndLocalNameIn(nameSpace, localNames);
+		return new SearchResult<PropertyType>(result);
 	}
+
 	@Override
-	public List<PropertyType> getPropertiesByIndexName(Set<String> names) {
-		return propRepo.findByItemFieldNamesIn(names);
+	public SearchResult<PropertyType> findForClass(String classType) {
+		List<PropertyType> result = propRepo.findByProduct(classType);
+		return new SearchResult<PropertyType>(result);
 	}
+
 	@Override
-	public void removeByNamespace(String namespace) {
-		propRepo.deleteByNameSpace(namespace);
+	public SearchResult<PropertyType> findByIdxNames(Set<String> idxNames) {
+		List<PropertyType> result = propRepo.findByItemFieldNamesIn(idxNames);
+		return new SearchResult<PropertyType>(result);
+	}
+
+	@Override
+	protected List<Field> getSelectFieldList() {
+		return IPropertyType.defaultFields();
 	}
 	
+	@Override
+	public SearchResult<PropertyType> findForClasses(Set<String> classTypes) {
+		List<PropertyType> result = propRepo.findByProductIn(classTypes);
+		return new SearchResult<PropertyType>(result);
+	}
+
 }

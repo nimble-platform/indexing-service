@@ -31,9 +31,9 @@ public class OntologyController {
 	@DeleteMapping("/ontology")
     public ResponseEntity<Void> deleteOntology(
 //    		@RequestHeader(value = "Authorization") String bearerToken,
-    		@RequestParam String namespace) {
+    		@RequestParam(name="nameSpace") String nameSpace) {
 
-		onto.deleteNamespace(namespace);
+		onto.deleteNamespace(nameSpace);
     	return ResponseEntity.ok(null);
 	}
 

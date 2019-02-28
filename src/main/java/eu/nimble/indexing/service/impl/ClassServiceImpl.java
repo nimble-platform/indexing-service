@@ -8,47 +8,38 @@ import org.springframework.stereotype.Service;
 
 import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.service.ClassService;
+import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.owl.ClassType;
 
 @Service
-public class ClassServiceImpl implements ClassService {
-	// injected via Autowired
-	private ClassRepository classRepo;
-	
-	@Override
-	public ClassType getClass(String uri) {
-		return classRepo.findById(uri).orElse(null);
-	}
-	@Override
-	public void setClass(ClassType prop) {
-		classRepo.save(prop);
-		
-	}
-	@Override
-	public void removeClass(String uri) {
-		ClassType c = getClass(uri);
-		if (c != null) {
-			classRepo.delete(c);
-		}
-		
-	}
-	@Override
-	public List<ClassType> getClasses(Set<String> uri) {
-		return classRepo.findByUriIn(uri);
-	}
-	@Override
-	public List<ClassType> getClassesForProperty(String forProperty) {
-		return classRepo.findByProperties(forProperty);
-	}
-	
+public class ClassServiceImpl extends SolrServiceImpl<ClassType> implements ClassService {
 	@Autowired
-	public void setClassRepository(ClassRepository repository) {
-		this.classRepo = repository;
-	}
+	private ClassRepository classRepo;
 	@Override
-	public List<ClassType> getClassesForLocalNames(String nameSpace, Set<String> localNames) {
-		// TODO Auto-generated method stub
-		return classRepo.findByNameSpaceAndLocalNameIn(nameSpace, localNames);
+	public String getCollection() {
+		return ClassType.COLLECTION;
 	}
-	
+
+	@Override
+	public Class<ClassType> getSolrClass() {
+		return ClassType.class;
+	}
+
+	@Override
+	public SearchResult<ClassType> findByProperty(String property) {
+		List<ClassType> result = classRepo.findByProperties(property);
+		return new SearchResult<ClassType>(result);
+	}
+
+	@Override
+	public SearchResult<ClassType> findByUris(Set<String> uriSet) {
+		List<ClassType> result = classRepo.findByUriIn(uriSet);
+		return new SearchResult<ClassType>(result);
+	}
+
+	@Override
+	public SearchResult<ClassType> findForNamespaceAndLocalNames(String nameSpace, Set<String> localNames) {
+		List<ClassType> result = classRepo.findByNameSpaceAndLocalNameIn(nameSpace, localNames);
+		return new SearchResult<ClassType>(result);
+	}
 }
