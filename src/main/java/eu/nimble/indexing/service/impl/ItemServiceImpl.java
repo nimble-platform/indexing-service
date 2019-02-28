@@ -13,7 +13,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.apache.jena.vocabulary.XSD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,6 @@ import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.Concept;
 import eu.nimble.service.model.solr.owl.PropertyType;
-import eu.nimble.service.model.solr.owl.ValueQualifier;
 import eu.nimble.service.model.solr.party.PartyType;
 
 @Service
@@ -99,7 +97,7 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 	}
 
 	@Override
-	protected void enrichContent(List<ItemType> content) {
+	protected void postSelect(List<ItemType> content) {
 		enrichManufacturers(content);
 		
 	}
@@ -181,15 +179,10 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 	}
 	private void preProcessPartyType(ItemType t, PartyType m) {
 		if ( m != null && m.getId() != null ) {
+			// use the manufacturer's id prior to the manufactuerId 
 			t.setManufacturerId(m.getId());
 			//
 			eventPublisher.publishEvent(new ManufacturerEvent(this, m));
-//			Optional<PartyType> pt = partyRepo.findById(m.getId());
-//			if (! pt.isPresent() ) {
-//				// be sure to have the manufacturer in the index
-//				partyRepo.save(m);
-//			}
-//			// ensure the manufacturer id is in the indexed field 
 		}
 	}
 	private void preProcessPropertyMap(ItemType t, Map<String, String> propertyMap) {
@@ -210,128 +203,13 @@ public class ItemServiceImpl extends SolrServiceImpl<ItemType> implements ItemSe
 						}
 						set.add(t);
 					}
-//					else {
-//						fieldNames.put(t, Collections.singleton(t));
-//					}
 				}
 			});
 			if (! fieldNames.keySet().isEmpty()) {
 				eventPublisher.publishEvent(new PropertyMapEvent(this, fieldNames));
-				
-//				List<PropertyType> existing = propRepo.findByItemFieldNamesIn(fieldNames.keySet());
-//				Set<PropertyType> changed = new HashSet<>();
-//				existing.forEach(new Consumer<PropertyType>() {
-//					
-//					@Override
-//					public void accept(PropertyType t) {
-//						for (String fn : t.getItemFieldNames()) {
-//							if ( fieldNames.containsKey(fn)) {
-//								for (String idxField : fieldNames.get(fn)) {
-//									if ( ! t.getItemFieldNames().contains(idxField)) {
-//										t.addItemFieldName(idxField);
-//										t.setValueQualifier(ValueQualifier.QUANTITY);
-//										changed.add(t);
-//									}
-//								}
-//							}
-//						}
-//					}
-//				});
-//				for ( PropertyType newPt : changed) {
-//					propRepo.save(newPt);
-//				}
 			}
-
 		}
-		
 	}
-//	@Deprecated
-//	private void preProcessCustomProperties(ItemType t, Map<String, PropertyType> cp) {
-//		if ( cp != null && !cp.isEmpty()) {
-//			eventPublisher.publishEvent(new CustomPropertyEvent(this, t));
-//			// 
-//			
-//			
-//			List<PropertyType> existing = propRepo.findByItemFieldNamesIn(cp.keySet());
-//			// keep a map of properties to change
-//			Map<String,PropertyType> changed = new HashMap<String,PropertyType>();
-//			
-//			// check whether an existing property lacks a itemFieldName
-//			existing.forEach(new Consumer<PropertyType>() {
-//
-//				@Override
-//				public void accept(PropertyType c) {
-//					// 
-//					PropertyType change = cp.get(c.getLocalName());
-//					if ( change != null ) {
-//						// harmonize item field names
-//						for (String idxField : change.getItemFieldNames()) {
-//							if (! c.getItemFieldNames().contains(idxField)) {
-//								c.addItemFieldName(idxField);
-//								// add to changed to have it saved ...
-//								changed.put(c.getUri(), c);
-//							}
-//						}
-//						// harmonize labels
-//						harmonizeLabels(c.getLabel(), change.getLabel());
-//						harmonizeLabels(c.getComment(), change.getComment());
-//						harmonizeLabels(c.getDescription(), change.getDescription());
-//						// remove any existing property so that is not added twice  
-//						cp.remove(c.getLocalName());
-//					}
-//				}
-//			});
-//			// process the remainder
-//			cp.forEach(new BiConsumer<String, PropertyType>() {
-//
-//				@Override
-//				public void accept(String qualifier, PropertyType newProp) {
-//					PropertyType pt = new PropertyType();
-//					// how to specify uri, localName & nameSpace
-//					// TODO - use namespace from config
-//					pt.setUri("urn:nimble:custom:"+ qualifier);
-//					pt.setNameSpace("urn:nimble:custom:");
-//					pt.setLocalName(qualifier);
-//					pt.setItemFieldNames(newProp.getItemFieldNames());
-//					pt.setLabel(newProp.getLabel());
-//					pt.setComment(newProp.getComment());
-//					pt.setDescription(newProp.getDescription());
-//					pt.setPropertyType("CustomProperty");
-//					
-//					pt.setValueQualifier(
-//							newProp.getValueQualifier()!=null 
-//							? newProp.getValueQualifier()
-//							: ValueQualifier.STRING);
-//					switch (pt.getValueQualifier()) {
-//					case BOOLEAN:
-//						pt.setRange(XSD.xboolean.getURI());
-//						break;
-//					case TEXT:
-//					case STRING:
-//						pt.setValueQualifier(ValueQualifier.STRING);
-//						pt.setRange(XSD.xstring.getURI());
-//						break;
-//					default:
-//						pt.setRange(XSD.xdouble.getURI());
-//						break;
-//					}
-//					// 
-//					changed.put(qualifier, pt);
-//				}});
-//
-//			//
-//			for ( PropertyType newPt : changed.values()) {
-//				propRepo.save(newPt);
-//			}
-//		}
-//	}
-//	private void harmonizeLabels(Map<String,String> toAdd, Map<String, String> from) {
-//		if ( toAdd != null && from != null) {
-//			for ( String lang : from.keySet()) {
-//				toAdd.putIfAbsent(lang,  from.get(lang));
-//			}
-//		}
-//	}
 	private Set<String> extractManufacturers(List<ItemType> items) {
 		return items.stream()
 				.map(ItemType::getManufacturerId)

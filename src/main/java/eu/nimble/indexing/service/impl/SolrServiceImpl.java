@@ -76,8 +76,15 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 		return true;
 	}
-	
+	/**
+	 * Obtain the name of the SOLR collection to work with
+	 * @return The collection's name
+	 */
 	public abstract String getCollection();
+	/**
+	 * Obtain the class name of the mapped SOLR document
+	 * @return The class of the mapped SOLR document
+	 */
 	public abstract Class<T> getSolrClass();
 
 	@Override
@@ -118,10 +125,6 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			for (String fieldName : facetFields ) {
 				// facet field could be a joined field
 				joinHelper.addFacetField(fieldName);
-//				Field facetField = parseFacetField(fieldName, joinedFacets);
-//				if (facetField != null) 
-//					fieldList.add(facetField);
-////				fieldList.add(new SimpleField(fieldName));
 			}
 		}
 		SearchResult<T> result = select(qCriteria, joinHelper.getFilterQueries(), joinHelper.getFacetFields(), facetLimit, facetMinCount, page);
@@ -171,11 +174,23 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		
 		
 		// enrich content - to be overloaded by subclasses
-		enrichContent(result.getContent());
+		postSelect(result.getContent());
 		
 
 		return new SearchResult<>(result);
 	}
+	/**
+	 * Method to query for joined facets. The faceting result is added to the main query
+	 * @param toExtend The main search result
+	 * @param joinName The join name, is used to prefix the facet field name
+	 * @param join The {@link JoinInfo} specifying the join between collections
+	 * @param filterQueries relevant filterqueries to reduce the result
+	 * @param facetFields The facets from the joined collection
+	 * @param facetLimit The number of facets
+	 * @param facetMinCount the minimum number of occurrences
+	 * @param page The query page
+	 * @return
+	 */
 	private SearchResult<T> joinFacets(
 			SearchResult<T> toExtend,
 			String joinName,
@@ -252,11 +267,20 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 		return new FacetResult(facetField);
 	}
-
+	/**
+	 * Retrieve the list of index-Fields in use,
+	 * @return The list of {@link IndexField} objects
+	 */
 	@Override
 	public Collection<IndexField> fields() {
 		return fields(null);
 	}
+	/**
+	 * Retrieve the list of index-Fields in use,
+	 * @param fieldNames A set of requested fields, wildcards are allowed at the beginning or at the end of each requested field
+	 * @return The list of {@link IndexField} objects
+	 */
+	@Override
 	public Collection<IndexField> fields(Set<String> fieldNames) {
 		
 		LukeRequest luke = new LukeRequest();
@@ -277,23 +301,60 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		return new ArrayList<>();
 		
 	}
+	/**
+	 * Perform post processing on a list of selected objects
+	 * <p>
+	 * Subclasses may override
+	 * </p>
+	 */
 	protected void enrichFields(Map<String, IndexField> inUse) {
 		// subclasses may override
 	}
-	protected void enrichContent(List<T> content) {
+	/**
+	 * Perform post processing on a list of selected objects
+	 * <p>
+	 * Subclasses may override
+	 * </p>
+	 */
+	protected void postSelect(List<T> content) {
 		// subclasses may override
 	}
+	/**
+	 * Perform pre-processing on an object which is to be saved.
+	 * <p>
+	 * Subclasses may override
+	 * </p>
+	 */
 	protected void prePersist(T t) {
 		// subclasses may override
 	}
+	/**
+	 * Perform post processing on a selected object
+	 * <p>
+	 * Subclasses may override
+	 * </p>
+	 */
 	protected void postSelect(T t) {
 		// subclasses may override
 	}
+	/**
+	 * Possibility to provide a list of index fields to include
+	 * in the search result. Defaults to empty list.
+	 * <p>
+	 * Subclasses may override
+	 * </p>
+	 * @return
+	 */
 	protected Collection<Field> getSelectFieldList() {
 		return new ArrayList<>();
 	}
-	
-	@SuppressWarnings("unchecked")
+	/**
+	 * Construct a index field map from the LUKE request, additional 
+	 * filters are evaluated
+	 * @param fields The result of the LUKE request
+	 * @param requested A set of requested fields, null or empty to include all
+	 * @return A map of {@link IndexField} objects with the used <code>indexFieldName</code> as key
+	 */
 	private Map<String, IndexField> getFields(NamedList<Object> fields, Set<String> requested)  {
 		Map<String, IndexField> ffield = new HashMap<>();
 		for (Map.Entry<String, Object> field : fields) {
@@ -305,7 +366,9 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 						|| isRequestedField(requested, name)) {
 					
 					IndexField f = new IndexField(name);
-					for (Entry<String, Object> prop : (NamedList<Object>)field.getValue()) {
+					@SuppressWarnings("unchecked")
+					NamedList<Object> namedList = (NamedList<Object>) field.getValue();
+					for (Entry<String, Object> prop : namedList) {
 						switch(prop.getKey()) {
 						case "type":
 							f.setDataType(getDatatype(prop.getValue()));
@@ -326,9 +389,10 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		return ffield;
 	}
 	/**
-	 * exclude the main text field ... 
+	 * exclude the distinct fields - calls 
 	 * @param fieldName
-	 * @return
+	 * @return <code>false</code> when fieldName is <code>_text_</code> or <code>_version_</code>
+	 * @see SolrServiceImpl#isRelevantField(String)
 	 */
 	private boolean includeField(String fieldName) {
 		switch(fieldName) {
@@ -386,19 +450,13 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			return list.stream().collect(Collectors.toSet());
 		}
 		return new HashSet<>();
-//		if ( list!=null) {
-//			list.forEach(new Consumer<I>() {
-//	
-//				@Override
-//				public void accept(I t) {
-//					set.add(t);
-//					
-//				}
-//			});
-//		}
-//		return set;
 	}
-
+	/**
+	 * Encode a string in quotes when the string contains a colon (:) as in HTTP URI'S 
+	 * 
+	 * @param in the string to encode
+	 * @return the encoded string (when colon found), otherwise the input string
+	 */
 	public static String encode(String in) {
 		// check for a colon - ensure URI's are quoted
 		if (in.contains(":")) {
@@ -411,9 +469,12 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 		return in;
 	}
-
+	/**
+	 * Determine whether a field relevant, defaults to true - subclasses must override
+	 * @param name The {@link IndexField#getFieldName()} 
+	 * @return <code>true</code> if relevant, <code>false</code> otherwise
+	 */
 	protected boolean isRelevantField(String name) {
 		return true;
 	}
-
 }

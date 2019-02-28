@@ -78,7 +78,7 @@ public interface SolrService<T> {
 	 * @param facetFields The names used for faceting, e.g. <code>facet.field</code> parameters
 	 * @param facetLimit The number of facet elements to return for each facet
 	 * @param facetMinCount The minimum number of facet occurrences to be included in the result
-	 * @return
+	 * @return A {@link FacetResult} denoting name, facet and facet count
 	 */
 	public FacetResult suggest(String query, String facetField, int facetLimit, int facetMinCount);
 }
