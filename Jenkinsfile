@@ -63,6 +63,18 @@ node('nimble-jenkins-slave') {
         stage('Build Java') {
             sh 'mvn clean install -DskipTests'
         }
+
+        stage('Build Docker') {
+            sh 'mvn docker:build -Ddocker.image.tag=latest'
+        }
+
+        stage('Push Docker') {
+            sh 'docker push nimbleplatform/indexing-service:latest'
+        }
+
+        stage('Deploy') {
+            sh 'ssh fmp-prod "cd /srv/nimble-fmp/ && ./run-fmp-prod.sh restart-single indexing-service"'
+        }
     }
 
     // -----------------------------------------------
