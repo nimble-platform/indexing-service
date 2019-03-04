@@ -29,5 +29,7 @@ in order to stop the SOLR service, run
  - Manufactuer Party (manufacturer)
  - Catalogue Items (item)
  
- Mor detailed information on the purpose & functionality of the service can be found [here](https://secure.salzburgresearch.at/wiki/pages/viewpage.action?pageId=33062939) (Nimble-Login required)
+ More detailed information on the purpose & functionality of the service can be found [here](https://secure.salzburgresearch.at/wiki/pages/viewpage.action?pageId=33062939) (Nimble-Login required)
+ 
+ The Service may be verified online [Nimble-Staging](http://nimble-staging.salzburgresearch.at/index/actuator/info)
  

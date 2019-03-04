@@ -1,17 +1,21 @@
 package eu.nimble.indexing.service;
 
-import java.util.List;
+import java.util.Set;
 
-import eu.nimble.indexing.repository.model.owl.Property;
+import eu.nimble.service.model.solr.SearchResult;
+import eu.nimble.service.model.solr.owl.PropertyType;
 
-public interface PropertyService {
+public interface PropertyService extends SolrService<PropertyType> {
+
+	SearchResult<PropertyType> findByUris(Set<String> uriSet);
+
+	SearchResult<PropertyType> findForNamespaceAndLocalNames(String nameSpace, Set<String> localNames);
+
+	SearchResult<PropertyType> findForClass(String classType);
 	
-	public Property getProperty(String uri);
-	
-	public void setProperty(Property prop);
-	
-	public void removeProperty(String uri);
+	SearchResult<PropertyType> findForClasses(Set<String> classTypes);
 
-	public List<Property> getProperties(String forClass);
+	SearchResult<PropertyType> findByIdxNames(Set<String> idxNames);
 
+	
 }

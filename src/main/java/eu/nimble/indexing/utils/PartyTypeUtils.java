@@ -1,18 +1,17 @@
-package eu.nimble.indexing.repository.model;
+package eu.nimble.indexing.utils;
 
-import java.util.Collections;
-
-import eu.nimble.indexing.repository.model.catalogue.PartyType;
+import eu.nimble.service.model.solr.party.PartyType;
 
 public class PartyTypeUtils {
 	public static PartyType template() {
 		PartyType p = new PartyType();
 		p.setId("uri");
-		p.setName("name");
-		p.setOrigin("origin");
-		p.setCertificateType(Collections.singletonList("certificateType"));
-		p.setPpapComplianceLevel("ppapComlianceLevel");
-		p.setPpapDocumentType("ppapDocumentType");
+		p.setLegalName("legalName");
+		p.addLabel("en","name");
+		p.addOrigin("en","origin");
+		p.addCertificateType("en", "certificateType");
+		p.setPpapComplianceLevel(3);
+		p.addPpapDocumentType("en","ppapDocumentType");
 		p.setTrustDeliveryPackaging(0.0d);
 		p.setTrustFullfillmentOfTerms(0.0d);
 		p.setTrustNumberOfTransactions(0.0d);
