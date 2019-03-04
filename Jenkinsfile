@@ -10,6 +10,7 @@ node('nimble-jenkins-slave') {
         stage('Clone and Update') {
             git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: env.BRANCH_NAME)
         }
+
         stage('Build Dependencies') {
             sh 'rm -rf common'
             sh 'git clone https://github.com/nimble-platform/common'
@@ -76,14 +77,14 @@ node('nimble-jenkins-slave') {
     if( env.TAG_NAME ==~ /^\d+.\d+.\d+$/) {
 
         stage('Clone and Update') {
-            git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: env.BRANCH_NAME)
+            git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: 'master')
         }
 
         stage('Build Dependencies') {
             sh 'rm -rf common'
             sh 'git clone https://github.com/nimble-platform/common'
             dir('common') {
-                sh 'git checkout ' + env.BRANCH_NAME
+                sh 'git checkout master'
                 sh 'mvn clean install'
             }
         }
@@ -105,8 +106,8 @@ node('nimble-jenkins-slave') {
         }
 
         stage('Push Docker') {
-            sh 'docker push nimbleplatform/identity-service:' + env.TAG_NAME
-            sh 'docker push nimbleplatform/identity-service:latest'
+            sh 'docker push nimbleplatform/indexing-service:' + env.TAG_NAME
+            sh 'docker push nimbleplatform/indexing-service:latest'
         }
 
         stage('Deploy MVP') {
