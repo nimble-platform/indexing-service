@@ -56,9 +56,9 @@ node('nimble-jenkins-slave') {
             }
         }
 
-        stage('Run Tests') {
-            sh 'mvn clean test'
-        }
+//        stage('Run Tests') {
+//            sh 'mvn clean test'
+//        }
 
         stage('Build Java') {
             sh 'mvn clean install -DskipTests'
