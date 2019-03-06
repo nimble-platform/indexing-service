@@ -14,7 +14,7 @@ public class SolrTemplate extends org.springframework.data.solr.core.SolrTemplat
 
 	public SolrTemplate(SolrClientFactory solrClientFactory) {
 		super(solrClientFactory);
-
+		
 		setSchemaCreationFeatures(Collections.singletonList(org.springframework.data.solr.core.schema.SolrPersistentEntitySchemaCreator.Feature.CREATE_MISSING_FIELDS));
 		setMappingContext(new SimpleMappingContext(
 				new SolrPersistentEntitySchemaCreator(solrClientFactory, new SolrSchemaWriter(solrClientFactory, this))
@@ -34,6 +34,11 @@ public class SolrTemplate extends org.springframework.data.solr.core.SolrTemplat
 	public SchemaOperations getSchemaOperations(String collection) {
 
 		return new SolrSchemaOperations(collection, this);
+	}
+
+	@Override
+	public RequestMethod getDefaultRequestMethod() {
+		return RequestMethod.POST;
 	}
 
 
