@@ -12,7 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eu.nimble.indexing.service.ItemService;
 import eu.nimble.service.model.solr.item.ItemType;
-
+/**
+ * Controller for managing catalogs. Supports
+ * <ul>
+ * <li>bulk uploading of items belonging to a single catalogue
+ * <li>deletion of all items in the given catalogue
+ * </ul> 
+ * @author dglachs
+ *
+ */
 @RestController
 public class CatalogueController {
 	@Autowired
