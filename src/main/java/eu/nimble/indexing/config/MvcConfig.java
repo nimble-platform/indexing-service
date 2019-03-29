@@ -1,0 +1,29 @@
+package eu.nimble.indexing.config;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@EnableWebMvc
+public class MvcConfig implements WebMvcConfigurer {
+
+    @Value("${nimble.corsEnabled}")
+    private String corsEnabled;
+
+    private static final Logger logger = LoggerFactory.getLogger(MvcConfig.class);
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        if (corsEnabled.equals("true")) {
+            logger.info("Enabling CORS");
+            registry.addMapping("/**").allowedMethods("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH");
+        }
+    }
+}
+
+
