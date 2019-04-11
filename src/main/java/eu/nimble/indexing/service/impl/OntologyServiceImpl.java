@@ -323,9 +323,6 @@ public class OntologyServiceImpl implements OntologyService {
         return index;
     }
 
-	private boolean isSubClass(OntClass classToCheck, String cl){
-		return false;
-	}
 	/**
 	 * Helper method to extract multilingual labels
 	 * @param prop

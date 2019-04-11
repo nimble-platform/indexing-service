@@ -1,6 +1,5 @@
 package eu.nimble.indexing.web.controller;
 
-import eu.nimble.indexing.service.impl.OntologyServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
