@@ -1,28 +1,13 @@
 package eu.nimble.indexing.service.impl;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.apache.jena.ontology.OntClass;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.ontology.OntProperty;
-import org.apache.jena.ontology.OntResource;
-import org.apache.jena.ontology.UnionClass;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.NodeIterator;
-import org.apache.jena.rdf.model.RDFList;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.ontology.*;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
@@ -31,6 +16,8 @@ import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.jena.vocabulary.XSD;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +38,9 @@ import eu.nimble.service.model.solr.owl.ValueQualifier;
  */
 @Service
 public class OntologyServiceImpl implements OntologyService {
+
+	private static final Logger logger = LoggerFactory.getLogger(OntologyServiceImpl.class);
+
 	@Autowired
 	private PropertyRepository propRepo;
 	@Autowired 
@@ -192,67 +182,149 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param prop
 	 * @return
 	 */
-	private PropertyType processProperty(OntModel model, OntProperty prop) {
-		
-		PropertyType index = new PropertyType();
-		index.setUri(prop.getURI());
-		if ( prop.getRange()!= null) {
-			Resource range = prop.getRange();
-			index.setRange(range.getURI());
-			// 
-			
-			if (range.getNameSpace()!=null &&  range.getNameSpace().equals(XSD.NS)) {
-				switch(prop.getRange().getLocalName()) {
-				case "string":
-				case "normalizedString":
-					index.setValueQualifier(ValueQualifier.STRING);
-					break;
-				case "float":
-				case "double":
-				case "decimal":
-				case "int":
-					// accordig to discussion
-					index.setValueQualifier(ValueQualifier.NUMBER);
-					break;
-				case "boolean":
-					index.setValueQualifier(ValueQualifier.BOOLEAN);
-					break;
-				default:
-					index.setValueQualifier(ValueQualifier.STRING);
-					break;
-				}
-				
-			}
-		}
-		index.setLocalName(prop.getLocalName());
-		index.setNameSpace(prop.getNameSpace());
+    private PropertyType processProperty(OntModel model, OntProperty prop) {
 
-		// try to find labels by searching rdfs:label and skos:prefLabel
-		index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
-		// try to find labels by searching rdfs:comment and skos:definition
-		index.setComment(obtainMultilingualValues(prop, RDFS.comment, SKOS.definition));
-		if ( index.getLabel() != null ) {
-			for ( String label : index.getLabel().values()) {
-				index.addItemFieldName(ItemType.dynamicFieldPart(label));
-			}
-		}
-		// add the local name
-		index.addItemFieldName(prop.getLocalName());
-		// add the uri
-		index.addItemFieldName(ItemType.dynamicFieldPart(prop.getURI()));
-		
+        PropertyType index = new PropertyType();
+        index.setUri(prop.getURI());
+        if (prop.getRange() != null) {
+            Resource range = prop.getRange();
+            index.setRange(range.getURI());
+
+            if (range.getNameSpace() != null) {
+                if (range.getNameSpace().equals(XSD.NS)) {
+                    switch (prop.getRange().getLocalName()) {
+                        case "string":
+                        case "normalizedString":
+                            index.setValueQualifier(ValueQualifier.STRING);
+                            break;
+                        case "float":
+                        case "double":
+                        case "decimal":
+                        case "int":
+                            // accordig to discussion
+                            index.setValueQualifier(ValueQualifier.NUMBER);
+                            break;
+                        case "boolean":
+                            index.setValueQualifier(ValueQualifier.BOOLEAN);
+                            break;
+                        default:
+                            index.setValueQualifier(ValueQualifier.STRING);
+                            break;
+                    }
+                } else if (range.getNameSpace().equals(UBL_CBC_NS)) {
+                    OntClass propClass = prop.getRange().asClass();
+                    if (propClass.getURI().equals(QUANTITY_CLASS_URI)) {
+                        index.setValueQualifier(ValueQualifier.QUANTITY);
+                        Property hasUnitProperty = model.getProperty(NIMBLE_CATALOGUE_NS, UNIT_CODE);
+                        Statement hasUnitStatement = prop.getProperty(hasUnitProperty);
+
+                        if (hasUnitStatement != null) {
+                            RDFNode hasUnitNode = hasUnitStatement.getObject();
+                            index.setUnitsType(hasUnitNode.toString());
+                        }
+                        Property hasUnitList = model.getProperty(NIMBLE_CATALOGUE_NS, HAS_UNIT_LIST);
+                        Statement hasUnitListStatement = prop.getProperty(hasUnitList);
+                        if (hasUnitList != null) {
+                            RDFNode hasUnitListNode = hasUnitListStatement.getObject();
+                            Resource unitListResource = model.getOntResource(hasUnitListNode.toString());
+                            StmtIterator iter = unitListResource.listProperties();
+                            List<String> unitList = new ArrayList<String>();
+                            while (iter.hasNext()) {
+                                Statement stmt = iter.nextStatement();
+                                Property predicate = stmt.getPredicate();
+                                if (predicate.getURI().equals(UBL_CBC_NS + UNIT_CODE)) {
+                                    RDFNode object = stmt.getObject();
+                                    unitList.add(object.asLiteral().getValue().toString());
+                                }
+                            }
+                            index.setUnitsTypeList(unitList);
+                        }
+
+                    } else if (propClass.getURI().equals(VALUECODE_CLASS_URI)) {
+                        index.setValueQualifier(ValueQualifier.TEXT);
+                        Property hasValueCodeProperty = model.getProperty(NIMBLE_CATALOGUE_NS, VALUE_CODE);
+                        Statement hasValueCodeStatement = prop.getProperty(hasValueCodeProperty);
+                        Property hasValueCodeListProperty = model.getProperty(NIMBLE_CATALOGUE_NS, HAS_CODE_LIST);
+                        Statement hasValueCodeListStatement = prop.getProperty(hasValueCodeListProperty);
+
+                        if (hasValueCodeStatement != null) {
+                            RDFNode valueCodeNode = hasValueCodeStatement.getObject();
+                            Property valueCodeProperty = model.getProperty(valueCodeNode.toString());
+                            StmtIterator iter = valueCodeProperty.listProperties();
+                            while (iter.hasNext()) {
+                                Statement stmt = iter.nextStatement();
+                                Property predicate = stmt.getPredicate();
+                                if (predicate.getURI().equals(NIMBLE_CATALOGUE_NS + VALUE_ELEMENT)) {
+                                    RDFNode object = stmt.getObject();
+                                    index.setValueCode(object.toString());
+                                }
+                            }
+                        }
+
+                        if (hasValueCodeListStatement != null) {
+                            RDFNode valueCodeListNode = hasValueCodeListStatement.getObject();
+                            Property valueCodeListResource = model.getProperty(valueCodeListNode.toString());
+                            StmtIterator iter = valueCodeListResource.listProperties();
+                            List<String> valueCodeList = new ArrayList<String>();
+                            while (iter.hasNext()) {
+                                Statement stmt = iter.nextStatement();
+                                Property predicate = stmt.getPredicate();
+                                if (predicate.getURI().equals(NIMBLE_CATALOGUE_NS + VALUE_CODE)) {
+                                    RDFNode object = stmt.getObject();
+                                    Property codeNode = model.getProperty(object.toString());
+                                    StmtIterator iter2 = codeNode.listProperties();
+                                    while (iter2.hasNext()) {
+                                        Statement stmt2 = iter2.nextStatement();
+                                        Property predicate2 = stmt2.getPredicate();
+                                        RDFNode object2 = stmt2.getObject();
+                                        if (predicate2.getURI().equals(NIMBLE_CATALOGUE_NS + VALUE_ELEMENT)) {
+                                            valueCodeList.add(object2.toString());
+                                        }
+
+                                    }
+                                }
+                            }
+                            index.setValueCodesList(valueCodeList);
+                        }
+                    }
+
+                }
+
+            }
+        }
+        index.setLocalName(prop.getLocalName());
+        index.setNameSpace(prop.getNameSpace());
+
+        // try to find labels by searching rdfs:label and skos:prefLabel
+        index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
+        // try to find labels by searching rdfs:comment and skos:definition
+        index.setComment(obtainMultilingualValues(prop, RDFS.comment, SKOS.definition));
+        if (index.getLabel() != null) {
+            for (String label : index.getLabel().values()) {
+                index.addItemFieldName(ItemType.dynamicFieldPart(label));
+            }
+        }
+        // add the local name
+        index.addItemFieldName(prop.getLocalName());
+        // add the uri
+        index.addItemFieldName(ItemType.dynamicFieldPart(prop.getURI()));
+
 //		index.setLabels(processPropertyLabel(prop));
-		prop.listDomain();
-		if ( prop.getDomain() != null && prop.getDomain().isClass()) {
-			Set<String> usage = getUsage(model,prop.getDomain().asClass());
-			index.getProduct().addAll(usage);
-		}
-		// 
-		Resource rdfType = prop.getRDFType();
-		if ( rdfType != null ) {
-			index.setPropertyType(rdfType.getLocalName());
-		}
-		return index;
+        prop.listDomain();
+        if (prop.getDomain() != null && prop.getDomain().isClass()) {
+            Set<String> usage = getUsage(model, prop.getDomain().asClass());
+            index.getProduct().addAll(usage);
+        }
+        //
+        Resource rdfType = prop.getRDFType();
+        if (rdfType != null) {
+            index.setPropertyType(rdfType.getLocalName());
+        }
+        return index;
+    }
+
+	private boolean isSubClass(OntClass classToCheck, String cl){
+		return false;
 	}
 	/**
 	 * Helper method to extract multilingual labels
@@ -281,7 +353,7 @@ public class OntologyServiceImpl implements OntologyService {
 	/**
 	 * Find the classes denoted by rdfs:domain
 	 * @param model
-	 * @param prop
+	 * @param
 	 * @return
 	 */
 	private Set<String> getUsage(OntModel model, OntClass ontClass) {
