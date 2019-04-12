@@ -71,6 +71,20 @@ public interface SolrService<T> {
 	 * @return
 	 */
 	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, int facetLimit, int facetMinCount, Pageable page);
+
+	/**
+	 * Perform a select query against the collection
+	 * @param query The query term used with the <code>q</code> query parameter
+	 * @param filterQueries The filter terms uses as <code>fq</code> query parameters
+	 * @param facetFields The names used for faceting, e.g. <code>facet.field</code> parameters
+	 * @param sortFields  Set of attributes for search pointing to the current page & size
+	 * @param facetLimit The number of facet elements to return for each facet
+	 * @param facetMinCount The minimum number of facet occurrences to be included in the result
+	 * @param page The {@link Pageable} pointing to the current page & size
+	 * @return
+	 */
+	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields,List<String> sortFields, int facetLimit, int facetMinCount, Pageable page);
+
 	/**
 	 * Perform a auto suggest query
 	 * @param query The query term used with the <code>q</code> query parameter

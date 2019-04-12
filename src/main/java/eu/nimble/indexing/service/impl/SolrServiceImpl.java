@@ -22,6 +22,7 @@ import org.apache.solr.common.util.NamedList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.RequestMethod;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.Criteria;
@@ -97,12 +98,22 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 
 	@Override
 	public SearchResult<T> search(Search search) {
-		return select(search.getQuery(),
-				search.getFilterQuery(),
-				search.getFacetFields(),
-				search.getFacetLimit(),
-				search.getFacetMinCount(),
-				search.getPage());
+		if(search.getSort() != null) {
+			return select(search.getQuery(),
+					search.getFilterQuery(),
+					search.getFacetFields(),
+					search.getSort(),
+					search.getFacetLimit(),
+					search.getFacetMinCount(),
+					search.getPage());
+		}else{
+			return select(search.getQuery(),
+					search.getFilterQuery(),
+					search.getFacetFields(),
+					search.getFacetLimit(),
+					search.getFacetMinCount(),
+					search.getPage());
+		}
 	}
 
 	@Override
@@ -139,19 +150,58 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 		return result;
 	}
+
+	@Override
+	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, List<String> sortFields, int facetLimit, int facetMinCount, Pageable page) {
+		// expand main query to a wild card search when it is only a single word
+		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
+			query = String.format("*%s*", query);
+		}
+		Criteria qCriteria = new SimpleStringCriteria(query);
+		//
+		JoinHelper joinHelper = new JoinHelper();
+
+		if ( filterQueries != null && !filterQueries.isEmpty()) {
+			//
+			for (String filter : filterQueries) {
+				joinHelper.addFilter(filter);
+			}
+		}
+
+		if ( facetFields != null && !facetFields.isEmpty()) {
+			for (String fieldName : facetFields ) {
+				// facet field could be a joined field
+				joinHelper.addFacetField(fieldName);
+			}
+		}
+
+		SearchResult<T> result = select(qCriteria, joinHelper.getFilterQueries(), joinHelper.getFacetFields(),sortFields, facetLimit, facetMinCount, page);
+
+		for (String join : joinHelper.getJoins()) {
+			// process join facets
+			if (!joinHelper.getFacetFields(join).isEmpty()) {
+				// process a query for the joined facet fields
+				joinFacets(result, join, joinHelper.getJoinInfo(join), joinHelper.getFilterQueries(join), joinHelper.getFacetFields(join), facetLimit, facetMinCount, page);
+			}
+
+		}
+		return result;
+	}
+
+
 	private SearchResult<T> select(
-			Criteria query, 
-			Set<FilterQuery> filterQueries, 
-			Set<Field> facetFields, 
-			int facetLimit, 
-			int facetMinCount, 
+			Criteria query,
+			Set<FilterQuery> filterQueries,
+			Set<Field> facetFields,
+			int facetLimit,
+			int facetMinCount,
 			Pageable page) {
-		
+
 		FacetQuery fq = new SimpleFacetQuery(query, page);
 		// add filter queries
 
 		if ( filterQueries != null && !filterQueries.isEmpty()) {
-			// 
+			//
 			for (FilterQuery filter : filterQueries) {
 				fq.addFilterQuery(filter);
 			}
@@ -164,18 +214,75 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			for (Field facetField : facetFields) {
 				facetOptions.addFacetOnField(facetField);
 			}
-			// 
+			//
 			facetOptions.setFacetMinCount(facetMinCount);
 			facetOptions.setFacetLimit(facetLimit);
 			fq.setFacetOptions(facetOptions);
 		}
-		
+
 		FacetPage<T> result = solrTemplate.queryForFacetPage(getCollection(),fq, getSolrClass(), RequestMethod.POST);
-		
-		
+
+
 		// enrich content - to be overloaded by subclasses
 		postSelect(result.getContent());
-		
+
+
+		return new SearchResult<>(result);
+	}
+
+	private SearchResult<T> select(
+			Criteria query,
+			Set<FilterQuery> filterQueries,
+			Set<Field> facetFields,
+			List<String> sortFields,
+			int facetLimit,
+			int facetMinCount,
+			Pageable page) {
+
+		FacetQuery fq = new SimpleFacetQuery(query, page);
+		// add filter queries
+
+
+		if(sortFields != null){
+
+			for(String sortVal : sortFields){
+				int fieldDelimPos = sortVal.indexOf(" ");
+				String fieldName = sortVal.substring(0,fieldDelimPos);
+				String operation = sortVal.substring(fieldDelimPos+1,sortVal.length());
+				if(operation.equalsIgnoreCase("desc")){
+					fq.addSort(new Sort(Sort.Direction.DESC,fieldName));
+				}else{
+					fq.addSort(new Sort(Sort.Direction.ASC,fieldName));
+				}
+			}
+		}
+
+		if ( filterQueries != null && !filterQueries.isEmpty()) {
+			//
+			for (FilterQuery filter : filterQueries) {
+				fq.addFilterQuery(filter);
+			}
+		}
+		for (Field f : getSelectFieldList()) {
+			fq.addProjectionOnField(f);
+		}
+		if ( facetFields != null && !facetFields.isEmpty()) {
+			FacetOptions facetOptions = new FacetOptions();
+			for (Field facetField : facetFields) {
+				facetOptions.addFacetOnField(facetField);
+			}
+			//
+			facetOptions.setFacetMinCount(facetMinCount);
+			facetOptions.setFacetLimit(facetLimit);
+			fq.setFacetOptions(facetOptions);
+		}
+
+		FacetPage<T> result = solrTemplate.queryForFacetPage(getCollection(),fq, getSolrClass(), RequestMethod.POST);
+
+
+		// enrich content - to be overloaded by subclasses
+		postSelect(result.getContent());
+
 
 		return new SearchResult<>(result);
 	}
