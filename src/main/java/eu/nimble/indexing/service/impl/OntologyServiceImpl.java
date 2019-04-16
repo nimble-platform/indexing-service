@@ -186,6 +186,14 @@ public class OntologyServiceImpl implements OntologyService {
 
         PropertyType index = new PropertyType();
         index.setUri(prop.getURI());
+        //check if the property should be hidden from the UI
+        Property isHiddenProperty = model.getProperty(NIMBLE_CATALOGUE_NS, IS_HIDDEN_ON_UI);
+        Statement isHiddenStatement = prop.getProperty(isHiddenProperty);
+		if (isHiddenStatement != null) {
+			RDFNode isHiddenNode = isHiddenStatement.getObject();
+			index.setHiddenOnUI( isHiddenNode.asLiteral().getBoolean());
+		}
+
         if (prop.getRange() != null) {
             Resource range = prop.getRange();
             index.setRange(range.getURI());
@@ -234,7 +242,7 @@ public class OntologyServiceImpl implements OntologyService {
                                 Property predicate = stmt.getPredicate();
                                 if (predicate.getURI().equals(UBL_CBC_NS + UNIT_CODE)) {
                                     RDFNode object = stmt.getObject();
-                                    unitList.add(object.asLiteral().getValue().toString());
+                                    unitList.add(object.asLiteral().getString());
                                 }
                             }
                             index.setUnitsTypeList(unitList);
@@ -256,7 +264,7 @@ public class OntologyServiceImpl implements OntologyService {
                                 Property predicate = stmt.getPredicate();
                                 if (predicate.getURI().equals(NIMBLE_CATALOGUE_NS + VALUE_ELEMENT)) {
                                     RDFNode object = stmt.getObject();
-                                    index.setValueCode(object.toString());
+                                    index.setValueCode(object.asLiteral().getString());
                                 }
                             }
                         }
@@ -278,7 +286,7 @@ public class OntologyServiceImpl implements OntologyService {
                                         Property predicate2 = stmt2.getPredicate();
                                         RDFNode object2 = stmt2.getObject();
                                         if (predicate2.getURI().equals(NIMBLE_CATALOGUE_NS + VALUE_ELEMENT)) {
-                                            valueCodeList.add(object2.toString());
+                                            valueCodeList.add(object2.asLiteral().getString());
                                         }
 
                                     }

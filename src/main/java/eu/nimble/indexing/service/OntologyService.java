@@ -14,9 +14,11 @@ public interface OntologyService {
 
 	public static final String HAS_UNIT_LIST = "hasUnitList";
 	public static final String HAS_CODE_LIST = "hasCodeList";
+    public static final String IS_HIDDEN_ON_UI = "isHiddenOnUI";
 
 
-	public void upload(String mimeType, String onto);
+
+    public void upload(String mimeType, String onto);
 
 	boolean deleteNamespace(String namespace);
 
