@@ -1,4 +1,4 @@
-# indexing-service
+# Indexing Service
 Spring-Boot Micro-Service providing search capabilites with Apache SOLR
 
 ## requirements
