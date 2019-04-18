@@ -240,7 +240,7 @@ public class OntologyServiceImpl implements OntologyService {
                             while (iter.hasNext()) {
                                 Statement stmt = iter.nextStatement();
                                 Property predicate = stmt.getPredicate();
-                                if (predicate.getURI().equals(UBL_CBC_NS + UNIT_CODE)) {
+                                if (predicate.getURI().equals(NIMBLE_CATALOGUE_NS + UNIT_CODE)) {
                                     RDFNode object = stmt.getObject();
                                     unitList.add(object.asLiteral().getString());
                                 }
