@@ -2,12 +2,14 @@ package eu.nimble.indexing.service.impl;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Collection;
+import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.HashSet;
+
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -172,7 +174,10 @@ public class OntologyServiceImpl implements OntologyService {
 			index.setLabel(obtainMultilingualValues(clazz, RDFS.label, DC.title, SKOS.prefLabel));
 			index.setDescription(obtainMultilingualValues(clazz, DC.description));
 			index.setComment(obtainMultilingualValues(clazz, RDFS.comment, DC.description, SKOS.definition));
-			// search for properties (including properties of super classes)
+
+			// hiddenlabels
+			index.setHiddenLabel(obtainMultilingualHiddenLabels(clazz,SKOS.hiddenLabel, SKOS.altLabel));
+			// search for properties (including properties of super classes
 			index.setProperties(getProperties(clazz, availableProps));
 			// search for parent / super classes
 			index.setAllParents(getSuperClasses(clazz));
@@ -359,6 +364,8 @@ public class OntologyServiceImpl implements OntologyService {
 
         // try to find labels by searching rdfs:label and skos:prefLabel
         index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
+		// hiddenlabels
+        index.setHiddenLabel(obtainMultilingualHiddenLabels(prop, SKOS.hiddenLabel, SKOS.altLabel));
         // try to find labels by searching rdfs:comment and skos:definition
         index.setComment(obtainMultilingualValues(prop, RDFS.comment, SKOS.definition));
         if (index.getLabel() != null) {
@@ -366,6 +373,7 @@ public class OntologyServiceImpl implements OntologyService {
                 index.addItemFieldName(ItemType.dynamicFieldPart(label));
             }
         }
+
         // add the local name
         index.addItemFieldName(prop.getLocalName());
         // add the uri
@@ -508,6 +516,36 @@ public class OntologyServiceImpl implements OntologyService {
 		
 	}
 
+	/**
+	 * Helper method to extract multilingual hidden and alternate labels
+	 * @param prop
+	 * @param properties
+	 * @return
+	 */
+	private Map<String, Collection<String>> obtainMultilingualHiddenLabels(OntResource prop, org.apache.jena.rdf.model.Property... properties) {
+
+		Map<String, Collection<String>> languageMap = new HashMap<String, Collection<String>>();
+		for (org.apache.jena.rdf.model.Property property : properties) {
+			NodeIterator nIter = prop.listPropertyValues(property);
+			while (nIter.hasNext()) {
+				RDFNode node = nIter.next();
+				if (node.isLiteral()) {
+					String lang = node.asLiteral().getLanguage();
+					if (languageMap.get(lang) != null) {
+						Collection<String> hiddenLabelValues = languageMap.get(lang);
+						hiddenLabelValues.add(node.asLiteral().getString());
+						languageMap.put(lang, hiddenLabelValues);
+					} else {
+						Collection<String> hiddenLabelValues = new ArrayList<String>();
+						hiddenLabelValues.add(node.asLiteral().getString());
+						languageMap.put(lang, hiddenLabelValues);
+					}
+				}
+			}
+		}
+		return languageMap;
+
+	}
 	/**
 	 * Find the classes denoted by rdfs:domain
 	 * @param model
