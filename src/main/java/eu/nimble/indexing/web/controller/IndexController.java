@@ -207,12 +207,16 @@ public class IndexController {
 	public ResponseEntity<SearchResult<CodedType>> getCodes(
 //			@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name="uri", required = false) Set<String> uriList, 
+			@RequestParam(name="listId", required = false) String listId,
 			@RequestParam(name="nameSpace", required = false) String nameSpace,
 			@RequestParam(name="localName", required = false) Set<String> localNames) {
 		if (uriList != null && !uriList.isEmpty()) {
 			SearchResult<CodedType> result = codeService.findByUris(uriList);
 			return ResponseEntity.ok(result);
-
+		}
+		if ( listId != null && !listId.isEmpty()) {
+			SearchResult<CodedType> result = codeService.findByListId(listId);
+			return ResponseEntity.ok(result);
 		}
 		if (nameSpace != null && localNames != null && !localNames.isEmpty()) {
 			SearchResult<CodedType> result = codeService.findForNamespaceAndLocalNames(nameSpace, localNames);

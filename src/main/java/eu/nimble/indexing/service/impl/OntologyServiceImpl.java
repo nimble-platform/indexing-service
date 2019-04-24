@@ -276,6 +276,13 @@ public class OntologyServiceImpl implements OntologyService {
 		}
 		return null;
 	}
+	private String getRange(OntProperty prop) {
+		OntResource range = prop.getRange();
+		if ( range != null && !range.isAnon() ) {
+			return range.getURI();
+		}
+		return null;
+	}
 	/**
 	 * retrieve {@link ValueQualifier} from {@link XSD} localNames
 	 * @param localName {@link XSD} qualifiers like <i>float</i>, <i>double</i> etc.
@@ -331,9 +338,13 @@ public class OntologyServiceImpl implements OntologyService {
 //			index.setVisible(!isHiddenNode.asLiteral().getBoolean());
 ////			index.setHiddenOnUI( isHiddenNode.asLiteral().getBoolean());
 //		}
+        index.setLocalName(prop.getLocalName());
+        index.setNameSpace(prop.getNameSpace());
+        index.setRange(getRange(prop));
         index.setVisible(isVisbileProperty(prop));
 		// check for the value qualifier, might be null
 		ValueQualifier valueQualifier = getValueQualifier(prop);
+		// QUANTITY and TEXT may have additional information
 		if ( valueQualifier != null ) {
 			switch ( valueQualifier) {
 			case QUANTITY:
@@ -354,8 +365,6 @@ public class OntologyServiceImpl implements OntologyService {
 				index.setValueQualifier(valueQualifier);
 			}
 		}
-        index.setLocalName(prop.getLocalName());
-        index.setNameSpace(prop.getNameSpace());
 
         // try to find labels by searching rdfs:label and skos:prefLabel
         index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
