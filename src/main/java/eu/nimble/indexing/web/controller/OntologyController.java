@@ -1,5 +1,8 @@
 package eu.nimble.indexing.web.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +28,15 @@ public class OntologyController {
 	@PostMapping("/ontology")
     public ResponseEntity<Void> uploadOntology(
 //    		@RequestHeader(value = "Authorization") String bearerToken,
-    		@RequestHeader(value = "Content-Type") String mimeType,
+    		@RequestHeader(value = "Content-Type", required=false) String mimeType,
+    		@RequestParam(name="nameSpace") List<String> nameSpace,
     		@RequestBody String content) {
 		logger.info("Indexing an ontology with mime-type : " + mimeType);
-
-		onto.upload(mimeType, content);
+		// nameSpace must not be null
+		if ( nameSpace == null) {
+			nameSpace = new ArrayList<String>();
+		}
+		onto.upload(mimeType, nameSpace, content);
     	return ResponseEntity.ok(null);
     }
 	

@@ -9,9 +9,16 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.solr.core.query.SolrPageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import eu.nimble.indexing.service.ClassService;
+import eu.nimble.indexing.service.CodeService;
 import eu.nimble.indexing.service.ItemService;
 import eu.nimble.indexing.service.PartyService;
 import eu.nimble.indexing.service.PropertyService;
@@ -23,6 +30,7 @@ import eu.nimble.service.model.solr.Search;
 import eu.nimble.service.model.solr.SearchResult;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
+import eu.nimble.service.model.solr.owl.CodedType;
 import eu.nimble.service.model.solr.owl.PropertyType;
 import eu.nimble.service.model.solr.party.PartyType;
 
@@ -41,6 +49,9 @@ public class IndexController {
 	@Autowired
 	private ItemService itemService;
 
+	@Autowired
+	private CodeService codeService;
+	
 	@GetMapping("/class")
 	public ResponseEntity<ClassType> getClass(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
@@ -135,6 +146,97 @@ public class IndexController {
 		classService.set(prop);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
+	
+	@GetMapping("/code")
+	public ResponseEntity<CodedType> getCode(
+//			@RequestHeader(value = "Authorization") String bearerToken, 
+			@RequestParam String uri) {
+		Optional<CodedType> c = codeService.get(uri);
+		return ResponseEntity.of(c);
+	}
+	@GetMapping("/code/fields")
+	public ResponseEntity<Collection<IndexField>> codeFields(
+//    		@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(name="fieldName", required=false) Set<String> fieldNames
+	) {
+		Collection<IndexField> result = codeService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
+		return ResponseEntity.ok(result);
+	}
+
+//	@GetMapping("/classes/search")
+//	public ResponseEntity<List<ClassType>> searchClasses(
+//			@RequestParam(name="query") String query) {
+//		
+//		// 
+//		return ResponseEntity.ok(classes.search(query));
+//	}
+	@GetMapping("/code/select")
+	public ResponseEntity<SearchResult<CodedType>> selectCode(
+//			@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
+			@RequestParam(name = "fq", required = false) List<String> filterQuery,
+			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
+			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
+			@RequestParam(name = "facet.mincount", required = false, defaultValue = "1") int facetMinCount,
+			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
+			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) {
+		SearchResult<CodedType> result = codeService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
+				new SolrPageRequest(start, rows));
+		return ResponseEntity.ok(result);
+	}
+	@GetMapping("/code/suggest")
+	public ResponseEntity<FacetResult> codeSuggest(
+			@RequestParam(name = "q") String query,
+			@RequestParam(name = "field") String fieldName,
+			@RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
+			@RequestParam(name = "minCount", required = false, defaultValue = "1") int minCount
+			
+			) {
+		FacetResult result = codeService.suggest(query, fieldName, limit, minCount);
+		return ResponseEntity.ok(result);
+	}
+
+	@PostMapping("/code/search")
+	public ResponseEntity<SearchResult<CodedType>> searchCode(
+			@RequestBody Search search) {
+		SearchResult<CodedType> result = codeService.search(search);
+		return ResponseEntity.ok(result);
+	}
+
+	@GetMapping("/codes")
+	public ResponseEntity<SearchResult<CodedType>> getCodes(
+//			@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(name="uri", required = false) Set<String> uriList, 
+			@RequestParam(name="nameSpace", required = false) String nameSpace,
+			@RequestParam(name="localName", required = false) Set<String> localNames) {
+		if (uriList != null && !uriList.isEmpty()) {
+			SearchResult<CodedType> result = codeService.findByUris(uriList);
+			return ResponseEntity.ok(result);
+
+		}
+		if (nameSpace != null && localNames != null && !localNames.isEmpty()) {
+			SearchResult<CodedType> result = codeService.findForNamespaceAndLocalNames(nameSpace, localNames);
+			return ResponseEntity.ok(result);
+		}
+		return ResponseEntity.ok(new SearchResult<>(new ArrayList<>()));
+	}
+
+	@DeleteMapping("/code")
+	public ResponseEntity<Boolean> removeCode(
+//			@RequestHeader(value = "Authorization") String bearerToken, 
+			@RequestParam String uri) {
+		codeService.remove(uri);
+		return ResponseEntity.ok(Boolean.TRUE);
+	}
+
+	@PostMapping("/code")
+	public ResponseEntity<Boolean> setCode(
+//			@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestBody CodedType prop) {
+		codeService.set(prop);
+		return ResponseEntity.ok(Boolean.TRUE);
+	}
+
 	@GetMapping("/party/fields")
 	public ResponseEntity<Collection<IndexField>> partyFields(
 //    		@RequestHeader(value = "Authorization") String bearerToken,
