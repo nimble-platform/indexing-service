@@ -218,11 +218,11 @@ public class OntologyServiceImpl implements OntologyService {
 				.collect(Collectors.toSet());
 	}
 	private ValueQualifier getValueQualifier(OntProperty prop) {
-		if ( isCodeTypeProperty(prop)) {
+		if ( isCodePropertyType(prop)) {
 			// when coded property, value qualifier is set to TEXT
 			return ValueQualifier.TEXT;
 		}
-		if ( isQuantityTypeProperty(prop)) {
+		if ( isQuantityPropertyType(prop)) {
 			// when quantity property, value qualifier is set to QUANTITY
 			return ValueQualifier.QUANTITY;
 		}
@@ -234,8 +234,8 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param prop
 	 * @return
 	 */
-	private boolean isQuantityTypeProperty(OntProperty prop) {
-		Property p = prop.getModel().createProperty(NIMBLE_CATALOGUE_NS, QUANTITY_TYPE);
+	private boolean isQuantityPropertyType(OntProperty prop) {
+		Property p = prop.getModel().createProperty(quantityPropertyURI());
 		return prop.hasURI(p.getURI()) || prop.hasSuperProperty(prop, false);
 	}
 	/**
@@ -263,8 +263,9 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param prop
 	 * @return
 	 */
-	private boolean isCodeTypeProperty(OntProperty prop) {
-		Property p = prop.getModel().createProperty(NIMBLE_CATALOGUE_NS, CODE_TYPE);
+	private boolean isCodePropertyType(OntProperty prop) {
+		// 
+		Property p = prop.getModel().createProperty(codePropertyURI());
 		return prop.hasURI(p.getURI()) || prop.hasSuperProperty(p, false);
 	}
 	private ValueQualifier fromRange(OntResource range) {
@@ -315,12 +316,19 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @return
 	 */
 	private boolean isVisbileProperty(OntProperty prop) {
-		Property isVisibleProperty = prop.getModel().createProperty(NIMBLE_CATALOGUE_NS, IS_VISIBLE);
+		Property isVisibleProperty = prop.getModel().createProperty(isVisibleURI());
 		RDFNode n = prop.getPropertyValue(isVisibleProperty);
 		if (n != null ) {
 			return n.asLiteral().getBoolean();
 		}
-		
+		else {
+			isVisibleProperty = prop.getModel().createProperty(isHiddenURI());
+			n = prop.getPropertyValue(isVisibleProperty);
+			if (n != null ) {
+				// need to reverse the setting of isHiddenOnUI!!
+				return !n.asLiteral().getBoolean();
+			}
+		}
 		return true;
 	}
 
@@ -336,13 +344,6 @@ public class OntologyServiceImpl implements OntologyService {
         PropertyType index = new PropertyType();
         index.setUri(prop.getURI());
         //check if the property should be hidden from the UI
-//        Property isHiddenProperty = model.getProperty(NIMBLE_CATALOGUE_NS, IS_HIDDEN_ON_UI);
-//        Statement isHiddenStatement = prop.getProperty(isHiddenProperty);
-//		if (isHiddenStatement != null) {
-//			RDFNode isHiddenNode = isHiddenStatement.getObject();
-//			index.setVisible(!isHiddenNode.asLiteral().getBoolean());
-////			index.setHiddenOnUI( isHiddenNode.asLiteral().getBoolean());
-//		}
         index.setLocalName(prop.getLocalName());
         index.setNameSpace(prop.getNameSpace());
         index.setRange(getRange(prop));
@@ -473,7 +474,7 @@ public class OntologyServiceImpl implements OntologyService {
      * @return
      */
     private String getValueProperty(OntResource resource) {
-    	Property codeProperty = resource.getModel().createProperty(NIMBLE_CATALOGUE_NS, VALUE_ELEMENT);
+    	Property codeProperty = resource.getModel().createProperty(codeValueURI());
     	// 
     	Statement stmt = resource.getProperty(codeProperty);
     	if ( stmt != null) {
@@ -486,18 +487,18 @@ public class OntologyServiceImpl implements OntologyService {
     			return node.asLiteral().getString();
     		}
     	}
-    	codeProperty = resource.getModel().createProperty(NIMBLE_CATALOGUE_NS, VALUE_CODE);
-    	stmt = resource.getProperty(codeProperty);
-    	if ( stmt != null) {
-    		RDFNode node = stmt.getObject();
-    		if (node.isResource()){
-    			return node.asResource().getLocalName();
-    		}
-    		else {
-    			// default - treat it as Literal
-    			return node.asLiteral().getString();
-    		}
-    	}
+//    	codeProperty = resource.getModel().createProperty(NIMBLE_CATALOGUE_NS, HAS_);
+//    	stmt = resource.getProperty(codeProperty);
+//    	if ( stmt != null) {
+//    		RDFNode node = stmt.getObject();
+//    		if (node.isResource()){
+//    			return node.asResource().getLocalName();
+//    		}
+//    		else {
+//    			// default - treat it as Literal
+//    			return node.asLiteral().getString();
+//    		}
+//    	}
     	// use the local name as fallback
     	return resource.getLocalName();
     }
@@ -507,9 +508,9 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param properties
 	 * @return
 	 */
-	private Map<String, String> obtainMultilingualValues(OntResource prop, org.apache.jena.rdf.model.Property ... properties ) {
+	private Map<String, String> obtainMultilingualValues(OntResource prop, Property ... properties ) {
 		Map<String,String> languageMap = new HashMap<>();
-		for ( org.apache.jena.rdf.model.Property property : properties ) {
+		for (Property property : properties) {
 			NodeIterator nIter = prop.listPropertyValues(property);
 			while ( nIter.hasNext()) {
 				RDFNode node = nIter.next();
@@ -531,10 +532,10 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param properties
 	 * @return
 	 */
-	private Map<String, Collection<String>> obtainMultilingualHiddenLabels(OntResource prop, org.apache.jena.rdf.model.Property... properties) {
+	private Map<String, Collection<String>> obtainMultilingualHiddenLabels(OntResource prop, Property... properties) {
 
 		Map<String, Collection<String>> languageMap = new HashMap<String, Collection<String>>();
-		for (org.apache.jena.rdf.model.Property property : properties) {
+		for (Property property : properties) {
 			NodeIterator nIter = prop.listPropertyValues(property);
 			while (nIter.hasNext()) {
 				RDFNode node = nIter.next();
