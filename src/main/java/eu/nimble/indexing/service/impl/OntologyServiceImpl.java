@@ -176,7 +176,10 @@ public class OntologyServiceImpl implements OntologyService {
 			index.setComment(obtainMultilingualValues(clazz, RDFS.comment, DC.description, SKOS.definition));
 
 			// hiddenlabels
-			index.setHiddenLabel(obtainMultilingualHiddenLabels(clazz,SKOS.hiddenLabel, SKOS.altLabel));
+			index.setHiddenLabel(obtainMultilingualLabels(clazz,SKOS.hiddenLabel));
+			//alternateLabels
+            index.setAlternateLabel(obtainMultilingualLabels(clazz,SKOS.altLabel));
+
 			// search for properties (including properties of super classes
 			index.setProperties(getProperties(clazz, availableProps));
 			// search for parent / super classes
@@ -374,8 +377,11 @@ public class OntologyServiceImpl implements OntologyService {
 
         // try to find labels by searching rdfs:label and skos:prefLabel
         index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
-		// hiddenlabels
-        index.setHiddenLabel(obtainMultilingualHiddenLabels(prop, SKOS.hiddenLabel, SKOS.altLabel));
+        // hiddenlabels
+        index.setHiddenLabel(obtainMultilingualLabels(prop,SKOS.hiddenLabel));
+        //alternateLabels
+        index.setAlternateLabel(obtainMultilingualLabels(prop,SKOS.altLabel));
+
         // try to find labels by searching rdfs:comment and skos:definition
         index.setComment(obtainMultilingualValues(prop, RDFS.comment, SKOS.definition));
         if (index.getLabel() != null) {
@@ -532,7 +538,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param properties
 	 * @return
 	 */
-	private Map<String, Collection<String>> obtainMultilingualHiddenLabels(OntResource prop, Property... properties) {
+	private Map<String, Collection<String>> obtainMultilingualLabels(OntResource prop, org.apache.jena.rdf.model.Property... properties) {
 
 		Map<String, Collection<String>> languageMap = new HashMap<String, Collection<String>>();
 		for (Property property : properties) {
@@ -542,13 +548,13 @@ public class OntologyServiceImpl implements OntologyService {
 				if (node.isLiteral()) {
 					String lang = node.asLiteral().getLanguage();
 					if (languageMap.get(lang) != null) {
-						Collection<String> hiddenLabelValues = languageMap.get(lang);
-						hiddenLabelValues.add(node.asLiteral().getString());
-						languageMap.put(lang, hiddenLabelValues);
+						Collection<String> labelValues = languageMap.get(lang);
+						labelValues.add(node.asLiteral().getString());
+						languageMap.put(lang, labelValues);
 					} else {
-						Collection<String> hiddenLabelValues = new ArrayList<String>();
-						hiddenLabelValues.add(node.asLiteral().getString());
-						languageMap.put(lang, hiddenLabelValues);
+						Collection<String> labelValues = new ArrayList<String>();
+						labelValues.add(node.asLiteral().getString());
+						languageMap.put(lang, labelValues);
 					}
 				}
 			}
