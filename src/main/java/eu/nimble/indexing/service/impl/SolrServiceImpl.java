@@ -124,7 +124,7 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		}
 		Criteria qCriteria = new SimpleStringCriteria(query);
 		// 
-		JoinHelper joinHelper = new JoinHelper();
+		JoinHelper joinHelper = new JoinHelper(getCollection());
 		
 		if ( filterQueries != null && !filterQueries.isEmpty()) {
 			// 
@@ -157,9 +157,10 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
 			query = String.format("*%s*", query);
 		}
+		
 		Criteria qCriteria = new SimpleStringCriteria(query);
 		//
-		JoinHelper joinHelper = new JoinHelper();
+		JoinHelper joinHelper = new JoinHelper(getCollection());
 
 		if ( filterQueries != null && !filterQueries.isEmpty()) {
 			//

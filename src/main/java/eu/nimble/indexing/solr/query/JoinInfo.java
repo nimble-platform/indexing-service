@@ -45,32 +45,97 @@ import eu.nimble.service.model.solr.party.PartyType;
  *
  */
 public enum JoinInfo {
-//	party(IParty.ID_FIELD, ItemType.MANUFACTURER_ID_FIELD, IParty.COLLECTION),
-	// join to party type (manufacturer)
-	manufacturer(IParty.ID_FIELD, ItemType.MANUFACTURER_ID_FIELD, IParty.COLLECTION, PartyType.class, "manufacturer", "party"),
-	// join to classes (furniture ontology, eClass)
-	classification(IClassType.ID_FIELD, ItemType.COMMODITY_CLASSIFICATION_URI_FIELD, IClassType.COLLECTION, ClassType.class, "productType", "classification"),
-	property(IPropertyType.ID_FIELD, IClassType.PROPERTIES_FIELD, IPropertyType.COLLECTION, PropertyType.class, "property", "prop"),
-	product(IClassType.ID_FIELD, IPropertyType.USED_WITH_FIELD, IClassType.COLLECTION, ClassType.class, "product", "productType", "class"),
+	// join from items to party type (manufacturer)
+	manufacturer(
+			ItemType.COLLECTION, 
+			ItemType.MANUFACTURER_ID_FIELD, 
+			IParty.COLLECTION, 
+			IParty.ID_FIELD, 
+			PartyType.class, 
+			"manufacturer", "party"),
+	// join from items to classes (furniture ontology, eClass)
+	classification(
+			ItemType.COLLECTION, 
+			ItemType.COMMODITY_CLASSIFICATION_URI_FIELD, 
+			IClassType.COLLECTION, 
+			IClassType.ID_FIELD, 
+			ClassType.class, 
+			"productType", "classification", "class" ),
+	// join from classification to items
+	item(
+			IClassType.COLLECTION,
+			IClassType.ID_FIELD,
+			ItemType.COLLECTION,
+			ItemType.COMMODITY_CLASSIFICATION_URI_FIELD,
+			ItemType.class,
+			"item" 
+			),
+	// join from class to props 
+	property(
+			IClassType.COLLECTION, 
+			IClassType.PROPERTIES_FIELD, 
+			IPropertyType.COLLECTION, 
+			IPropertyType.ID_FIELD, 
+			PropertyType.class, 
+			"property", "prop", "props"),
+	// join from props to class	
+	product(
+			IPropertyType.COLLECTION, 
+			IPropertyType.USED_WITH_FIELD, 
+			IClassType.COLLECTION, 
+			IClassType.ID_FIELD, 
+			ClassType.class, 
+			"product", "productType", "class"),
 
 	;
-	
-	String from;
-	String to;
-	String fromIndex;
+	/** 
+	 * the main (outgoing) collection
+	 */
+	String collection;
+	/**
+	 * The field in the 
+	 */
+	String joinedField;
+	String field;
+	String joinedCollection;
 	String[] names;
 	Class<?> classType;
 	
-	JoinInfo(String from, String to, String fromIndex, Class<?> classType, String ... names) {
-		this.from = from;
-		this.to = to;
-		this.fromIndex = fromIndex;
+	JoinInfo(String mainCollection,  String mainField, String joinedCollection, String joinedField, Class<?> classType, String ... names) {
+		this.collection = mainCollection;
+		this.joinedField = joinedField;
+		this.field = mainField;
+		this.joinedCollection = joinedCollection;
 		this.names = names;
 		this.classType = classType;
 	}
 	public Field getField() {
-		return new SimpleField(to);
+		return new SimpleField(field);
 	}
+	public static JoinInfo getJoinInfo(String collection, String mappedName) {
+		for ( JoinInfo j : values()) {
+			if ( j.collection.equals(collection)) {
+				if ( j.names != null ) {
+					for (String s : j.names) {
+						if ( s.equalsIgnoreCase(mappedName)) {
+							return j;
+						}
+					}
+				}
+			}
+		}
+		// not found - try the enum name
+		try {
+			// check for ItemType JOINS
+			JoinInfo info = JoinInfo.valueOf(mappedName.toLowerCase());
+			// 
+			return info;
+		} catch (Exception e) {
+			// invalid join
+			return null;
+		}
+	}
+	@Deprecated
 	public static JoinInfo getJoinInfo(String mappedName) {
 		for ( JoinInfo j : values()) {
 			if ( j.names != null ) {
@@ -114,10 +179,10 @@ public enum JoinInfo {
 		}
 	}		
 	public Join getJoin() {
-		return new Join(new SimpleField(from), new SimpleField(to), fromIndex);
+		return new Join(new SimpleField(joinedField), new SimpleField(field), joinedCollection);
 	}
 	public String getJoinedCollection() {
-		return fromIndex;
+		return joinedCollection;
 	}
 	public Class<?> getJoinedType() {
 		return classType;

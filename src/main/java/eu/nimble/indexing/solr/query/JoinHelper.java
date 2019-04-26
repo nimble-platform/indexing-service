@@ -13,6 +13,8 @@ import org.springframework.data.solr.core.query.SimpleFilterQuery;
 
 public class JoinHelper {
 	private static final String QUOTE = "\"";
+	
+	private final String collection;
 
 	private Set<Field> facetFields = new HashSet<>();
 	private Set<FilterQuery> filterQueries = new HashSet<>();
@@ -22,6 +24,10 @@ public class JoinHelper {
 	
 	
 	private Map<JoinInfo, Set<FilterQuery>> filter = new HashMap<>();
+	
+	public JoinHelper(String collection) {
+		this.collection = collection;
+	}
 	
 	public void addFilter(String fromString) {
 		
@@ -148,6 +154,9 @@ public class JoinHelper {
 			return String.format("%s%s%s", QUOTE, in, QUOTE);
 		}
 		return in;
+	}
+	public String getCollection() {
+		return collection;
 	}
 
 }
