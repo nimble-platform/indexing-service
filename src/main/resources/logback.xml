@@ -1,25 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
-    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
-        <resetJUL>true</resetJUL>
-    </contextListener>
+<configuration debug="false">
 
-    <!-- To enable JMX Management -->
-    <jmxConfigurator/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    ​
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+    <springProperty name="logstash-uri" source="logstash.uri"/>
+    <springProperty name="build-version" source="build.version"/>
 
-    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%.-1level|MVC|%-30.30logger{0}|%msg%n</pattern>
+    <!-- Appender to send logs to Logstash -->
+    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${logstash-uri}</destination>
+
+        <!--<encoder class="net.logstash.logback.encoder.LogstashEncoder" />-->
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <pattern>
+                    <pattern>
+                        {
+                        "level": "%level",
+                        "serviceID": "${springAppName:-}",
+                        "trace": "%X{X-B3-TraceId:-}",
+                        "span": "%X{X-B3-SpanId:-}",
+                        "exportable": "%X{X-Span-Export:-}",
+                        "pid": "${PID:-}",
+                        "thread": "%thread",
+                        "class": "%logger{40}",
+                        "version": "${build-version:-}",
+                        "message": "%message",
+                        "exception": "%exception"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
         </encoder>
     </appender>
 
-    <logger name="org.springframework.data.solr.core" level="DEBUG"/>
-    <logger name="eu.nimble.indexing" level="DEBUG"/>
-
-    <!--<include resource="logJpaToFile.xml" />-->
-
-    <root level="ERROR">
-        <appender-ref ref="console"/>
+    <root level="INFO">
+        <appender-ref ref="logstash"/>
+        <appender-ref ref="CONSOLE"/>
     </root>
+
+    <logger name="org.apache.tomcat.jdbc.pool" level="debug" />
+    <logger name="springfox.documentation.spring.web.readers.operation.OperationModelsProvider" level="info" />
+    <logger name="springfox.documentation.spring.web.readers.operation.OperationResponseClassReader" level="info" />
+    <logger name="org.springframework.cloud.config.client" level="warn"/>
+    <logger name="com.netflix.discovery.shared.resolver.aws" level="warn"/>
+    <logger name="com.netflix.discovery.DiscoveryClient" level="warn"/>
+    <logger name="org.springframework.context.annotation.ConfigurationClassPostProcessor" level="error"/>
+    <logger name="com.netflix.config.sources.URLConfigurationSource" level="error"/>
 </configuration>
