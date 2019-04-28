@@ -20,6 +20,7 @@
         <docker.plugin.version>1.2.0</docker.plugin.version>
         <docker.image.prefix>nimbleplatform</docker.image.prefix>
         <docker.image.tag>${project.version}</docker.image.tag>
+        <ch.qos.logback.version>1.2.3</ch.qos.logback.version>
     </properties>
 
     <dependencyManagement>
@@ -30,6 +31,21 @@
                 <version>Finchley.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${ch.qos.logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${ch.qos.logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-access</artifactId>
+                <version>${ch.qos.logback.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -73,9 +89,21 @@
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
         <dependency>
-        	<groupId>eu.nimble.core.common</groupId>
-        	<artifactId>solr-data-model</artifactId>
-        	<version>0.0.1-SNAPSHOT</version>
+            <groupId>eu.nimble.core.common</groupId>
+            <artifactId>solr-data-model</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!--logstash dependencies-->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
         </dependency>
     </dependencies>
 
