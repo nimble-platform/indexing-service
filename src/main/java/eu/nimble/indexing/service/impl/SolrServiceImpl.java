@@ -117,9 +117,10 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		// expand main query to a wild card search when it is only a single word
 		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
 			query = String.format("*%s*", query);
-		} else {
-			query = joinHelper.parseQuery(query);
 		}
+//		else {
+//			query = joinHelper.parseQuery(query);
+//		}
 
 		Criteria qCriteria = new SimpleStringCriteria(query);
 

@@ -105,18 +105,22 @@ public class JoinHelper {
 				//handle join statement separately
 				if (joinDelimPosOuter > 0) {
 					int joinPosInner = fieldName.indexOf(".");
-					String joinName = fieldName.substring(0, joinPosInner);
-					JoinInfo joinInfo = JoinInfo.getJoinInfo(joinName);
+					if(joinPosInner > 0) {
+						String joinName = fieldName.substring(0, joinPosInner);
+						JoinInfo joinInfo = JoinInfo.getJoinInfo(joinName);
 
-					if (joinInfo != null) {
-						String joinedFieldName = fieldName.substring(joinPosInner + 1);
-						String fieldValue = queryPart.substring(fieldDelimPos + 1);
-						String joinQuery = joinInfo.getJoinPrefix() + joinedFieldName + ":" + fieldValue;
-						query += joinQuery + "";
+						if (joinInfo != null) {
+							String joinedFieldName = fieldName.substring(joinPosInner + 1);
+							String fieldValue = queryPart.substring(fieldDelimPos + 1);
+							String joinQuery = joinInfo.getJoinPrefix() + joinedFieldName + ":" + fieldValue;
+							query += joinQuery + "";
+						}
 					}
 				} else {
 					query += queryPart + " ";
 				}
+			} else {
+				query += queryPart + " ";
 			}
 		}
 		return query;
