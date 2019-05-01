@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.Field;
@@ -56,6 +57,7 @@ public class JoinHelper {
 			}
 		}
 	}
+
 	/**
 	 * Add a facet field, perform join verification
 	 * @param fieldName
@@ -86,7 +88,41 @@ public class JoinHelper {
 			facetFields.add(new SimpleField(fieldName));
 		}
 	}
-	
+
+	/**
+	 * @param queryString the query to parse with joins
+	 * @return parsed query string with joins incorporated
+	 */
+	public String parseQuery(String queryString) {
+		String[] queryParts = queryString.split(Pattern.quote(" "));
+		String query = "";
+
+		for (String queryPart : queryParts) {
+			int fieldDelimPos = queryPart.indexOf(":");
+			int joinDelimPosOuter = queryPart.indexOf(".");
+			if (fieldDelimPos > 0) {
+				String fieldName = queryPart.substring(0, fieldDelimPos);
+				//handle join statement separately
+				if (joinDelimPosOuter > 0) {
+					int joinPosInner = fieldName.indexOf(".");
+					String joinName = fieldName.substring(0, joinPosInner);
+					JoinInfo joinInfo = JoinInfo.getJoinInfo(joinName);
+
+					if (joinInfo != null) {
+						String joinedFieldName = fieldName.substring(joinPosInner + 1);
+						String fieldValue = queryPart.substring(fieldDelimPos + 1);
+						String joinQuery = joinInfo.getJoinPrefix() + joinedFieldName + ":" + fieldValue;
+						query += joinQuery + "";
+					}
+				} else {
+					query += queryPart + " ";
+				}
+			}
+		}
+		return query;
+	}
+
+
 	public Set<String> getJoins() {
 		return joinedList.keySet();
 	}
@@ -138,7 +174,6 @@ public class JoinHelper {
 	}
 	private void addFilter(Criteria criteria) {
 		SimpleFilterQuery query = new SimpleFilterQuery(criteria);
-
 		filterQueries.add(query);
 
 	}

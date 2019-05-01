@@ -25,13 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.RequestMethod;
 import org.springframework.data.solr.core.SolrTemplate;
-import org.springframework.data.solr.core.query.Criteria;
-import org.springframework.data.solr.core.query.FacetOptions;
-import org.springframework.data.solr.core.query.FacetQuery;
-import org.springframework.data.solr.core.query.Field;
-import org.springframework.data.solr.core.query.FilterQuery;
-import org.springframework.data.solr.core.query.SimpleFacetQuery;
-import org.springframework.data.solr.core.query.SimpleStringCriteria;
+import org.springframework.data.solr.core.query.*;
 import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.FacetPage;
 import org.springframework.data.solr.repository.SolrCrudRepository;
@@ -118,14 +112,17 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 
 	@Override
 	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, int facetLimit, int facetMinCount, Pageable page) {
+
+		JoinHelper joinHelper = new JoinHelper(getCollection());
 		// expand main query to a wild card search when it is only a single word
 		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
 			query = String.format("*%s*", query);
+		} else {
+			query = joinHelper.parseQuery(query);
 		}
+
 		Criteria qCriteria = new SimpleStringCriteria(query);
-		// 
-		JoinHelper joinHelper = new JoinHelper(getCollection());
-		
+
 		if ( filterQueries != null && !filterQueries.isEmpty()) {
 			// 
 			for (String filter : filterQueries) {
@@ -200,7 +197,6 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 
 		FacetQuery fq = new SimpleFacetQuery(query, page);
 		// add filter queries
-
 		if ( filterQueries != null && !filterQueries.isEmpty()) {
 			//
 			for (FilterQuery filter : filterQueries) {
