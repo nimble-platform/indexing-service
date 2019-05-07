@@ -40,7 +40,7 @@ public class JoinHelper {
 			if ( joinDelimPos > 0 ) {
 				String joinName = fieldName.substring(0,joinDelimPos);
 				// find the join info
-				joinInfo = JoinInfo.getJoinInfo(joinName);
+				joinInfo = JoinInfo.getJoinInfo(getCollection(), joinName);
 				
 				if (joinInfo != null) {
 					// get the remainder of the join
@@ -68,7 +68,7 @@ public class JoinHelper {
 			String joinName = fieldName.substring(0,joinDelimPos);
 			
 			// find the join info
-			joinInfo = JoinInfo.getJoinInfo(joinName);
+			joinInfo = JoinInfo.getJoinInfo(collection, joinName);
 			
 			if (joinInfo != null) {
 				// keep the join (mappedName and info)
@@ -132,7 +132,7 @@ public class JoinHelper {
 		}
 		filter.get(info).add(new SimpleFilterQuery(criteria));
 		// 
-		SimpleFilterQuery joinQuery = new SimpleFilterQuery(criteria);
+		SimpleFilterQuery joinQuery = new SimpleFilterQuery();
 		joinQuery.setJoin(info.getJoin());
 		filterQueries.add(joinQuery);
 	}

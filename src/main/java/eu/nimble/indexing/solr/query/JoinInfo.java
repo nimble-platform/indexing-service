@@ -157,27 +157,7 @@ public enum JoinInfo {
 			return null;
 		}
 	}
-	public static Join getJoin(String name) {
-		for ( JoinInfo j : values()) {
-			if ( j.names != null ) {
-				for (String s : j.names) {
-					if ( s.equalsIgnoreCase(name)) {
-						return j.getJoin();
-					}
-				}
-			}
-		}
-		// not found - try the enum name
-		try {
-			// check for ItemType JOINS
-			JoinInfo join = JoinInfo.valueOf(name.toLowerCase());
-			// 
-			return join.getJoin();
-		} catch (Exception e) {
-			// invalid join
-			return null;
-		}
-	}		
+		
 	public Join getJoin() {
 		return new Join(new SimpleField(joinedField), new SimpleField(field), joinedCollection);
 	}
