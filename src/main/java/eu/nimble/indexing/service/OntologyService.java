@@ -86,6 +86,15 @@ public interface OntologyService {
 	default String isVisibleURI() {
 		return NIMBLE_CATALOGUE_NS + IS_VISIBLE;
 	}
+
+	default String codeListURI(){
+		return NIMBLE_CATALOGUE_NS + HAS_CODE_LIST;
+	}
+
+	default String unitListURI(){
+		return NIMBLE_CATALOGUE_NS + HAS_UNIT_LIST;
+	}
+
 	@Deprecated
 	default String isHiddenURI() {
 		return NIMBLE_CATALOGUE_NS + IS_HIDDEN_ON_UI;

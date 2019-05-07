@@ -335,6 +335,46 @@ public class OntologyServiceImpl implements OntologyService {
 		return true;
 	}
 
+	/**
+	 * get the codeList Uri
+	 *
+	 * @param prop
+	 * @return codeList Uri
+	 */
+	private String getCodeListURI(OntProperty prop) {
+		Property codeListProperty = prop.getModel().createProperty(codeListURI());
+		RDFNode n = prop.getPropertyValue(codeListProperty);
+		String codeListURI = null;
+		if (n != null) {
+			if (n.isLiteral()) {
+				codeListURI = n.asLiteral().getString();
+			} else {
+				codeListURI = n.toString();
+			}
+		}
+		return codeListURI;
+
+	}
+
+	/**
+	 * get the unitList Uri
+	 *
+	 * @param prop
+	 * @return unitList Uri
+	 */
+	private String getUnitListURI(OntProperty prop) {
+		Property unitListProperty = prop.getModel().createProperty(unitListURI());
+		RDFNode n = prop.getPropertyValue(unitListProperty);
+		String unitListURI = null;
+		if (n != null) {
+			if (n.isLiteral()) {
+				unitListURI = n.asLiteral().getString();
+			} else {
+				unitListURI = n.toString();
+			}
+		}
+		return unitListURI;
+	}
 
 	/**
 	 * Helper method to obtain all necessary information for indexing a property
@@ -351,6 +391,7 @@ public class OntologyServiceImpl implements OntologyService {
         index.setNameSpace(prop.getNameSpace());
         index.setRange(getRange(prop));
         index.setVisible(isVisbileProperty(prop));
+
 		// check for the value qualifier, might be null
 		ValueQualifier valueQualifier = getValueQualifier(prop);
 		// QUANTITY and TEXT may have additional information
@@ -362,6 +403,7 @@ public class OntologyServiceImpl implements OntologyService {
 				// store result as units
 				index.setUnits(units);
 				index.setValueQualifier(ValueQualifier.QUANTITY);
+				index.setUnitListUri(getUnitListURI(prop));
 				break;
 			case TEXT:
 			case CODE:
@@ -369,6 +411,7 @@ public class OntologyServiceImpl implements OntologyService {
 				Set<String> codes = collectAllowedValues(prop, codeProperties(model));
 				index.setValueCodes(codes);
 				index.setValueQualifier(ValueQualifier.TEXT);
+				index.setCodeListUri(getCodeListURI(prop));
 				break;
 			default:
 				index.setValueQualifier(valueQualifier);
