@@ -22,7 +22,7 @@ import eu.nimble.service.model.solr.party.PartyType;
  * 
  * <ul>
  * <li>item --> party via {@link ItemType#getManufacturerId()}: use join names <i>manufacturer</i> or <i>party</i> 
- * <li>item --> classification via {@link ItemType#getClassificationUri()}: use join names <i>productType</i> or <i>classfication</i> 
+ * <li>item --> classification via {@link ItemType#getClassificationUri()}: use join names <i>productType</i> or <i>classification</i>
  * <li>class --> property via {@link ClassType#getProperties()}: use join names <i>property</i> or <i>prop</i> 
  * <li>property --> class via {@link PropertyType#getProduct()}: use join names <i>product</i> or <i>productType</i> or <i>class</i> 
  * </ul>
@@ -164,6 +164,17 @@ public enum JoinInfo {
 	public String getJoinedCollection() {
 		return joinedCollection;
 	}
+
+	/**
+	 *
+	 * @return joinPrefix the string value of Join prefix
+	 */
+	public String getJoinPrefix() {
+		String joinPrefix = "{!join from=" + joinedField + " to="
+				+ field + " fromIndex=" + joinedCollection + "}";
+		return joinPrefix;
+	}
+
 	public Class<?> getJoinedType() {
 		return classType;
 	}
