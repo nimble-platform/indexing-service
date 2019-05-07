@@ -55,6 +55,12 @@ public interface OntologyService {
 		Property p2 = model.createProperty(NIMBLE_CATALOGUE_NS + HAS_CODE_LIST);
 		return new Property[] {p1, p2};
 	}
+	default String[] unitResourceTypes() {
+		return new String[] { NIMBLE_UNIT_TYPE_URI };
+	}
+	default String[] codeResourceTypes() {
+		return new String[] { NIMBLE_CODE_TYPE_URI };
+	}
 	/**
 	 * retrieve the uri's for a quantity type range.
 	 * @return
@@ -82,6 +88,12 @@ public interface OntologyService {
 	 */
 	default String codePropertyURI() {
 		return NIMBLE_CATALOGUE_NS + CODE_PROPERTY_TYPE;
+	}
+	default String codeTypeURI() {
+		return NIMBLE_CODE_TYPE_URI;
+	}
+	default String unitTypeURI() {
+		return NIMBLE_UNIT_TYPE_URI;
 	}
 	default String isVisibleURI() {
 		return NIMBLE_CATALOGUE_NS + IS_VISIBLE;
