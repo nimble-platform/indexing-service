@@ -24,3 +24,4 @@ logstash:
 
 nimble:
   corsEnabled: true
+  platformHost: ${INDEXING_SERVICE_URL:http://localhost:8090}
