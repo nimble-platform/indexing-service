@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.mapping.context.MappingContextEvent;
+import org.springframework.data.solr.core.mapping.SolrDocument;
 import org.springframework.data.solr.core.mapping.SolrPersistentEntity;
 import org.springframework.data.solr.core.schema.SchemaDefinition;
 import org.springframework.data.solr.server.SolrClientFactory;
@@ -56,11 +57,13 @@ public class SolrPersistentEntitySchemaCreator implements ApplicationListener<Ma
 	public void onApplicationEvent(MappingContextEvent<?, ?> event) {
 
 		if (features.contains(Feature.CREATE_MISSING_FIELDS)) {
-
+			
 			if (event.getPersistentEntity() instanceof SolrPersistentEntity) {
 				SolrPersistentEntity<?> entity = (SolrPersistentEntity<?>) event.getPersistentEntity();
-				if (!processed.contains(entity.getType())) {
-					process(entity);
+				if (entity.isAnnotationPresent(SolrDocument.class)) {
+					if (!processed.contains(entity.getType())) {
+						process(entity);
+					}
 				}
 			}
 		}

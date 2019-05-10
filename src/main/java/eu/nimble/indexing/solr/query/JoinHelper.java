@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.springframework.data.solr.core.query.Criteria;
 import org.springframework.data.solr.core.query.Field;
@@ -13,6 +14,8 @@ import org.springframework.data.solr.core.query.SimpleFilterQuery;
 
 public class JoinHelper {
 	private static final String QUOTE = "\"";
+	
+	private final String collection;
 
 	private Set<Field> facetFields = new HashSet<>();
 	private Set<FilterQuery> filterQueries = new HashSet<>();
@@ -22,6 +25,10 @@ public class JoinHelper {
 	
 	
 	private Map<JoinInfo, Set<FilterQuery>> filter = new HashMap<>();
+	
+	public JoinHelper(String collection) {
+		this.collection = collection;
+	}
 	
 	public void addFilter(String fromString) {
 		
@@ -34,7 +41,7 @@ public class JoinHelper {
 			if ( joinDelimPos > 0 ) {
 				String joinName = fieldName.substring(0,joinDelimPos);
 				// find the join info
-				joinInfo = JoinInfo.getJoinInfo(joinName);
+				joinInfo = JoinInfo.getJoinInfo(getCollection(), joinName);
 				
 				if (joinInfo != null) {
 					// get the remainder of the join
@@ -50,6 +57,7 @@ public class JoinHelper {
 			}
 		}
 	}
+
 	/**
 	 * Add a facet field, perform join verification
 	 * @param fieldName
@@ -62,7 +70,7 @@ public class JoinHelper {
 			String joinName = fieldName.substring(0,joinDelimPos);
 			
 			// find the join info
-			joinInfo = JoinInfo.getJoinInfo(joinName);
+			joinInfo = JoinInfo.getJoinInfo(collection, joinName);
 			
 			if (joinInfo != null) {
 				// keep the join (mappedName and info)
@@ -80,7 +88,45 @@ public class JoinHelper {
 			facetFields.add(new SimpleField(fieldName));
 		}
 	}
-	
+
+	/**
+	 * @param queryString the query to parse with joins
+	 * @return parsed query string with joins incorporated
+	 */
+	public String parseQuery(String queryString) {
+		String[] queryParts = queryString.split(Pattern.quote(" "));
+		String query = "";
+
+		for (String queryPart : queryParts) {
+			int fieldDelimPos = queryPart.indexOf(":");
+			int joinDelimPosOuter = queryPart.indexOf(".");
+			if (fieldDelimPos > 0) {
+				String fieldName = queryPart.substring(0, fieldDelimPos);
+				//handle join statement separately
+				if (joinDelimPosOuter > 0) {
+					int joinPosInner = fieldName.indexOf(".");
+					if (joinPosInner > 0) {
+						String joinName = fieldName.substring(0, joinPosInner);
+						JoinInfo joinInfo = JoinInfo.getJoinInfo(joinName);
+
+						if (joinInfo != null) {
+							String joinedFieldName = fieldName.substring(joinPosInner + 1);
+							String fieldValue = queryPart.substring(fieldDelimPos + 1);
+							String joinQuery = joinInfo.getJoinPrefix() + joinedFieldName + ":" + fieldValue;
+							query += joinQuery + " ";
+						}
+					}
+				} else {
+					query += queryPart + " ";
+				}
+			} else {
+				query += queryPart + " ";
+			}
+		}
+		return query;
+	}
+
+
 	public Set<String> getJoins() {
 		return joinedList.keySet();
 	}
@@ -126,13 +172,12 @@ public class JoinHelper {
 		}
 		filter.get(info).add(new SimpleFilterQuery(criteria));
 		// 
-		SimpleFilterQuery joinQuery = new SimpleFilterQuery(criteria);
+		SimpleFilterQuery joinQuery = new SimpleFilterQuery();
 		joinQuery.setJoin(info.getJoin());
 		filterQueries.add(joinQuery);
 	}
 	private void addFilter(Criteria criteria) {
 		SimpleFilterQuery query = new SimpleFilterQuery(criteria);
-
 		filterQueries.add(query);
 
 	}
@@ -148,6 +193,9 @@ public class JoinHelper {
 			return String.format("%s%s%s", QUOTE, in, QUOTE);
 		}
 		return in;
+	}
+	public String getCollection() {
+		return collection;
 	}
 
 }

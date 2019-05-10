@@ -1,6 +1,10 @@
 package eu.nimble.indexing.solr.schema;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 import org.springframework.data.mapping.PropertyHandler;
 import org.springframework.data.solr.core.mapping.SolrPersistentEntity;
@@ -31,7 +35,24 @@ public class SolrSchemaResolver {
 				schemaDefinition.addFieldDefinition(fieldDefinition);
 			}
 		});
-
+		List<FieldDefinition> copyOnly = new ArrayList<FieldDefinition>();
+		schemaDefinition.getFields().forEach((Consumer<FieldDefinition>) def -> {
+			if (! def.getCopyFields().isEmpty()) {
+				for (String copyField : def.getCopyFields()) {
+					if (! schemaDefinition.containsField(copyField)) {
+						FieldDefinition copy = createFieldDefinitionForCopyField(def, copyField);
+						if( copy !=null ) {
+							copyOnly.add(copy);
+						}
+					}
+				}
+			}
+		});
+		for (FieldDefinition c : copyOnly) {
+			if (! schemaDefinition.containsField(c.getName())) {
+				schemaDefinition.addFieldDefinition(c);
+			}
+		}
 		return schemaDefinition;
 	}
 	private boolean isMultiValued(SolrPersistentProperty property) {
@@ -67,6 +88,16 @@ public class SolrSchemaResolver {
 			definition.setCopyFields(copyFields);
 		}
 
+		return definition;
+	}
+	@Nullable
+	protected FieldDefinition createFieldDefinitionForCopyField(FieldDefinition source, String fieldName) {
+		FieldDefinition definition = new FieldDefinition(fieldName);
+		definition.setMultiValued(true);
+		definition.setIndexed(source.isIndexed());
+		definition.setType(source.getType());
+		definition.setRequired(false);
+		definition.setCopyFields(Collections.emptyList());
 		return definition;
 	}
 

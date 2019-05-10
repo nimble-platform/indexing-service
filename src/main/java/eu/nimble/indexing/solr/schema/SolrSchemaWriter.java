@@ -2,6 +2,7 @@ package eu.nimble.indexing.solr.schema;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.data.solr.core.schema.SchemaDefinition;
@@ -37,24 +38,31 @@ public class SolrSchemaWriter extends org.springframework.data.solr.core.schema.
 	protected void updateSchema(SchemaDefinition schemaDefinition) {
 
 		SchemaDefinition existing = collectionOperations.loadSchema(schemaDefinition.getCollectionName());
+		SchemaOperations schemaOps = collectionOperations.getSchemaOperations(schemaDefinition.getCollectionName());
 
-		List<FieldDefinition> fieldsToBeCreated = new ArrayList<>();
+		
 		for (FieldDefinition fieldDefinition : schemaDefinition.getFields()) {
-
-			if (!existing.containsField(fieldDefinition.getName()))
-				fieldsToBeCreated.add(fieldDefinition);
+			if (! fieldDefinition.getCopyFields().isEmpty()) {
+				writeCopyToTarget(schemaOps, fieldDefinition.getCopyFields(), schemaDefinition, existing);
+			}
+			if (!existing.containsField(fieldDefinition.getName())) {
+				// add the missing field, any copy target must be already present
+				schemaOps.addField(fieldDefinition);
+			}
 		}
-
-		writeFieldDefinitions(fieldsToBeCreated, schemaDefinition.getCollectionName());
 	}
-
-	private void writeFieldDefinitions(Collection<FieldDefinition> definitions, String collectionName) {
-
-		if (!CollectionUtils.isEmpty(definitions)) {
-
-			SchemaOperations schemaOps = collectionOperations.getSchemaOperations(collectionName);
-			for (FieldDefinition fd : definitions) {
-				schemaOps.addField(fd);
+	private void writeCopyToTarget(SchemaOperations schemaOps, List<String> copyTo, SchemaDefinition definition, SchemaDefinition existing) {
+		for (String copyField : copyTo ) {
+			if ( !existing.containsField(copyField)) {
+				FieldDefinition target = definition.getFieldDefinition(copyField);
+				if ( target!= null) {
+					if (! target.getCopyFields().isEmpty()) {
+						writeCopyToTarget(schemaOps, target.getCopyFields(), definition, existing);
+					}
+					// add the copy target to the schema & to existing
+					schemaOps.addField(target);
+					existing.addFieldDefinition(target);
+				}
 			}
 		}
 	}
