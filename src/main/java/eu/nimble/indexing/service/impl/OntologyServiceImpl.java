@@ -2,14 +2,13 @@ package eu.nimble.indexing.service.impl;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Collection;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.HashMap;
 import java.util.HashSet;
-
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -27,7 +26,6 @@ import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
@@ -45,9 +43,11 @@ import eu.nimble.indexing.repository.ClassRepository;
 import eu.nimble.indexing.repository.CodedRepository;
 import eu.nimble.indexing.repository.PropertyRepository;
 import eu.nimble.indexing.service.OntologyService;
+import eu.nimble.indexing.service.impl.owl.NIMBLEOntology;
 import eu.nimble.service.model.solr.item.ItemType;
 import eu.nimble.service.model.solr.owl.ClassType;
 import eu.nimble.service.model.solr.owl.CodedType;
+import eu.nimble.service.model.solr.owl.Concept;
 import eu.nimble.service.model.solr.owl.PropertyType;
 import eu.nimble.service.model.solr.owl.ValueQualifier;
 /**
@@ -63,15 +63,13 @@ public class OntologyServiceImpl implements OntologyService {
 
 	private static final Logger logger = LoggerFactory.getLogger(OntologyServiceImpl.class);
 	
-
 	@Autowired
 	private PropertyRepository propRepo;
 	@Autowired 
 	private ClassRepository classRepository;
 	@Autowired
 	private CodedRepository codedRepository;
-//	@Autowired
-//	PropertyService propRepo;
+
 	@Override
 	public boolean deleteNamespace(String namespace) {
 		propRepo.deleteByNameSpace(namespace);
@@ -220,67 +218,31 @@ public class OntologyServiceImpl implements OntologyService {
 				// collect the data
 				.collect(Collectors.toSet());
 	}
+	/**
+	 * Detect the {@link ValueQualifier} for this property
+	 * @param prop
+	 * @return
+	 */
 	private ValueQualifier getValueQualifier(OntProperty prop) {
-		if ( isCodePropertyType(prop)) {
-			// when coded property, value qualifier is set to TEXT
-			return ValueQualifier.TEXT;
-		}
-		if ( isQuantityPropertyType(prop)) {
-			// when quantity property, value qualifier is set to QUANTITY
+		if ( NIMBLEOntology.isQuantityProperty(prop)) {
 			return ValueQualifier.QUANTITY;
 		}
-		// try to obtain valueQualifier from range
-		return fromRange(prop.getRange());
-	}
-	/**
-	 * Determine whether the current property is a NIMBLE quantity type
-	 * @param prop
-	 * @return
-	 */
-	private boolean isQuantityPropertyType(OntProperty prop) {
-		Property p = prop.getModel().createProperty(quantityPropertyURI());
-		return prop.hasURI(p.getURI()) || prop.hasSuperProperty(prop, false);
-	}
-	/**
-	 * determine whether the provide range resource is related to nimble quantity
-	 * @param resource
-	 * @return
-	 */
-	private boolean isOfRange(OntResource resource, String ... rangeUris) {
-		for (String rangeUri : rangeUris ) {
-			// 
-			if ( resource.hasURI(rangeUri)) {
-				return true;
-			}
-			Resource res = resource.getModel().createResource(rangeUri);
-			if ( resource.as(OntClass.class).hasSuperClass(res) ) {
-				return true;
-			}
+		if ( NIMBLEOntology.isCodeProperty(prop)) {
+			return ValueQualifier.TEXT;
 		}
-		return false;
-	
-	}
 
-	/**
-	 * Determine whether the current property is a NIMBLE code type
-	 * @param prop
-	 * @return
-	 */
-	private boolean isCodePropertyType(OntProperty prop) {
-		// 
-		Property p = prop.getModel().createProperty(codePropertyURI());
-		return prop.hasURI(p.getURI()) || prop.hasSuperProperty(p, false);
+		return fromRange(prop.getRange());
 	}
 	private ValueQualifier fromRange(OntResource range) {
 		if ( range != null && !range.isAnon() ) {
-			if ( isOfRange(range, codedRangeUris()) ) {
-				return ValueQualifier.TEXT;
+			if (range.getNameSpace().equals(XSD.NS)) {
+				return fromXSDLocalName(range.getLocalName());
 			}
-			else if ( isOfRange(range, quantityRangeUris()) ) {
+			else if ( NIMBLEOntology.isUnitType(range)) {
 				return ValueQualifier.QUANTITY;
 			}
-			else if (range.getNameSpace().equals(XSD.NS)) {
-				return fromXSDLocalName(range.getLocalName());
+			else if ( NIMBLEOntology.isCodeType(range)) {
+				return ValueQualifier.TEXT;
 			}
 		}
 		return null;
@@ -313,68 +275,6 @@ public class OntologyServiceImpl implements OntologyService {
         }
 
 	}
-	/**
-	 * check whether a property should be marked "invisible"
-	 * @param prop
-	 * @return
-	 */
-	private boolean isVisbileProperty(OntProperty prop) {
-		Property isVisibleProperty = prop.getModel().createProperty(isVisibleURI());
-		RDFNode n = prop.getPropertyValue(isVisibleProperty);
-		if (n != null ) {
-			return n.asLiteral().getBoolean();
-		}
-		else {
-			isVisibleProperty = prop.getModel().createProperty(isHiddenURI());
-			n = prop.getPropertyValue(isVisibleProperty);
-			if (n != null ) {
-				// need to reverse the setting of isHiddenOnUI!!
-				return !n.asLiteral().getBoolean();
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * get the codeList Uri
-	 *
-	 * @param prop
-	 * @return codeList Uri
-	 */
-	private String getCodeListURI(OntProperty prop) {
-		Property codeListProperty = prop.getModel().createProperty(codeListURI());
-		RDFNode n = prop.getPropertyValue(codeListProperty);
-		String codeListURI = null;
-		if (n != null) {
-			if (n.isLiteral()) {
-				codeListURI = n.asLiteral().getString();
-			} else {
-				codeListURI = n.toString();
-			}
-		}
-		return codeListURI;
-
-	}
-
-	/**
-	 * get the unitList Uri
-	 *
-	 * @param prop
-	 * @return unitList Uri
-	 */
-	private String getUnitListURI(OntProperty prop) {
-		Property unitListProperty = prop.getModel().createProperty(unitListURI());
-		RDFNode n = prop.getPropertyValue(unitListProperty);
-		String unitListURI = null;
-		if (n != null) {
-			if (n.isLiteral()) {
-				unitListURI = n.asLiteral().getString();
-			} else {
-				unitListURI = n.toString();
-			}
-		}
-		return unitListURI;
-	}
 
 	/**
 	 * Helper method to obtain all necessary information for indexing a property
@@ -383,14 +283,15 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @return
 	 */
     private PropertyType processProperty(OntModel model, OntProperty prop) {
-
-        PropertyType index = new PropertyType();
+    	// find the existing property or create a new one
+        PropertyType index = propRepo.findById(prop.getURI()).orElse(new PropertyType());
         index.setUri(prop.getURI());
         //check if the property should be hidden from the UI
         index.setLocalName(prop.getLocalName());
         index.setNameSpace(prop.getNameSpace());
         index.setRange(getRange(prop));
-        index.setVisible(isVisbileProperty(prop));
+        // check the visible property, defaults to true
+        index.setVisible(NIMBLEOntology.isVisible(prop, true));
 
 		// check for the value qualifier, might be null
 		ValueQualifier valueQualifier = getValueQualifier(prop);
@@ -398,20 +299,23 @@ public class OntologyServiceImpl implements OntologyService {
 		if ( valueQualifier != null ) {
 			switch ( valueQualifier) {
 			case QUANTITY:
-				// when quantity search for unit properties
-				Set<String> units = collectAllowedValues(prop, unitProperties(model));
-				// store result as units
-				index.setUnits(units);
 				index.setValueQualifier(ValueQualifier.QUANTITY);
-				index.setUnitListUri(getUnitListURI(prop));
+				// when quantity search for unit properties, store them in the codeValues 
+				
+				processCodedTypes(index, ValueQualifier.QUANTITY, prop);
+//				Set<String> units = collectAllowedValues(prop, unitProperties(model));
+//				// store result as units
+//				index.setUnits(units);
+//				index.setUnitListUri(getUnitListURI(prop));
 				break;
 			case TEXT:
 			case CODE:
 				// when coded values, search for code properties
-				Set<String> codes = collectAllowedValues(prop, codeProperties(model));
-				index.setValueCodes(codes);
 				index.setValueQualifier(ValueQualifier.TEXT);
-				index.setCodeListUri(getCodeListURI(prop));
+				processCodedTypes(index, ValueQualifier.TEXT, prop);
+//				Set<String> codes = collectAllowedValues(prop, codeProperties(model));
+//				index.setValueCodes(codes);
+//				index.setCodeListUri(getCodeListURI(prop));
 				break;
 			default:
 				index.setValueQualifier(valueQualifier);
@@ -422,7 +326,7 @@ public class OntologyServiceImpl implements OntologyService {
         index.setLabel(obtainMultilingualValues(prop, RDFS.label, SKOS.prefLabel));
         // hiddenlabels
         index.setHiddenLabel(obtainMultilingualLabels(prop,SKOS.hiddenLabel));
-        //alternateLabels
+        // alternateLabels
         index.setAlternateLabel(obtainMultilingualLabels(prop,SKOS.altLabel));
 
         // try to find labels by searching rdfs:comment and skos:definition
@@ -442,6 +346,7 @@ public class OntologyServiceImpl implements OntologyService {
         prop.listDomain();
         if (prop.getDomain() != null && prop.getDomain().isClass()) {
             Set<String> usage = getUsage(model, prop.getDomain().asClass());
+            
             index.getProduct().addAll(usage);
         }
         //
@@ -452,104 +357,98 @@ public class OntologyServiceImpl implements OntologyService {
         return index;
     }
     /**
-     * Method collecting all string literals allowed for this property
+     * 
+     * @param pt
+     * @param qualifier
      * @param resource
-     * @param props
      * @return
      */
-    private Set<String> collectAllowedValues(OntResource resource, Property ... props) {
-    	// 
+    private void processCodedTypes(PropertyType pt, ValueQualifier qualifier, OntProperty resource) {
+    	// process all relevant nimble statements
     	Set<String> codeSet = new HashSet<String>();
-    	for ( Property prop : props) {
-	    		
-	//    	Property unitCode = resource.getModel().createProperty(NIMBLE_CATALOGUE_NS, UNIT_CODE);
-	    	
-	    	StmtIterator codeList = resource.listProperties(prop);
-	    	while (codeList.hasNext()) {
-	    		Statement stmt = codeList.next();
-	    		if ( stmt.getObject().isLiteral()) {
-	    			codeSet.add(stmt.getObject().asLiteral().getString());
-	    		}
-	    		else if ( stmt.getObject().isResource()) {
-	    			// process the nimble-list item and add the returned code
-	    			codeSet.addAll(processNimbleList(stmt.getObject().as(OntResource.class), props));
-	    		}
-	    	}
-    	}
-    	return codeSet;
-    }
-    private Set<String> processNimbleList(OntResource listItem, Property ... props ) {
-    	// TODO: check for nimble list type
-    	Set<String> codeSet = new HashSet<String>();
-    	for ( Property prop : props) {
-   	
-	    	StmtIterator codeList = listItem.listProperties(prop);
-	    	while (codeList.hasNext()) {
-	    		Statement stmt = codeList.next();
-	    		if ( stmt.getObject().isLiteral()) {
-	    			codeSet.add(stmt.getObject().asLiteral().getString());
-	    		}
-	    		else if ( stmt.getObject().isResource()) {
-	    			// process the nimble-list item and add the returned code
-	    			
-	    			codeSet.add(processNimbleListItem(listItem, stmt.getObject().as(OntResource.class)));
-	    		}
-	    	}
-    	}
-    	return codeSet;
-    }
-    private String processNimbleListItem(OntResource list, OntResource resource) {
-    	
+    	// preset the codeSet with any existing
+    	codeSet.addAll(pt.getCodeList());
     	// 
+    	String codeListUri = null;
     	
-    	CodedType index = new CodedType();
+    	Iterator<Statement> nimbleIter = NIMBLEOntology.listNimbleStatements(resource);
+    	while ( nimbleIter.hasNext() ) {
+    		Statement stmt = nimbleIter.next();
+    		if ( stmt.getObject().isLiteral()) {
+    			// keep the literal as a possbile code
+    			codeSet.add(stmt.getObject().asLiteral().getString());
+    		}
+    		else if ( stmt.getObject().isResource()) {
+    			OntResource nRes = stmt.getObject().as(OntResource.class);
+    			// in case it is a list 
+    			if ( NIMBLEOntology.isListType(nRes)) {
+    				// keep the uri of the list id ... check for the nimble:id element
+    				codeListUri = NIMBLEOntology.listId(nRes, nRes.getURI());
+    				// collect the codes from the list
+    				codeSet.addAll(processCodedList(nRes));
+    			}
+    			else {
+    				// process the coded type along the the property as list identifier
+    				// thus, keep the property uri as list id
+    				codeListUri = resource.getURI();
+    				codeSet.add(processCodedItem(resource, nRes));
+    			}
+    		}
+    	}
+    	// store the codelist 
+    	pt.getCodeList().addAll(codeSet);
+    	// store the list uri - helpful to obtain the list of codes
+    	pt.setCodeListId(codeListUri);
+    }
+
+    private Set<String> processCodedList(OntResource list) {
+    	Set<String> codes = new HashSet<String>();
+    	Iterator<Statement> iter = NIMBLEOntology.listNimbleStatements(list);
+    	while (iter.hasNext()) {
+    		//
+    		Statement stmt = iter.next();
+    		if ( stmt.getObject().isLiteral()) {
+    			// keep the literal as a possbile code
+    			codes.add(stmt.getObject().asLiteral().getString());
+    		}
+    		else if ( stmt.getObject().isResource()) {
+    			OntResource nRes = stmt.getObject().as(OntResource.class);
+    			// 
+    			codes.add(processCodedItem(list, nRes));
+    			// process the nimble-list item and add the returned code
+    		}
+    	}
+    	return codes;
+    }
+    private String processCodedItem(OntResource list, OntResource item) {
+    	
+    	CodedType codedType = codedRepository.findById(item.getURI()).orElse(new CodedType());
+    	codedType.setUri(item.getURI());
+    	codedType.setNameSpace(item.getNameSpace());
+    	codedType.setLocalName(item.getLocalName());
     	// 
-    	index.setListId(list.getURI());
-    	index.setUri(resource.getURI());
-    	index.setLocalName(resource.getLocalName());
-    	index.setNameSpace(resource.getNameSpace());
-    	// use the code (encoded as value property)
-    	index.setCode(getValueProperty(resource));
-    	// try to find labels by searching rdfs:label and skos:prefLabel
-    	index.setLabel(obtainMultilingualValues(resource, RDFS.label, SKOS.prefLabel));
-    	// try to find labels by searching rdfs:comment and skos:definition
-    	index.setComment(obtainMultilingualValues(resource, RDFS.comment, SKOS.definition));
-    	codedRepository.save(index);
-    	return index.getCode();
+    	// process all the labels
+    	processLabels(codedType, item);
+    	// check for the list id and the value
+    	codedType.setListId(NIMBLEOntology.listId(list, list.getURI()));
+    	// find the nimble:hasCode (use localName as default)
+    	codedType.setCode(NIMBLEOntology.hasCode(item, item.getLocalName()));
+    	// store the coded item
+    	codedRepository.save(codedType);
+    	// return the code
+    	return codedType.getCode();
     }
     /**
-     * Helper method obtaining the code property from the given resource
+     * helper method processing all the labels (preferred, alternate, hidden) including description & comments
+     * @param concept
      * @param resource
-     * @return
      */
-    private String getValueProperty(OntResource resource) {
-    	Property codeProperty = resource.getModel().createProperty(codeValueURI());
-    	// 
-    	Statement stmt = resource.getProperty(codeProperty);
-    	if ( stmt != null) {
-    		RDFNode node = stmt.getObject();
-    		if (node.isResource()){
-    			return node.asResource().getLocalName();
-    		}
-    		else {
-    			// default - treat it as Literal
-    			return node.asLiteral().getString();
-    		}
-    	}
-//    	codeProperty = resource.getModel().createProperty(NIMBLE_CATALOGUE_NS, HAS_);
-//    	stmt = resource.getProperty(codeProperty);
-//    	if ( stmt != null) {
-//    		RDFNode node = stmt.getObject();
-//    		if (node.isResource()){
-//    			return node.asResource().getLocalName();
-//    		}
-//    		else {
-//    			// default - treat it as Literal
-//    			return node.asLiteral().getString();
-//    		}
-//    	}
-    	// use the local name as fallback
-    	return resource.getLocalName();
+    private void processLabels(Concept concept, OntResource resource) {
+    	concept.setLabel(obtainMultilingualValues(resource, RDFS.label, SKOS.prefLabel));
+    	concept.setAlternateLabel(obtainMultilingualLabels(resource, SKOS.altLabel));
+    	concept.setHiddenLabel(obtainMultilingualLabels(resource, SKOS.hiddenLabel));
+    	concept.setDescription(obtainMultilingualValues(resource, SKOS.definition));
+    	concept.setComment(obtainMultilingualValues(resource, RDFS.comment, SKOS.note));
     }
 	/**
 	 * Helper method to extract multilingual labels
