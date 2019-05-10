@@ -25,11 +25,15 @@
     <!-- http://www.nimble-project.org/catalogue#hasCode -->
 
     <owl:AnnotationProperty rdf:about="http://www.nimble-project.org/catalogue#hasCode">
-        <rdfs:range rdf:resource="http://www.nimble-project.org/catalogue#CodeList"/>
+        <rdfs:range rdf:resource="http://www.nimble-project.org/catalogue#CodeType"/>
+        <rdfs:range rdf:resource="http://www.nimble-project.org/catalogue#UnitType"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
         <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#CodeList"/>
         <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#CodeProperty"/>
         <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#CodeType"/>
+        <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#QuantityProperty"/>
+        <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#UnitList"/>
+        <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#UnitType"/>
     </owl:AnnotationProperty>
     
 
@@ -39,6 +43,7 @@
     <owl:AnnotationProperty rdf:about="http://www.nimble-project.org/catalogue#hasCodeList">
         <rdfs:range rdf:resource="http://www.nimble-project.org/catalogue#CodeList"/>
         <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#CodeProperty"/>
+        <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#QuantityProperty"/>
     </owl:AnnotationProperty>
     
 
@@ -46,6 +51,7 @@
     <!-- http://www.nimble-project.org/catalogue#hasSymbol -->
 
     <owl:AnnotationProperty rdf:about="http://www.nimble-project.org/catalogue#hasSymbol">
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#normalizedString"/>
         <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#UnitType"/>
     </owl:AnnotationProperty>
     
@@ -54,7 +60,7 @@
     <!-- http://www.nimble-project.org/catalogue#hasUnit -->
 
     <owl:AnnotationProperty rdf:about="http://www.nimble-project.org/catalogue#hasUnit">
-        <rdfs:range rdf:resource="http://www.nimble-project.org/catalogue#UnitList"/>
+        <rdfs:range rdf:resource="http://www.nimble-project.org/catalogue#UnitType"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
         <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#QuantityProperty"/>
         <rdfs:domain rdf:resource="http://www.nimble-project.org/catalogue#UnitList"/>
@@ -213,9 +219,7 @@
 
     <!-- http://www.nimble-project.org/catalogue#QuantityType -->
 
-    <owl:Class rdf:about="http://www.nimble-project.org/catalogue#QuantityType">
-        <owl:equivalentClass rdf:resource="http://www.nimble-project.org/catalogue#UnitType"/>
-    </owl:Class>
+    <owl:Class rdf:about="http://www.nimble-project.org/catalogue#QuantityType"/>
     
 
 
