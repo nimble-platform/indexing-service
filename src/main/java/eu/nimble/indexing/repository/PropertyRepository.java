@@ -42,8 +42,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.UNITS_FIELD,
-			IPropertyType.VALUE_CODES_FIELD
+			IPropertyType.CODE_LIST_FIELD,
+			IPropertyType.CODE_LIST_ID_FIELD
 		})
 	List<PropertyType> findByProduct(String product);
 	/**
@@ -70,8 +70,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.UNITS_FIELD,
-			IPropertyType.VALUE_CODES_FIELD
+			IPropertyType.CODE_LIST_FIELD,
+			IPropertyType.CODE_LIST_ID_FIELD
 		})
 	List<PropertyType> findByProductIn(Set<String> products);
 	/**
@@ -99,8 +99,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.UNITS_FIELD,
-			IPropertyType.VALUE_CODES_FIELD
+			IPropertyType.CODE_LIST_FIELD,
+			IPropertyType.CODE_LIST_ID_FIELD
 		})
 	List<PropertyType> findByNameSpaceAndLocalNameIn(String namespace, Set<String> localNames);
 	/**
@@ -127,8 +127,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.UNITS_FIELD,
-			IPropertyType.VALUE_CODES_FIELD
+			IPropertyType.CODE_LIST_FIELD,
+			IPropertyType.CODE_LIST_ID_FIELD
 		})
 	List<PropertyType> findByUriIn(Set<String> uri);
 	/**
@@ -162,8 +162,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.UNITS_FIELD,
-			IPropertyType.VALUE_CODES_FIELD
+			IPropertyType.CODE_LIST_FIELD,
+			IPropertyType.CODE_LIST_ID_FIELD
 		})
 	List<PropertyType> findByLocalNameOrItemFieldNamesIn(Set<String> names);
 	/**
