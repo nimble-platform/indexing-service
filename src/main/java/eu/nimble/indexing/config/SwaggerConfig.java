@@ -1,5 +1,7 @@
 package eu.nimble.indexing.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +22,8 @@ import static springfox.documentation.service.ApiInfo.DEFAULT_CONTACT;
 @EnableWebMvc
 public class SwaggerConfig {
 
+    private static final Logger logger = LoggerFactory.getLogger(SwaggerConfig.class);
+
     @Value("${nimble.platformHost:}")
     private String platformHost;
 
@@ -33,19 +37,19 @@ public class SwaggerConfig {
 
     @Bean
     public Docket api() {
+        logger.info("Indexing platformhost : " + platformHost);
         platformHost = platformHost.replace("https://", "");
         platformHost = platformHost.replace("http://","");
-        platformHost = platformHost.replace("/index/indexing-service","/index");
-        platformHost = platformHost.replace("/index/index","/index");
-
+        platformHost = platformHost.replace("/index","");
+        logger.info("Indexing platformhost : " + platformHost);
 
         return new Docket(DocumentationType.SWAGGER_2)
                 .host(platformHost)
-                .apiInfo(DEFAULT_API_INFO)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("eu.nimble"))
                 .paths(PathSelectors.any())
-                .build();
+                .build()
+                .apiInfo(DEFAULT_API_INFO);
     }
 
 }
