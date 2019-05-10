@@ -35,6 +35,9 @@ public class SwaggerConfig {
     public Docket api() {
         platformHost = platformHost.replace("https://", "");
         platformHost = platformHost.replace("http://","");
+        platformHost = platformHost.replace("/index/indexing-service","/index");
+        platformHost = platformHost.replace("/index/index","/index");
+
 
         return new Docket(DocumentationType.SWAGGER_2)
                 .host(platformHost)
