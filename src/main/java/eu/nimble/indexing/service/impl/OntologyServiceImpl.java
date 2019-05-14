@@ -231,7 +231,7 @@ public class OntologyServiceImpl implements OntologyService {
 			return ValueQualifier.TEXT;
 		}
 		if ( NIMBLEOntology.isFileProperty(prop)) {
-			return ValueQualifier.TEXT;
+			return ValueQualifier.FILE;
 		}
 
 		return fromRange(prop.getRange());

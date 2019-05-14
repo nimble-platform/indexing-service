@@ -165,6 +165,7 @@
     <!-- http://www.nimble-project.org/catalogue#FileProperty -->
 
     <owl:ObjectProperty rdf:about="http://www.nimble-project.org/catalogue#FileProperty">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
         <rdfs:label xml:lang="en">Property allowing/triggering file upload possibilites</rdfs:label>
     </owl:ObjectProperty>
     
