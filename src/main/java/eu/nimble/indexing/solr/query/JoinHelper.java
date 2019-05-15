@@ -172,7 +172,7 @@ public class JoinHelper {
 		}
 		filter.get(info).add(new SimpleFilterQuery(criteria));
 		// 
-		SimpleFilterQuery joinQuery = new SimpleFilterQuery();
+		SimpleFilterQuery joinQuery = new SimpleFilterQuery(criteria);
 		joinQuery.setJoin(info.getJoin());
 		filterQueries.add(joinQuery);
 	}
