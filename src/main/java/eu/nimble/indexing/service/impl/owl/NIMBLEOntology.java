@@ -40,6 +40,7 @@ public class NIMBLEOntology {
 	
 	public static final String QUANTITY_PROPERTY_TYPE = "QuantityProperty";
 	public static final String CODE_PROPERTY_TYPE = "CodeProperty";
+	public static final String FILE_PROPERTY_TYPE = "FileProperty";
 
 	
 	private static final String ONT_FILE = "/NIMBLEOntology.owl";
@@ -136,6 +137,13 @@ public class NIMBLEOntology {
 	}
 	private boolean checkUnitTypeProperty(OntProperty resource) {
 		OntProperty unitTypeProperty = getOntProperty(NS + QUANTITY_PROPERTY_TYPE);
+		return resource.hasURI(unitTypeProperty.getURI()) || resource.hasSuperProperty(unitTypeProperty, false);
+	}
+	public static boolean isFileProperty(OntProperty resource) { 
+		return getInstance().checkFileTypeProperty(resource);
+	}
+	private boolean checkFileTypeProperty(OntProperty resource) {
+		OntProperty unitTypeProperty = getOntProperty(NS + FILE_PROPERTY_TYPE);
 		return resource.hasURI(unitTypeProperty.getURI()) || resource.hasSuperProperty(unitTypeProperty, false);
 	}
 	/**
