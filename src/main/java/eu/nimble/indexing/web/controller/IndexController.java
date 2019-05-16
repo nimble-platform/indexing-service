@@ -440,7 +440,7 @@ public class IndexController {
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
-	@ApiOperation(value = "", notes = "Search for a property", response = Boolean.class)
+	@ApiOperation(value = "", notes = "Index a property", response = Boolean.class)
 	@PostMapping("/property")
 	public ResponseEntity<Boolean> setProperty(
 //			@RequestHeader(value = "Authorization") String bearerToken, 
