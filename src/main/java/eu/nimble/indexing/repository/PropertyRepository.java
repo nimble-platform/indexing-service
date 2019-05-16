@@ -17,6 +17,28 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 	 * @param uri
 	 * @return
 	 */
+	@Query(fields={
+			IPropertyType.TYPE_FIELD,
+			IPropertyType.IS_FACET_FIELD,
+			IPropertyType.BOOST_FIELD,
+			IPropertyType.IDX_FIELD_NAME_FIELD,
+			IPropertyType.PROPERTY_TYPE_FIELD,
+			IPropertyType.LABEL_FIELD,
+			IPropertyType.ALTERNATE_LABEL_FIELD,
+			IPropertyType.HIDDEN_LABEL_FIELD,
+			IPropertyType.LANGUAGES_FIELD,
+			IPropertyType.LANGUAGE_TXT_FIELD,
+			IPropertyType.LOCAL_NAME_FIELD,
+			IPropertyType.NAME_SPACE_FIELD,
+			IPropertyType.ID_FIELD,
+			IPropertyType.COMMENT_FIELD,
+			IPropertyType.DESCRIPTION_FIELD,
+			IPropertyType.RANGE_FIELD,
+			IPropertyType.VALUE_QUALIFIER_FIELD,
+			IPropertyType.IS_VISIBLE_FIELD,
+			IPropertyType.VALUE_CODES_FIELD,
+			IPropertyType.CODE_LIST_URI_FIELD
+	})
 	List<PropertyType> findByUri(String uri);
 	/**
 	 * Retrieve all properties for a distinct product
@@ -42,8 +64,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.CODE_LIST_FIELD,
-			IPropertyType.CODE_LIST_ID_FIELD
+			IPropertyType.VALUE_CODES_FIELD,
+			IPropertyType.CODE_LIST_URI_FIELD
 		})
 	List<PropertyType> findByProduct(String product);
 	/**
@@ -70,8 +92,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.CODE_LIST_FIELD,
-			IPropertyType.CODE_LIST_ID_FIELD
+			IPropertyType.VALUE_CODES_FIELD,
+			IPropertyType.CODE_LIST_URI_FIELD
 		})
 	List<PropertyType> findByProductIn(Set<String> products);
 	/**
@@ -99,8 +121,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.CODE_LIST_FIELD,
-			IPropertyType.CODE_LIST_ID_FIELD
+			IPropertyType.VALUE_CODES_FIELD,
+			IPropertyType.CODE_LIST_URI_FIELD
 		})
 	List<PropertyType> findByNameSpaceAndLocalNameIn(String namespace, Set<String> localNames);
 	/**
@@ -127,8 +149,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.CODE_LIST_FIELD,
-			IPropertyType.CODE_LIST_ID_FIELD
+			IPropertyType.VALUE_CODES_FIELD,
+			IPropertyType.CODE_LIST_URI_FIELD
 		})
 	List<PropertyType> findByUriIn(Set<String> uri);
 	/**
@@ -162,8 +184,8 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
-			IPropertyType.CODE_LIST_FIELD,
-			IPropertyType.CODE_LIST_ID_FIELD
+			IPropertyType.VALUE_CODES_FIELD,
+			IPropertyType.CODE_LIST_URI_FIELD
 		})
 	List<PropertyType> findByLocalNameOrItemFieldNamesIn(Set<String> names);
 	/**
