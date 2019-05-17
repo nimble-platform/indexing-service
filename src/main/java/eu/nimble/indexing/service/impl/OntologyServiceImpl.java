@@ -370,7 +370,7 @@ public class OntologyServiceImpl implements OntologyService {
     	// process all relevant nimble statements
     	Set<String> codeSet = new HashSet<String>();
     	// preset the codeSet with any existing
-    	codeSet.addAll(pt.getValueCodes());
+    	codeSet.addAll(pt.getCodeList());
     	// 
     	String codeListUri = null;
     	
@@ -399,9 +399,9 @@ public class OntologyServiceImpl implements OntologyService {
     		}
     	}
     	// store the codelist 
-    	pt.getValueCodes().addAll(codeSet);
+    	pt.getCodeList().addAll(codeSet);
     	// store the list uri - helpful to obtain the list of codes
-    	pt.setCodeListUri(codeListUri);
+    	pt.setCodeListId(codeListUri);
     }
 
     private Set<String> processCodedList(OntResource list) {
