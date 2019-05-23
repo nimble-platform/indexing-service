@@ -46,13 +46,13 @@ public class JoinHelper {
 				if (joinInfo != null) {
 					// get the remainder of the join
 					String joinedFieldName = fieldName.substring(joinDelimPos+1);
-					crit = Criteria.where(joinedFieldName).expression(encode(fromString.substring(fieldDelimPos+1)));
+					crit = Criteria.where(joinedFieldName).expression(fromString.substring(fieldDelimPos+1));
 					// add the join filter 
 					addFilter(joinInfo, crit);
 				}
 			}
 			else {
-				crit = Criteria.where(fieldName).expression(encode(fromString.substring(fieldDelimPos+1)));
+				crit = Criteria.where(fieldName).expression(fromString.substring(fieldDelimPos+1));
 				addFilter(crit);
 			}
 		}
@@ -181,7 +181,8 @@ public class JoinHelper {
 		filterQueries.add(query);
 
 	}
-
+	
+	@SuppressWarnings("unused")
 	private String encode(String in) {
 		// check for a colon - ensure URI's are quoted
 		if (in.contains(":")) {
