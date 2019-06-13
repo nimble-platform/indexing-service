@@ -1,11 +1,9 @@
 package eu.nimble.indexing.web.controller;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import eu.nimble.indexing.utils.SearchEvent;
+import eu.nimble.utility.LoggerUtils;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -313,6 +311,14 @@ public class IndexController {
 	@PostMapping("/party/search")
 	public ResponseEntity<SearchResult<PartyType>> searchParty(
 			@RequestBody Search search) {
+		//mdc logging
+		Map<String,String> paramMap = new HashMap<String, String>();
+		paramMap.put("activity", SearchEvent.SEARCH_PARTY.getActivity());
+		String queryString = "";
+		if(search.getQuery() != null) {
+			queryString = search.getQuery();
+		}
+		LoggerUtils.logWithMDC(logger, paramMap, LoggerUtils.LogLevel.INFO, "Searching a party with query: {}", queryString);
 		SearchResult<PartyType> result = partyService.search(search);
 		return ResponseEntity.ok(result);
 	}
@@ -326,6 +332,10 @@ public class IndexController {
 			return ResponseEntity.ok(PartyTypeUtils.template());
 		}
 		Optional<PartyType> res = partyService.get(uri);
+		//mdc logging
+		Map<String,String> paramMap = new HashMap<String, String>();
+		paramMap.put("activity", SearchEvent.GET_PARTY.getActivity());
+		LoggerUtils.logWithMDC(logger, paramMap, LoggerUtils.LogLevel.INFO, "Getting a party with uri: {}", uri);
 		return ResponseEntity.of(res);
 	}
 
@@ -494,6 +504,14 @@ public class IndexController {
 	public ResponseEntity<SearchResult<ItemType>> searchItem(
 			@RequestBody Search search) {
 		SearchResult<ItemType> result = itemService.search(search);
+		//mdc logging
+		Map<String,String> paramMap = new HashMap<String, String>();
+		paramMap.put("activity", SearchEvent.SEARCH_ITEM.getActivity());
+		String queryString = "";
+		if(search.getQuery() != null) {
+			queryString = search.getQuery();
+		}
+		LoggerUtils.logWithMDC(logger, paramMap, LoggerUtils.LogLevel.INFO, "Searching an item with query: {}", queryString);
 		return ResponseEntity.ok(result);
 	}
 
@@ -506,7 +524,10 @@ public class IndexController {
 			return ResponseEntity.ok(ItemUtils.template());
 		}
 		Optional<ItemType> result = itemService.get(uri);
-
+		//mdc logging
+		Map<String,String> paramMap = new HashMap<String, String>();
+		paramMap.put("activity", SearchEvent.GET_ITEM.getActivity());
+		LoggerUtils.logWithMDC(logger, paramMap, LoggerUtils.LogLevel.INFO, "Getting an item with uri: {}", uri);
 		return ResponseEntity.of(result);
 	}
 

@@ -1,8 +1,12 @@
 package eu.nimble.indexing.web.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import eu.nimble.indexing.utils.SearchEvent;
+import eu.nimble.utility.LoggerUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -35,7 +39,10 @@ public class OntologyController {
     		@RequestHeader(value = "Content-Type", required=false) String mimeType,
     		@RequestParam(name="nameSpace") List<String> nameSpace,
     		@RequestBody String content) {
-		logger.info("Indexing an ontology with mime-type : " + mimeType);
+		//mdc logging
+		Map<String,String> paramMap = new HashMap<String, String>();
+		paramMap.put("activity", SearchEvent.INDEX_ONTOLOGY.getActivity());
+		LoggerUtils.logWithMDC(logger, paramMap, LoggerUtils.LogLevel.INFO, "Indexing an ontology with mime-type: {}", mimeType);
 		// nameSpace must not be null
 		if ( nameSpace == null) {
 			nameSpace = new ArrayList<String>();
@@ -53,7 +60,10 @@ public class OntologyController {
     public ResponseEntity<Void> deleteOntology(
 //    		@RequestHeader(value = "Authorization") String bearerToken,
     		@RequestParam(name="nameSpace") String nameSpace) {
-
+		//mdc logging
+		Map<String,String> paramMap = new HashMap<String, String>();
+		paramMap.put("activity", SearchEvent.DELETE_ONTOLOGY.getActivity());
+		LoggerUtils.logWithMDC(logger, paramMap, LoggerUtils.LogLevel.INFO, "Indexing an ontology with namespace: {}", nameSpace);
 		onto.deleteNamespace(nameSpace);
     	return ResponseEntity.ok(null);
 	}
