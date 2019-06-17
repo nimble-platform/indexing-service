@@ -30,6 +30,7 @@
                         "thread": "%thread",
                         "class": "%logger{40}",
                         "version": "${build-version:-}",
+                        "activity": "%X{activity}",
                         "message": "%message",
                         "exception": "%exception"
                         }
