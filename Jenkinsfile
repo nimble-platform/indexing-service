@@ -71,6 +71,39 @@ node('nimble-jenkins-slave') {
         }
     }
 
+
+    // -----------------------------------------------
+    // --------------- K8s Branch ----------------
+    // -----------------------------------------------
+    if (env.BRANCH_NAME == 'efactory') {
+
+        stage('Clone and Update') {
+            git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: env.BRANCH_NAME)
+        }
+
+        stage('Build Dependencies') {
+            sh 'rm -rf common'
+            sh 'git clone https://github.com/nimble-platform/common'
+            dir('common') {
+                sh 'git checkout master'
+                sh 'mvn clean install'
+            }
+        }
+
+
+        stage('Build Docker') {
+            sh 'mvn docker:build -Ddocker.image.tag=efactory'
+        }
+
+        stage('Push Docker') {
+            sh 'docker push nimbleplatform/indexing-service:efactory'
+        }
+
+        stage('Deploy') {
+            sh 'ssh efac-prod "kubectl delete pod -l  io.kompose.service=indexing-service"'
+        }
+    }
+
     // -----------------------------------------------
     // ---------------- Release Tags -----------------
     // -----------------------------------------------
