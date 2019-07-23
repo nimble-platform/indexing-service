@@ -90,6 +90,9 @@ node('nimble-jenkins-slave') {
             }
         }
 
+        stage('Build Java') {
+            sh 'mvn clean install -DskipTests'
+        }
 
         stage('Build Docker') {
             sh 'mvn docker:build -Ddocker.image.tag=efactory'
