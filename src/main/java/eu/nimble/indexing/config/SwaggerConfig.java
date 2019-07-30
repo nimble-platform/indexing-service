@@ -40,7 +40,7 @@ public class SwaggerConfig {
         logger.info("Indexing platformhost : " + platformHost);
         platformHost = platformHost.replace("https://", "");
         platformHost = platformHost.replace("http://","");
-        platformHost = platformHost.replace("/index","");
+//        platformHost = platformHost.replace("/index","");
         logger.info("Indexing platformhost : " + platformHost);
 
         return new Docket(DocumentationType.SWAGGER_2)
