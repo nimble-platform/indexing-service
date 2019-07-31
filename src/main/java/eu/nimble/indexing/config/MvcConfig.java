@@ -31,7 +31,8 @@ public class MvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         if (corsEnabled.equals("true")) {
             logger.info("Enabling CORS");
-            registry.addMapping("/**").allowedMethods("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH");
+            registry.addMapping("/**").allowedOrigins("*")
+			        .allowedHeaders("*").exposedHeaders("*").allowedMethods("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH","OPTIONS");
         }
     }
 }
