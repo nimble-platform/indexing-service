@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -782,7 +784,8 @@ public class IndexController {
 
 	@ApiOperation(value = "", notes = "Retrieve specific fields in items index", response = IndexField.class,
 			responseContainer = "List")
-	@GetMapping("/item/fields")
+//	@GetMapping("/item/fields")
+	@RequestMapping(value = "/item/fields", produces = {"application/json"}, method = RequestMethod.GET)
 	public ResponseEntity<?> itemFields(
     		@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name="fieldName", required=false) Set<String> fieldNames
