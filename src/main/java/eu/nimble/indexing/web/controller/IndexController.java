@@ -497,9 +497,9 @@ public class IndexController {
 	@ApiOperation(value = "", notes = "Reindex Party With Trust Updates", response = SearchResult.class)
 	@PostMapping("/party/trust")
 	public ResponseEntity<?> partyTrustUpdate(
-			@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam(name = "partyId") String partyId,
-			@RequestBody eu.nimble.service.model.ubl.commonaggregatecomponents.PartyType partyType) throws Exception {
+			@RequestBody eu.nimble.service.model.ubl.commonaggregatecomponents.PartyType partyType,
+			@RequestHeader(value = "Authorization") String bearerToken) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
 				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
