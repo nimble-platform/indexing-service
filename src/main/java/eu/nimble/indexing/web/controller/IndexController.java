@@ -4,6 +4,7 @@ import java.util.*;
 
 import eu.nimble.indexing.service.IdentityService;
 import eu.nimble.indexing.utils.SearchEvent;
+import eu.nimble.service.model.ubl.extension.QualityIndicatorParameter;
 import eu.nimble.utility.LoggerUtils;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -490,6 +491,49 @@ public class IndexController {
 					HttpStatus.UNAUTHORIZED);
 
 		partyService.set(party);
+		return ResponseEntity.ok(Boolean.TRUE);
+	}
+
+	@ApiOperation(value = "", notes = "Reindex Party With Trust Updates", response = SearchResult.class)
+	@PostMapping("/party/trust")
+	public ResponseEntity<?> partyTrustUpdate(
+			@RequestHeader(value = "Authorization") String bearerToken,
+			@RequestParam(name = "partyId") String partyId,
+			@RequestBody eu.nimble.service.model.ubl.commonaggregatecomponents.PartyType partyType) throws Exception {
+
+		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
+
+
+		if (partyId.equals("null")) {
+			return ResponseEntity.ok(PartyTypeUtils.template());
+		}
+
+		Optional<PartyType> res = partyService.get(partyId);
+		PartyType indexParty = res.get();
+
+		// get trust scores
+		partyType.getQualityIndicator().forEach(qualityIndicator -> {
+			if(qualityIndicator.getQualityParameter() != null && qualityIndicator.getQuantity() != null) {
+				if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.COMPANY_RATING.toString())) {
+									indexParty.setTrustRating(qualityIndicator.getQuantity().getValue().doubleValue());
+				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.TRUST_SCORE.toString())) {
+									indexParty.setTrustScore(qualityIndicator.getQuantity().getValue().doubleValue());
+				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.DELIVERY_PACKAGING.toString())) {
+									indexParty.setTrustDeliveryPackaging(qualityIndicator.getQuantity().getValue().doubleValue());
+				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.FULFILLMENT_OF_TERMS.toString())) {
+									indexParty.setTrustFullfillmentOfTerms(qualityIndicator.getQuantity().getValue().doubleValue());
+				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.SELLER_COMMUNICATION.toString())) {
+									indexParty.setTrustSellerCommunication(qualityIndicator.getQuantity().getValue().doubleValue());
+				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.NUMBER_OF_TRANSACTIONS.toString())) {
+									indexParty.setTrustNumberOfTransactions(qualityIndicator.getQuantity().getValue().doubleValue());
+				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.TRADING_VOLUME.toString())) {
+									indexParty.setTrustTradingVolume(qualityIndicator.getQuantity().getValue().doubleValue());
+				}
+			}
+		});
+		partyService.set(indexParty);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
