@@ -171,7 +171,7 @@ public class IndexController {
 	public ResponseEntity<?> getClasses(
 			@RequestParam(name="uri", required = false) Set<String> uriList,
 			@RequestParam(name="nameSpace", required = false) String nameSpace,
-			@RequestParam(name="localName", required = false) Set<String> localNames, 
+			@RequestParam(name="localName", required = false) Set<String> localNames,
 			@RequestParam(required = false) String property,
 			@RequestHeader(value = "Authorization") String bearerToken) throws Exception{
 
@@ -288,7 +288,7 @@ public class IndexController {
 			@RequestParam(name = "field") String fieldName,
 			@RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
 			@RequestParam(name = "minCount", required = false, defaultValue = "1") int minCount
-			
+
 			) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER,
@@ -318,7 +318,7 @@ public class IndexController {
 	@GetMapping("/codes")
 	public ResponseEntity<?> getCodes(
 			@RequestHeader(value = "Authorization") String bearerToken,
-			@RequestParam(name="uri", required = false) Set<String> uriList, 
+			@RequestParam(name="uri", required = false) Set<String> uriList,
 			@RequestParam(name="listId", required = false) String listId,
 			@RequestParam(name="nameSpace", required = false) String nameSpace,
 			@RequestParam(name="localName", required = false) Set<String> localNames) throws Exception{
@@ -732,7 +732,7 @@ public class IndexController {
 	}
 
 	@ApiOperation(value = "", notes = "Search for templates", response = Search.class)
-	@GetMapping("/search/template") 	
+	@GetMapping("/search/template")
 	public ResponseEntity<?> searchTemplate(
 			@RequestHeader(value = "Authorization") String bearerToken
 			)throws Exception{
@@ -745,8 +745,8 @@ public class IndexController {
 		Search result = new Search("query")
 				.filter("fieldName:filter")
 				.facetField("fieldName");
-		
-		
+
+
 		return ResponseEntity.ok(result);
 	}
 
@@ -878,19 +878,24 @@ public class IndexController {
 		for (ItemType i : result.getResult()) {
 			SimpleItem simpleItem = new SimpleItem();
 
-			simpleItem.setPrice(String.valueOf(i.getPrice().get("EUR")));
-			simpleItem.setItemName(i.getLabel().get("en"));
-			simpleItem.setItemID(i.getManufactuerItemId());
-			simpleItem.setCatalogueID(i.getCatalogueId());
-
+            if (null != i.getPrice()) {
+                simpleItem.setPrice(String.valueOf(i.getPrice().get("EUR")));
+            }
+            if(null != i.getLabel()){
+                simpleItem.setItemName(i.getLabel().get("en"));
+            }
+            if (null != i.getManufactuerItemId()) {
+                simpleItem.setItemID(i.getManufactuerItemId());
+            }
+            if (null != i.getCatalogueId()) {
+                simpleItem.setCatalogueID(i.getCatalogueId());
+            }
 			if (null != i.getManufacturer()) {
 				simpleItem.setManufacturerName(i.getManufacturer().getLegalName());
 			}
             if (null != i.getImgageUri() && (i.getImgageUri().toArray()).length != 0) {
                 simpleItem.setImageURI((i.getImgageUri().toArray())[0].toString());
             }
-
-
 
 			String classificationQuery = "";
 			for (String c : i.getClassificationUri()) {
