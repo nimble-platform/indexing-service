@@ -102,7 +102,7 @@ public class OpenIdConnectUserDetails implements UserDetails {
 		PLATFORM_MANAGER("platform_manager"),
 		COMPANY_ADMIN("company_admin"),
 		PUBLISHER("publisher"),
-		EFACTORYUSER("eFactoryUser");
+		EFACTORYUSER("eFactory_basic");
 
 		private final String role;
 
