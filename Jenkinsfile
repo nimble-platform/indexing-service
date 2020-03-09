@@ -27,11 +27,11 @@ node('nimble-jenkins-slave') {
         }
 
         stage('Build Docker') {
-            sh 'mvn docker:build -Ddocker.image.tag=staging'
+            sh 'mvn docker:build -Ddocker.image.tag=federated-search'
         }
 
         stage('Push Docker') {
-            sh 'docker push nimbleplatform/indexing-service:staging'
+            sh 'docker push nimbleplatform/indexing-service:federated-search'
         }
 
         stage('Deploy') {
