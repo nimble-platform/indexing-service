@@ -530,6 +530,8 @@ public class IndexController {
 									indexParty.setTrustSellerCommunication(qualityIndicator.getQuantity().getValue().doubleValue());
 				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.NUMBER_OF_TRANSACTIONS.toString())) {
 									indexParty.setTrustNumberOfTransactions(qualityIndicator.getQuantity().getValue().doubleValue());
+				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.Number_OF_EVALUATIONS.toString())) {
+									indexParty.setTrustNumberOfEvaluations(qualityIndicator.getQuantity().getValue().doubleValue());
 				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.TRADING_VOLUME.toString())) {
 									indexParty.setTrustTradingVolume(qualityIndicator.getQuantity().getValue().doubleValue());
 				}
