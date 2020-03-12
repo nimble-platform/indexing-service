@@ -3,9 +3,9 @@
 node('nimble-jenkins-slave') {
 
     // -----------------------------------------------
-    // --------------- Staging Branch ----------------
+    // --------------- Efactory Federated Search Branch ----------------
     // -----------------------------------------------
-    if (env.BRANCH_NAME == 'staging') {
+    if (env.BRANCH_NAME == 'efactory_federated_search') {
 
         stage('Clone and Update') {
             git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: env.BRANCH_NAME)
@@ -35,38 +35,7 @@ node('nimble-jenkins-slave') {
         }
 
         stage('Deploy') {
-            sh 'ssh staging "cd /srv/nimble-staging/ && ./run-staging.sh restart-single indexing-service"'
-        }
-    }
-
-    // -----------------------------------------------
-    // ---------------- Master Branch ----------------
-    // -----------------------------------------------
-    if (env.BRANCH_NAME == 'master') {
-
-        stage('Clone and Update') {
-            git(url: 'https://github.com/nimble-platform/indexing-service.git', branch: env.BRANCH_NAME)
-        }
-
-        stage('Build Dependencies') {
-            sh 'rm -rf common'
-            sh 'git clone https://github.com/nimble-platform/common'
-            dir('common') {
-                sh 'git checkout ' + env.BRANCH_NAME
-                sh 'mvn clean install'
-            }
-        }
-
-//        stage('Run Tests') {
-//            sh 'mvn clean test'
-//        }
-
-        stage('Build Java') {
-            sh 'mvn clean install -DskipTests'
-        }
-
-        stage('Build Docker') {
-            sh 'mvn docker:build -Ddocker.image.tag=latest'
+            sh 'ssh staging "cd /srv/efactoryefs/docker_setup/prod-efac-efs && ./run-efac-portal.sh restart-single indexing-service"'
         }
     }
 
