@@ -105,8 +105,8 @@ node('nimble-jenkins-slave') {
         }
 
         stage('Push Docker') {
-            sh 'docker push nimbleplatform/identity-service:' + env.TAG_NAME
-            sh 'docker push nimbleplatform/identity-service:latest'
+            sh 'docker push nimbleplatform/indexing-service:' + env.TAG_NAME
+            sh 'docker push nimbleplatform/indexing-service:latest'
         }
 
         stage('Deploy MVP') {
