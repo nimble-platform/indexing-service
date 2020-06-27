@@ -91,6 +91,11 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	}
 
 	@Override
+	public void clearIndex() {
+		solr.deleteAll();
+	}
+
+	@Override
 	public SearchResult<T> search(Search search) {
 		if(search.getSort() != null) {
 			return select(search.getQuery(),

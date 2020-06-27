@@ -36,6 +36,10 @@ public interface SolrService<T> {
 	 */
 	public void remove(String uri);
 	/**
+	 * Clear the index
+	 */
+	public void clearIndex();
+	/**
 	 * Retrieve the {@link IndexField} descriptors for the
 	 * collection. The {@link IndexField} denotes
 	 * <ul>
