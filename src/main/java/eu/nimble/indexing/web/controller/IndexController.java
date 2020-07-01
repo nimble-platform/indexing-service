@@ -446,6 +446,18 @@ public class IndexController {
 		return ResponseEntity.ok(result);
 	}
 
+	@ApiOperation(value = "", notes = "Clear party index", response = Boolean.class)
+	@DeleteMapping("/party/clear")
+	public ResponseEntity<?> clearPartyIndex(
+			@RequestHeader(value = "Authorization") String bearerToken) throws Exception {
+
+		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+			return new ResponseEntity<>("User Not Allowed To Clear Party Index", HttpStatus.UNAUTHORIZED);
+		partyService.clearIndex();
+		return ResponseEntity.ok(Boolean.TRUE);
+	}
+
 	@ApiOperation(value = "", notes = "Retrieve a specific party identified by the given uri", response = PartyType.class)
 	@GetMapping("/party")
 	public ResponseEntity<?> getParty(
@@ -796,6 +808,18 @@ public class IndexController {
 		paramMap.put("activity", SearchEvent.GET_ITEM.getActivity());
 		LoggerUtils.logWithMDC(logger, paramMap, LoggerUtils.LogLevel.INFO, "Getting an item with uri: {}", uri);
 		return ResponseEntity.of(result);
+	}
+
+	@ApiOperation(value = "", notes = "Clear item index", response = Boolean.class)
+	@DeleteMapping("/item/clear")
+	public ResponseEntity<?> clearItemIndex(
+			@RequestHeader(value = "Authorization") String bearerToken) throws Exception {
+
+		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+			return new ResponseEntity<>("User Not Allowed To Clear Item Index", HttpStatus.UNAUTHORIZED);
+		itemService.clearIndex();
+		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
 	@ApiOperation(value = "", notes = "Detele an item", response = Boolean.class)
