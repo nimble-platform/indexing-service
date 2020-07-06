@@ -91,6 +91,11 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 	}
 
 	@Override
+	public void clearIndex() {
+		solr.deleteAll();
+	}
+
+	@Override
 	public SearchResult<T> search(Search search) {
 		if(search.getSort() != null) {
 			return select(search.getQuery(),
@@ -151,14 +156,17 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 
 	@Override
 	public SearchResult<T> select(String query, List<String> filterQueries, List<String> facetFields, List<String> sortFields, int facetLimit, int facetMinCount, Pageable page) {
+		JoinHelper joinHelper = new JoinHelper(getCollection());
 		// expand main query to a wild card search when it is only a single word
 		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
 			query = String.format("*%s*", query);
 		}
-		
+		else if (query.indexOf("classification.") != -1) {
+			//parse the query with a join on class index for synonyms
+			query = joinHelper.parseQuery(query);
+		}
+
 		Criteria qCriteria = new SimpleStringCriteria(query);
-		//
-		JoinHelper joinHelper = new JoinHelper(getCollection());
 
 		if ( filterQueries != null && !filterQueries.isEmpty()) {
 			//

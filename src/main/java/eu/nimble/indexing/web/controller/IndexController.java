@@ -2,6 +2,8 @@ package eu.nimble.indexing.web.controller;
 
 import java.util.*;
 
+import eu.nimble.indexing.dto.SimpleItem;
+import eu.nimble.indexing.dto.SimpleSearchResponse;
 import eu.nimble.indexing.service.IdentityService;
 import eu.nimble.indexing.utils.SearchEvent;
 import eu.nimble.service.model.ubl.extension.QualityIndicatorParameter;
@@ -103,8 +105,8 @@ public class IndexController {
 //	@GetMapping("/classes/search")
 //	public ResponseEntity<List<ClassType>> searchClasses(
 //			@RequestParam(name="query") String query) {
-//		
-//		// 
+//
+//		//
 //		return ResponseEntity.ok(classes.search(query));
 //	}
 
@@ -169,7 +171,7 @@ public class IndexController {
 	public ResponseEntity<?> getClasses(
 			@RequestParam(name="uri", required = false) Set<String> uriList,
 			@RequestParam(name="nameSpace", required = false) String nameSpace,
-			@RequestParam(name="localName", required = false) Set<String> localNames, 
+			@RequestParam(name="localName", required = false) Set<String> localNames,
 			@RequestParam(required = false) String property,
 			@RequestHeader(value = "Authorization") String bearerToken) throws Exception{
 
@@ -252,8 +254,8 @@ public class IndexController {
 //	@GetMapping("/classes/search")
 //	public ResponseEntity<List<ClassType>> searchClasses(
 //			@RequestParam(name="query") String query) {
-//		
-//		// 
+//
+//		//
 //		return ResponseEntity.ok(classes.search(query));
 //	}
 
@@ -286,7 +288,7 @@ public class IndexController {
 			@RequestParam(name = "field") String fieldName,
 			@RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
 			@RequestParam(name = "minCount", required = false, defaultValue = "1") int minCount
-			
+
 			) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER,
@@ -316,7 +318,7 @@ public class IndexController {
 	@GetMapping("/codes")
 	public ResponseEntity<?> getCodes(
 			@RequestHeader(value = "Authorization") String bearerToken,
-			@RequestParam(name="uri", required = false) Set<String> uriList, 
+			@RequestParam(name="uri", required = false) Set<String> uriList,
 			@RequestParam(name="listId", required = false) String listId,
 			@RequestParam(name="nameSpace", required = false) String nameSpace,
 			@RequestParam(name="localName", required = false) Set<String> localNames) throws Exception{
@@ -444,6 +446,18 @@ public class IndexController {
 		return ResponseEntity.ok(result);
 	}
 
+	@ApiOperation(value = "", notes = "Clear party index", response = Boolean.class)
+	@DeleteMapping("/party/clear")
+	public ResponseEntity<?> clearPartyIndex(
+			@RequestHeader(value = "Authorization") String bearerToken) throws Exception {
+
+		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+			return new ResponseEntity<>("User Not Allowed To Clear Party Index", HttpStatus.UNAUTHORIZED);
+		partyService.clearIndex();
+		return ResponseEntity.ok(Boolean.TRUE);
+	}
+
 	@ApiOperation(value = "", notes = "Retrieve a specific party identified by the given uri", response = PartyType.class)
 	@GetMapping("/party")
 	public ResponseEntity<?> getParty(
@@ -528,6 +542,8 @@ public class IndexController {
 									indexParty.setTrustSellerCommunication(qualityIndicator.getQuantity().getValue().doubleValue());
 				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.NUMBER_OF_TRANSACTIONS.toString())) {
 									indexParty.setTrustNumberOfTransactions(qualityIndicator.getQuantity().getValue().doubleValue());
+				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.Number_OF_EVALUATIONS.toString())) {
+									indexParty.setTrustNumberOfEvaluations(qualityIndicator.getQuantity().getValue().doubleValue());
 				} else if(qualityIndicator.getQualityParameter().contentEquals(QualityIndicatorParameter.TRADING_VOLUME.toString())) {
 									indexParty.setTrustTradingVolume(qualityIndicator.getQuantity().getValue().doubleValue());
 				}
@@ -730,7 +746,7 @@ public class IndexController {
 	}
 
 	@ApiOperation(value = "", notes = "Search for templates", response = Search.class)
-	@GetMapping("/search/template") 	
+	@GetMapping("/search/template")
 	public ResponseEntity<?> searchTemplate(
 			@RequestHeader(value = "Authorization") String bearerToken
 			)throws Exception{
@@ -743,8 +759,8 @@ public class IndexController {
 		Search result = new Search("query")
 				.filter("fieldName:filter")
 				.facetField("fieldName");
-		
-		
+
+
 		return ResponseEntity.ok(result);
 	}
 
@@ -792,6 +808,18 @@ public class IndexController {
 		paramMap.put("activity", SearchEvent.GET_ITEM.getActivity());
 		LoggerUtils.logWithMDC(logger, paramMap, LoggerUtils.LogLevel.INFO, "Getting an item with uri: {}", uri);
 		return ResponseEntity.of(result);
+	}
+
+	@ApiOperation(value = "", notes = "Clear item index", response = Boolean.class)
+	@DeleteMapping("/item/clear")
+	public ResponseEntity<?> clearItemIndex(
+			@RequestHeader(value = "Authorization") String bearerToken) throws Exception {
+
+		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+			return new ResponseEntity<>("User Not Allowed To Clear Item Index", HttpStatus.UNAUTHORIZED);
+		itemService.clearIndex();
+		return ResponseEntity.ok(Boolean.TRUE);
 	}
 
 	@ApiOperation(value = "", notes = "Detele an item", response = Boolean.class)
@@ -854,6 +882,70 @@ public class IndexController {
 
 		itemService.set(prop);
 		return ResponseEntity.ok(Boolean.TRUE);
+	}
+
+	@ApiOperation(value = "", notes = "Provides flat search with minimal data", response = SearchResult.class)
+	@GetMapping("/item/simpleSearch")
+	public ResponseEntity<?> simpleSearch(@RequestParam(name = "q", required = false, defaultValue = "*:*") String query,
+                                          @RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
+                                          @RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows)throws Exception {
+
+        Search search = new Search();
+	    search.setQuery(query);
+	    search.setRows(rows);
+	    search.setStart(start);
+
+		SearchResult<ItemType> result = itemService.search(search);
+		SimpleSearchResponse simpleSearchResponse = new SimpleSearchResponse();
+		List<SimpleItem> simpleItemList = new ArrayList<>();
+
+
+
+		for (ItemType i : result.getResult()) {
+			SimpleItem simpleItem = new SimpleItem();
+
+            if (null != i.getPrice()) {
+                simpleItem.setPrice(String.valueOf(i.getPrice().get("EUR")));
+            }
+            if(null != i.getLabel()){
+                simpleItem.setItemName(i.getLabel().get("en"));
+            }
+            if (null != i.getManufactuerItemId()) {
+                simpleItem.setItemID(i.getManufactuerItemId());
+            }
+            if (null != i.getCatalogueId()) {
+                simpleItem.setCatalogueID(i.getCatalogueId());
+            }
+			if (null != i.getManufacturer()) {
+				simpleItem.setManufacturerName(i.getManufacturer().getLegalName());
+			}
+            if (null != i.getImgageUri() && (i.getImgageUri().toArray()).length != 0) {
+                simpleItem.setImageURI((i.getImgageUri().toArray())[0].toString());
+            }
+
+			String classificationQuery = "";
+			for (String c : i.getClassificationUri()) {
+				if (classificationQuery.isEmpty()) {
+                    classificationQuery = classificationQuery + "id:\"" + c + "\"";
+				}else {
+                    classificationQuery = classificationQuery + " OR id:\"" + c + "\"";
+				}
+			}
+
+			search = new Search();
+			search.setQuery(classificationQuery);
+
+			SearchResult<ClassType> classResults = classService.search(search);
+			List<String> categoryNames = new ArrayList<>();
+			for (ClassType c: classResults.getResult()) {
+				categoryNames.add(c.getLabel().get("en"));
+			}
+			simpleItem.setCategory(categoryNames);
+
+            simpleItemList.add(simpleItem);
+		}
+		simpleSearchResponse.setItemList(simpleItemList);
+		return ResponseEntity.ok(simpleSearchResponse);
 	}
 
 }
