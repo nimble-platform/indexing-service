@@ -504,6 +504,7 @@ public class IndexController {
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
+		party.setBasePlatform("nimble");
 		partyService.set(party);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
@@ -848,7 +849,12 @@ public class IndexController {
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
-		boolean result = itemService.set(store);
+		List<ItemType> nimbleItems = new ArrayList<ItemType>();
+		for(ItemType item : store){
+			item.setBasePlatform("nimble");
+			nimbleItems.add(item);
+		}
+		boolean result = itemService.set(nimbleItems);
 		return ResponseEntity.ok(result);
 	}
 
@@ -880,6 +886,7 @@ public class IndexController {
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
+		prop.setBasePlatform("nimble");
 		itemService.set(prop);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
