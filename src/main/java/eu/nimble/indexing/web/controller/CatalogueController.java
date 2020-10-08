@@ -65,7 +65,9 @@ public class CatalogueController {
 				,COMPANY_ADMIN,EFACTORYUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
-
+		// delete the items belonging to the given catalogue
+		items.deleteCatalogue(catalogueId);
+		// index the catalogue items
 		return ResponseEntity.ok(items.set(catalogueItems));
 	}    
 }
