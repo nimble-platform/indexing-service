@@ -36,6 +36,7 @@ public class NIMBLEOntology {
 	public static final String CODE      = "code";
 	private static final String UNIT_CODE = "unitCode";
 	public static final String IS_VISIBLE = "isVisible";
+	public static final String IS_REQUIRED = "isRequired";
 	public static final String ID        = "id";
 	
 	public static final String QUANTITY_PROPERTY_TYPE = "QuantityProperty";
@@ -338,6 +339,20 @@ public class NIMBLEOntology {
 	 */
 	public static boolean isVisible(OntProperty resource, boolean def) {
 		RDFNode node = resource.getPropertyValue(getInstance().getOntProperty(NS+IS_VISIBLE));
+		if (node != null) {
+			return node.asLiteral().getBoolean();
+		}
+		return def;
+	}
+	/**
+	 * Retrieve the nimble:{@value #IS_REQUIRED} from the provided resource, when not found
+	 * return the default value
+	 * @param resource
+	 * @param def The default
+	 * @return
+	 */
+	public static boolean isRequired(OntProperty resource, boolean def) {
+		RDFNode node = resource.getPropertyValue(getInstance().getOntProperty(NS+IS_REQUIRED));
 		if (node != null) {
 			return node.asLiteral().getBoolean();
 		}

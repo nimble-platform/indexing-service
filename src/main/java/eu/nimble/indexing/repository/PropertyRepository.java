@@ -42,6 +42,7 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
+			IPropertyType.IS_REQUIRED_FIELD,
 			IPropertyType.CODE_LIST_FIELD,
 			IPropertyType.CODE_LIST_ID_FIELD
 		})
@@ -70,6 +71,7 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
+			IPropertyType.IS_REQUIRED_FIELD,
 			IPropertyType.CODE_LIST_FIELD,
 			IPropertyType.CODE_LIST_ID_FIELD
 		})
@@ -99,6 +101,7 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
+			IPropertyType.IS_REQUIRED_FIELD,
 			IPropertyType.CODE_LIST_FIELD,
 			IPropertyType.CODE_LIST_ID_FIELD
 		})
@@ -127,6 +130,7 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
+			IPropertyType.IS_REQUIRED_FIELD,
 			IPropertyType.CODE_LIST_FIELD,
 			IPropertyType.CODE_LIST_ID_FIELD
 		})
@@ -162,6 +166,7 @@ public interface PropertyRepository  extends SolrCrudRepository<PropertyType, St
 			IPropertyType.RANGE_FIELD,
 			IPropertyType.VALUE_QUALIFIER_FIELD,
 			IPropertyType.IS_VISIBLE_FIELD,
+			IPropertyType.IS_REQUIRED_FIELD,
 			IPropertyType.CODE_LIST_FIELD,
 			IPropertyType.CODE_LIST_ID_FIELD
 		})

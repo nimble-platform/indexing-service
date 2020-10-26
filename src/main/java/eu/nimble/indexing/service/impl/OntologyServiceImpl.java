@@ -295,6 +295,8 @@ public class OntologyServiceImpl implements OntologyService {
         index.setRange(getRange(prop));
         // check the visible property, defaults to true
         index.setVisible(NIMBLEOntology.isVisible(prop, true));
+        // check the required property, defaults to false
+		index.setRequired(NIMBLEOntology.isRequired(prop,false));
 
 		// check for the value qualifier, might be null
 		ValueQualifier valueQualifier = getValueQualifier(prop);
