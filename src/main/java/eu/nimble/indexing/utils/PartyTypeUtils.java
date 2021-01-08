@@ -9,7 +9,6 @@ public class PartyTypeUtils {
 		p.setLegalName("legalName");
 		p.addLabel("en","name");
 		p.addOrigin("en","origin");
-		p.addCertificateType("en", "certificateType");
 		p.setPpapComplianceLevel(3);
 		p.addPpapDocumentType("en","ppapDocumentType");
 		p.setTrustDeliveryPackaging(0.0d);
