@@ -503,7 +503,7 @@ public class IndexController {
 				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
-
+		logger.info("Indexing party: {}, legal name: {}",party.getId(),party.getLegalName());
 		partyService.set(party);
 		return ResponseEntity.ok(Boolean.TRUE);
 	}
