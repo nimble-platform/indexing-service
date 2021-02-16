@@ -70,7 +70,7 @@ public class JoinHelper {
 			String joinName = fieldName.substring(0,joinDelimPos);
 			
 			// find the join info
-			joinInfo = JoinInfo.getJoinInfo(collection, joinName);
+			joinInfo = JoinInfo.getJoinInfo(joinName);
 			
 			if (joinInfo != null) {
 				// keep the join (mappedName and info)
