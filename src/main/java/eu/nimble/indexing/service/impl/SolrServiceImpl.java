@@ -163,8 +163,8 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
 			query = String.format("*%s*", query);
 		}
-		else if (query.indexOf("classification.") != -1) {
-			//parse the query with a join on class index for synonyms
+		//parse the query with a join on class/item index
+		else if (query.indexOf("classification.") != -1 || query.indexOf("item.") != -1) {
 			query = joinHelper.parseQuery(query);
 		}
 
