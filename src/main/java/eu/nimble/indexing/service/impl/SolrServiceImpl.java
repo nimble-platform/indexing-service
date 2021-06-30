@@ -142,14 +142,16 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 			}
 		}
 		SearchResult<T> result = select(qCriteria, joinHelper.getFilterQueries(), joinHelper.getFacetFields(), facetLimit, facetMinCount, page);
-		
-		for (String join : joinHelper.getJoins()) {
-			// process join facets
-			if (!joinHelper.getFacetFields(join).isEmpty()) {
-				// process a query for the joined facet fields
-				joinFacets(result, join, joinHelper.getJoinInfo(join), joinHelper.getFilterQueries(join), joinHelper.getFacetFields(join), facetLimit, facetMinCount, page);
+
+		if(result.getTotalElements() > 0){
+			for (String join : joinHelper.getJoins()) {
+				// process join facets
+				if (!joinHelper.getFacetFields(join).isEmpty()) {
+					// process a query for the joined facet fields
+					joinFacets(result, join, joinHelper.getJoinInfo(join), joinHelper.getFilterQueries(join), joinHelper.getFacetFields(join), facetLimit, facetMinCount, page);
+				}
+
 			}
-			
 		}
 		return result;
 	}
@@ -161,8 +163,8 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 		if (query.indexOf(":") == -1 && query.indexOf("*") == -1 && query.indexOf(" ") == -1)   {
 			query = String.format("*%s*", query);
 		}
-		else if (query.indexOf("classification.") != -1) {
-			//parse the query with a join on class index for synonyms
+		//parse the query with a join on class/item index
+		else if (query.indexOf("classification.") != -1 || query.indexOf("item.") != -1) {
 			query = joinHelper.parseQuery(query);
 		}
 
@@ -184,13 +186,14 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 
 		SearchResult<T> result = select(qCriteria, joinHelper.getFilterQueries(), joinHelper.getFacetFields(),sortFields, facetLimit, facetMinCount, page);
 
-		for (String join : joinHelper.getJoins()) {
-			// process join facets
-			if (!joinHelper.getFacetFields(join).isEmpty()) {
-				// process a query for the joined facet fields
-				joinFacets(result, join, joinHelper.getJoinInfo(join), joinHelper.getFilterQueries(join), joinHelper.getFacetFields(join), facetLimit, facetMinCount, page);
+		if(result.getTotalElements() > 0){
+			for (String join : joinHelper.getJoins()) {
+				// process join facets
+				if (!joinHelper.getFacetFields(join).isEmpty()) {
+					// process a query for the joined facet fields
+					joinFacets(result, join, joinHelper.getJoinInfo(join), joinHelper.getFilterQueries(join), joinHelper.getFacetFields(join), facetLimit, facetMinCount, page);
+				}
 			}
-
 		}
 		return result;
 	}
@@ -320,6 +323,16 @@ public abstract class SolrServiceImpl<T> implements SolrService<T> {
 //			
 //		}
 		FacetQuery fq = new SimpleFacetQuery(new SimpleStringCriteria("*:*"), page);
+		// handle the join for commodity classifications
+		if (toExtend.getFacets() != null && join.getField().getName().contentEquals(JoinInfo.classification.getField().getName()) && toExtend.getFacets().containsKey(join.getField().getName())) {
+			StringBuilder facetFilter = new StringBuilder();
+			FacetResult facetResult = toExtend.getFacets().get(join.getField().getName());
+			for (FacetResult.Entry entry : facetResult.getEntry()) {
+				facetFilter.append("\""+entry.getLabel()+"\",");
+			}
+			String expression = String.format("(%s)",facetFilter.substring(0,facetFilter.length()-1));
+			fq.addFilterQuery(new SimpleFilterQuery(Criteria.where(JoinInfo.classification.getJoinedField()).expression(expression)));
+		}
 		// we are interested in facets only
 		fq.setRows(0);
 		// add filter queries

@@ -112,6 +112,9 @@ public enum JoinInfo {
 	public Field getField() {
 		return new SimpleField(field);
 	}
+	public String getJoinedField(){
+		return joinedField;
+	}
 	public static JoinInfo getJoinInfo(String collection, String mappedName) {
 		for ( JoinInfo j : values()) {
 			if ( j.collection.equals(collection)) {
