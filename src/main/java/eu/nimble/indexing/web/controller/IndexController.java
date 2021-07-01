@@ -77,7 +77,7 @@ public class IndexController {
 			@ApiParam(value = "uri of the class", required = true) @RequestParam String uri) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER
-				,COMPANY_ADMIN,EFACTORYUSER) == false)
+				,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -94,7 +94,7 @@ public class IndexController {
 					Set<String> fieldNames) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -126,7 +126,7 @@ public class IndexController {
 			)  throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,PUBLISHER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		SearchResult<ClassType> result = classService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
@@ -145,7 +145,7 @@ public class IndexController {
 	) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		FacetResult result = classService.suggest(query, fieldName, limit, minCount);
@@ -159,7 +159,7 @@ public class IndexController {
 			@RequestHeader(value = "Authorization") String bearerToken) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		SearchResult<ClassType> result = classService.search(search);
@@ -176,7 +176,7 @@ public class IndexController {
 			@RequestHeader(value = "Authorization") String bearerToken) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER
-				,COMPANY_ADMIN,EFACTORYUSER) == false)
+				,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		if (property != null) {
@@ -215,7 +215,7 @@ public class IndexController {
 			@RequestBody ClassType prop) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,PUBLISHER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		classService.set(prop);
@@ -229,7 +229,7 @@ public class IndexController {
 			@RequestParam String uri) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE, PUBLISHER,NIMBLE_USER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		Optional<CodedType> c = codeService.get(uri);
@@ -245,7 +245,7 @@ public class IndexController {
 	) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,PUBLISHER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 		Collection<IndexField> result = codeService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
 		return ResponseEntity.ok(result);
@@ -274,7 +274,7 @@ public class IndexController {
 				new SolrPageRequest(start, rows));
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,PUBLISHER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		return ResponseEntity.ok(result);
@@ -292,7 +292,7 @@ public class IndexController {
 			) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		FacetResult result = codeService.suggest(query, fieldName, limit, minCount);
@@ -306,7 +306,7 @@ public class IndexController {
 			@RequestBody Search search) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER
-				,COMPANY_ADMIN,EFACTORYUSER) == false)
+				,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		SearchResult<CodedType> result = codeService.search(search);
@@ -324,7 +324,7 @@ public class IndexController {
 			@RequestParam(name="localName", required = false) Set<String> localNames) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,NIMBLE_USER,LEGAL_REPRESENTATIVE, PUBLISHER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		if (uriList != null && !uriList.isEmpty()) {
@@ -362,7 +362,7 @@ public class IndexController {
 			@RequestBody CodedType prop) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE, PUBLISHER,NIMBLE_USER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		codeService.set(prop);
@@ -378,7 +378,7 @@ public class IndexController {
 	)  throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE, PUBLISHER,NIMBLE_USER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		Collection<IndexField> result = partyService.fields(fieldNames);  // (query, new SolrPageRequest(0, 10));
@@ -398,7 +398,7 @@ public class IndexController {
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE, PUBLISHER,NIMBLE_USER,
-				COMPANY_ADMIN,EFACTORYUSER) == false)
+				COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		SearchResult<PartyType> result = partyService.select(query, filterQuery, facetFields, facetLimit, facetMinCount,
@@ -417,7 +417,7 @@ public class IndexController {
 			) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		FacetResult result = partyService.suggest(query, fieldName, limit, minCount);
@@ -431,7 +431,7 @@ public class IndexController {
 			@RequestBody Search search) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 		//mdc logging
 		Map<String,String> paramMap = new HashMap<String, String>();
@@ -452,7 +452,7 @@ public class IndexController {
 			@RequestHeader(value = "Authorization") String bearerToken) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Clear Party Index", HttpStatus.UNAUTHORIZED);
 		partyService.clearIndex();
 		return ResponseEntity.ok(Boolean.TRUE);
@@ -465,7 +465,7 @@ public class IndexController {
 			@RequestParam(defaultValue = "null") String uri)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 		if (uri.equals("null")) {
@@ -500,7 +500,7 @@ public class IndexController {
 			@RequestBody PartyType party) throws Exception  {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -517,7 +517,7 @@ public class IndexController {
 			@RequestHeader(value = "Authorization") String bearerToken) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points", HttpStatus.UNAUTHORIZED);
 
 
@@ -563,7 +563,7 @@ public class IndexController {
 	)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -577,7 +577,7 @@ public class IndexController {
 			@RequestHeader(value = "Authorization") String bearerToken,
 			@RequestParam String uri)throws Exception {
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -597,7 +597,7 @@ public class IndexController {
 			@RequestParam(name = "idxName", required = false) Set<String> idxNames) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -632,7 +632,7 @@ public class IndexController {
 			)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 		FacetResult result = propertyService.suggest(query, fieldName, limit, minCount);
@@ -652,7 +652,7 @@ public class IndexController {
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -668,7 +668,7 @@ public class IndexController {
 			@RequestBody Search search)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -697,7 +697,7 @@ public class IndexController {
 			@RequestBody PropertyType prop)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -716,7 +716,7 @@ public class IndexController {
 			) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -737,7 +737,7 @@ public class IndexController {
 			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -753,7 +753,7 @@ public class IndexController {
 			)throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -772,7 +772,7 @@ public class IndexController {
 			@RequestBody Search search)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -796,7 +796,7 @@ public class IndexController {
 			@RequestParam(defaultValue = "null") String uri) throws Exception  {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -817,7 +817,7 @@ public class IndexController {
 			@RequestHeader(value = "Authorization") String bearerToken) throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Clear Item Index", HttpStatus.UNAUTHORIZED);
 		itemService.clearIndex();
 		return ResponseEntity.ok(Boolean.TRUE);
@@ -830,7 +830,7 @@ public class IndexController {
 			@RequestParam String uri)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -845,7 +845,7 @@ public class IndexController {
 			@RequestBody List<ItemType> store)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -867,7 +867,7 @@ public class IndexController {
 	)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -882,7 +882,7 @@ public class IndexController {
 			@RequestBody ItemType prop)throws Exception {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE,NIMBLE_USER,
-				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER) == false)
+				PUBLISHER,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 

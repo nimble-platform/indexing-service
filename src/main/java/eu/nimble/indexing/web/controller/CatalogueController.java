@@ -47,7 +47,7 @@ public class CatalogueController {
 			)  throws Exception{
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE, PUBLISHER
-				,COMPANY_ADMIN,EFACTORYUSER) == false)
+				,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
@@ -62,7 +62,7 @@ public class CatalogueController {
 			@RequestBody List<ItemType> catalogueItems) {
 
 		if (identityService.hasAnyRole(bearerToken, PLATFORM_MANAGER,LEGAL_REPRESENTATIVE, PUBLISHER
-				,COMPANY_ADMIN,EFACTORYUSER) == false)
+				,COMPANY_ADMIN,EFACTORYUSER, EFPFUSER) == false)
 			return new ResponseEntity<>("User Not Allowed To Access The Indexing End Points",
 					HttpStatus.UNAUTHORIZED);
 
