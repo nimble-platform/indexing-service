@@ -59,6 +59,7 @@ public class OntologyController {
 			nameSpace = new ArrayList<String>();
 		}
 		onto.upload(mimeType, nameSpace, content);
+		logger.info("Indexed the ontologies with namespaces {}",nameSpace);
     	return ResponseEntity.ok(null);
     }
 
@@ -80,6 +81,7 @@ public class OntologyController {
 		paramMap.put("activity", SearchEvent.DELETE_ONTOLOGY.getActivity());
 		LoggerUtils.logWithMDC(logger, paramMap, LoggerUtils.LogLevel.INFO, "Indexing an ontology with namespace: {}", nameSpace);
 		onto.deleteNamespace(nameSpace);
+		logger.info("Deleted the ontology with namespace {}",nameSpace);
     	return ResponseEntity.ok(null);
 	}
 
